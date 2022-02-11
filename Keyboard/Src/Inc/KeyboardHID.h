@@ -1,5 +1,5 @@
 // C:\Users\ianjr\Downloads\dt2_4\MSDEV\Projects\test\KeyboardHID.h
-#ifndef 
+#ifndef KEYBOARDHID_H_
 #define KEYBOARDHID_H_
 
 char ReportDescriptor[63] = {

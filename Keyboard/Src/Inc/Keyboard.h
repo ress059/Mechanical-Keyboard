@@ -5,78 +5,108 @@
  *  Author: ianjr
  */ 
 
-#ifndef 
+#ifndef KEYBOARD_H_
 #define KEYBOARD_H_
 
 /*-----------------------------------Includes-------------------------------*/
-//#include <avr/io.h>
+#include <stdbool.h>
+#include <stddef.h>
 
-/*-----------------------------------User Defines-------------------------------*/
-#define NUM_ROWS			4
-#define NUM_COLUMNS			15
+/*-----------------------------------GPIO Registers-------------------------------*/
+typedef struct{
+	volatile uint8_t PINX;
+	volatile uint8_t DDRX;
+	volatile uint8_t PORTX;
+} GPIO_TypeDef;
 
-#define ROW_PINS			{PD0, PD1, PD2, PD3}
-#define COLUMN_PINS			{PF0, PF1, PF4, PF5, PF6, PF7, PC7, PC6, PB6, PB5, PB4, PD7, PD6, PD5}
+/*-----------------------------------Defines-------------------------------*/
+#define GPIOB							((GPIO_TypeDef*) 0x03) // TODO - change back to 0x03 for ATmega32U4 (0x23 for ATmega328)
+#define GPIOC							((GPIO_TypeDef*) 0x06)
+#define GPIOD							((GPIO_TypeDef*) 0x09)
+#define GPIOE							((GPIO_TypeDef*) 0x0C)
+#define GPIOF							((GPIO_TypeDef*) 0x0F)
 
+#define _PORTB							(1U<<8)
+#define _PORTC							(1U<<9)
+#define _PORTD							(1U<<10)
+#define _PORTE							(1U<<11)
+#define _PORTF							(1U<<12)
 
-/*-----------------------------------Driver Defines-------------------------------*/
-#define PORTB_				0
-#define PORTC_				1
-#define PORTD_				2
-#define PORTE_				3
-#define PORTF_				4
+#define _PIN0							(1U<<0)
+#define _PIN1							(1U<<1)
+#define _PIN2							(1U<<2)
+#define _PIN3							(1U<<3)
+#define _PIN4							(1U<<4)
+#define _PIN5							(1U<<5)
+#define _PIN6							(1U<<6)
+#define _PIN7							(1U<<7)
 
-/*1) Define Keyboard col to pins (PF0,...)
-* 2) Create enum with PD5, PD6, PD7,...
- *2) Create struct for each pin storing DDRx, PINx, and PORTx addresses
- 
-*/
+#define _PB0							(_PORTB | _PIN0)
+#define _PB1							(_PORTB | _PIN1)
+#define _PB2							(_PORTB | _PIN2)
+#define _PB3							(_PORTB | _PIN3)
+#define _PB4							(_PORTB | _PIN4)
+#define _PB5							(_PORTB | _PIN5)
+#define _PB6							(_PORTB | _PIN6)
+#define _PB7							(_PORTB | _PIN7)
+
+#define _PC6							(_PORTC | _PIN6)
+#define _PC7							(_PORTC | _PIN7)
+
+#define _PD0							(_PORTD | _PIN0)
+#define _PD1							(_PORTD | _PIN1)
+#define _PD2							(_PORTD | _PIN2)
+#define _PD3							(_PORTD | _PIN3)
+#define _PD4							(_PORTD | _PIN4)
+#define _PD5							(_PORTD | _PIN5)
+#define _PD6							(_PORTD | _PIN6)
+#define _PD7							(_PORTD | _PIN7)
+
+#define _PE2							(_PORTE | _PIN2)
+#define _PE6							(_PORTE | _PIN6)
+
+#define _PF0							(_PORTF | _PIN0)
+#define _PF1							(_PORTF | _PIN1)
+#define _PF4							(_PORTF | _PIN4)
+#define _PF5							(_PORTF | _PIN5)
+#define _PF6							(_PORTF | _PIN6)
+#define _PF7							(_PORTF | _PIN7)
+
+#define INVALID_PIN_NUMBER				8U
+#define MCU_CLOCK						2000000 //Hz
+
+/*-----------------------------------Macros-------------------------------*/
+#define GET_PIN_NUMBER(X)				(((X) & _PIN0) ? 0U : \
+										((X) & _PIN1) ? 1U : \
+										((X) & _PIN2) ? 2U : \
+										((X) & _PIN3) ? 3U : \
+										((X) & _PIN4) ? 4U : \
+										((X) & _PIN5) ? 5U : \
+										((X) & _PIN6) ? 6U : \
+										((X) & _PIN7) ? 7U : INVALID_PIN_NUMBER)\
+											
+
+#define GET_MEMORY_ADDRESS(X)			(((X) & _PORTB) ? GPIOB : \
+										((X) & _PORTC) ? GPIOC : \
+										((X) & _PORTD) ? GPIOD : \
+										((X) & _PORTE) ? GPIOE : \
+										((X) & _PORTF) ? GPIOF : NULL)
+
 
 /*-----------------------------------Enums-------------------------------*/
 typedef enum{
-	PB0 = PORTB_,
-	PB1 = PORTB_,
-	PB2 = PORTB_,
-	PB3 = PORTB_,
-	PB4 = PORTB_,
-	PB5 = PORTB_,
-	PB6 = PORTB_,
-	PB7 = PORTB_,
-	
-	PC6 = PORTC_,
-	PC7 = PORTC_,
-	
-	PD0 = PORTD_,
-	PD1 = PORTD_,
-	PD2 = PORTD_,
-	PD3 = PORTD_,
-	PD4 = PORTD_,
-	PD5 = PORTD_,
-	PD6 = PORTD_,
-	PD7 = PORTD_,
-	
-	PE2 = PORTE_,
-	PE6 = PORTE_,
-	
-	PF0 = PORTF_,
-	PF1 = PORTF_,
-	PF4 = PORTF_,
-	PF5 = PORTF_,
-	PF6 = PORTF_,
-	PF7 = PORTF_,
-} PinNumber_TypeDef;
+	INPUT,
+	OUTPUT,
+	INPUT_PULLUP
+} ModeTypeDef;
 
+typedef enum{
+	HIGH,
+	LOW,
+	INVALID
+} State_TypeDef;
 
-/*-----------------------------------Driver Defines-------------------------------*/
-typedef struct{
-	volatile uint8_t PIND;
-	volatile uint8_t DDRD;
-	volatile uint8_t PORTD;
-} GPIOD_TypeDef;
-
-#define GPIOD ((GPIOD_TypeDef*) 0x09)
-
-(*(volatile uint8_t *)(mem_addr))
+/*-----------------------------------Current pin configuration-------------------------------*/
 
 /*
 *	COL1 = PF0
@@ -106,8 +136,9 @@ typedef struct{
 
 
 /*-----------------------------------Prototypes-------------------------------*/
-void begin(void);
-
-void keyscan(void);
+void Keyboard_Init(void);
+void Keyscan(void);
+void pinMode(uint16_t Pin, ModeTypeDef Mode);
+void SetColumn(int index, bool state);
 
 #endif /* KEYBOARDHID_H_ */

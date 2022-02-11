@@ -4,59 +4,28 @@
  * Created: 2/6/2022 7:23:27 PM
  *  Author: ianjr
  */ 
-#include "Keyboard.h"
-#include <stdbool.h>
 
+/*-----------------------------------Includes-------------------------------*/
+#include <Keyboard.h>
+#include <UserConfig.h>
+
+/*-----------------------------Private Function Prototypes--------------------*/
 static void SetColumn(int index, bool state);
+static void pinMode(uint16_t Pin, ModeTypeDef Mode);
+static State_TypeDef readRow(uint8_t index);
 
-PinNumber_TypeDef RowPins[ROW_PINS] = ROW_PINS;
-PinNumber_TypeDef ColumnPins[NUM_COLUMNS] = COLUMN_PINS;
-
-/*
-*	COL1 = PF0
-*	COL2 = PF1
-*	COL3 = PF4
-*	COL4 = PF5
-*	COL5 = PF6
-*	COL6 = PF7
-*
-*	COL7 = PC7
-*	COL8 = PC6
-*
-*	COL9 = PB6
-*	COL10 = PB5
-*	COL11 = PB4
-*
-*	COL12 = PD7
-*	COL13 = PD6
-*	COL14 = PD4
-*	COL15 = PD5
-*
-*	ROW1 = PD0
-*	ROW2 = PD1
-*	ROW3 = PD2
-*	ROW4 = PD3
-*/
-
-void begin(){
-	//Row input
-	DDRD &= ~((1<<DDD3) | (1<<DDD2) | (1<<DDD1) | (1<<DDD0));
-	PORTD |= ((1<<PORTD3) | (1<<PORTD2) | (1<<PORTD1) | (1<<PORTD0)); //enable PULL-UP resistors on rows
+void Keyboard_Init(){
+	for (int i = 0; i < NUM_ROWS; i++){	
+		pinMode(ROW_PINS[i], INPUT_PULLUP);
+	}
 	
-	//Column outputs
-	DDRF |= ((1<<DDF7) | (1<<DDF6) | (1<<DDF5) | (1<<DDF4) | (1<<DDF1) | (1<<DDF0));
-	DDRC |= ((1<<DDC7) | (1<<DDC6));
-	DDRB |= ((1<<DDB6) | (1<<DDB5) | (1<<DDB4));
-	DDRD |= ((1<<DDD7) | (1<<DDD6) | (1<<DDD5) | (1<<DDD4));
-	
-	//Set all columns HIGH (LOW means we are scanning that column for press)
-	PORTF |= ((1<<PORTF7) | (1<<PORTF6) | (1<<PORTF5) | (1<<PORTF4) | (1<<PORTF1) | (1<<PORTF0));
-	PORTC |= ((1<<PORTC7) | (1<<PORTC6));
-	PORTB |= ((1<<PORTB6) | (1<<PORTB5) | (1<<PORTB4));
-	PORTD |= ((1<<PORTD7) | (1<<PORTD6) | (1<<PORTD5) | (1<<PORTD4));
+	for (int i = 0; i < NUM_COLUMNS; i++){
+		pinMode(COLUMN_PINS[i], OUTPUT);
+		SetColumn(i, HIGH);
+	}
 }
 
-void keyscan(){
+void Keyscan(){
 	/*
 	*1) Set COL1 LOW to scan it
 	*2) Read Rows 1 to 4
@@ -68,39 +37,71 @@ void keyscan(){
 	*8) Send buffer over USB 
 	*/
 	
-
+	for (int i = 0; i < NUM_COLUMNS; i++){
+		SetColumn(COLUMN_PINS[i], LOW);
+		
+		for (int j = 0; j < NUM_ROWS; j++){
+			
+		}
+	}
 }
 
 
-static void SetColumn(int index, bool state){ //Start index = 0
-	PinNumber_TypeDef Pin = ColumnPins[index];
+static void pinMode(uint16_t Pin, ModeTypeDef Mode){
+	unsigned int Pin_Number = GET_PIN_NUMBER(Pin);
+	GPIO_TypeDef* GPIO = GET_MEMORY_ADDRESS(Pin);
 	
-	if ((index >= NUM_COLUMNS) | (index <= 0)){
+	if ((Pin_Number == INVALID_PIN_NUMBER) | (GPIO == NULL)){
 		return;
 	}
 	
-	else{
-		switch(Pin){
-			case: PORTB_
-				//do stuff
-				break;
-				
-			case: PORTC_
-				//do stuff
-				break;
-				
-			case: PORTD_
-				//do stuff
-				break;
-			
-			case: PORTE_
-				//do stuff
-				break;
-				
-			case: PORTF_
-				//do stuff
-				break;
+	switch (Mode){
+		case INPUT:
+			GPIO->DDRX &= ~(1<<Pin_Number);
+		
+		case INPUT_PULLUP:
+			GPIO->DDRX &= ~(1<<Pin_Number);
+			GPIO->PORTX |= (1<<Pin_Number);
+		
+		case OUTPUT:
+			GPIO->DDRX |= (1<<Pin_Number);
+	}
+}
+
+static void SetColumn(int index, State_TypeDef state){ //Start index = 0
+	unsigned int Pin = COLUMN_PINS[index];	
+	unsigned int Pin_Number = GET_PIN_NUMBER(Pin);
+	GPIO_TypeDef* GPIO = GET_MEMORY_ADDRESS(Pin);
+	
+	if ((index >= NUM_COLUMNS) | (index < 0) | (Pin == INVALID_PIN_NUMBER) | (GPIO == NULL)){
+		return;
+	}
+	
+	if (GPIO->DDRX & (1<<Pin_Number)){ //verify pin is OUTPUT
+		if (state == HIGH){
+			GPIO->PORTX |= (1<<Pin_Number);
+		}
+		else if (state == LOW){
+			GPIO->PORTX &= ~(1<<Pin_Number);
 		}
 	}
-	//COL1, COL3
+}
+
+/* 10.2.4 - pg. 69 reading I/O */
+static State_TypeDef readRow(int index){ 
+	
+	unsigned int Pin = ROW_PINS[index];
+	unsigned int Pin_Number = GET_PIN_NUMBER(Pin);
+	GPIO_TypeDef* GPIO = GET_MEMORY_ADDRESS(Pin);
+	
+	if ((index >= NUM_ROWS) | (index < 0) | (Pin == INVALID_PIN_NUMBER) | (GPIO == NULL)){
+		return INVALID;
+	}
+	
+	if (!(GPIO->PINX & (1<<Pin_Number))){ //key press
+		return LOW;
+	}
+	else{
+		return HIGH;
+	}
 }
