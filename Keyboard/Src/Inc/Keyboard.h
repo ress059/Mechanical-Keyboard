@@ -11,20 +11,22 @@
 /*-----------------------------------Includes-------------------------------*/
 #include <stdbool.h>
 #include <stddef.h>
+#include <xc.h> //TODO - delete after debugging
+#include <util/delay.h> //TODO - delete after debugging
 
 /*-----------------------------------GPIO Registers-------------------------------*/
 typedef struct{
 	volatile uint8_t PINX;
 	volatile uint8_t DDRX;
 	volatile uint8_t PORTX;
-} GPIO_TypeDef;
+} GPIOTypeDef;
 
 /*-----------------------------------Defines-------------------------------*/
-#define GPIOB							((GPIO_TypeDef*) 0x03) // TODO - change back to 0x03 for ATmega32U4 (0x23 for ATmega328)
-#define GPIOC							((GPIO_TypeDef*) 0x06)
-#define GPIOD							((GPIO_TypeDef*) 0x09)
-#define GPIOE							((GPIO_TypeDef*) 0x0C)
-#define GPIOF							((GPIO_TypeDef*) 0x0F)
+#define GPIOB							((GPIOTypeDef*) 0x23)
+#define GPIOC							((GPIOTypeDef*) 0x26)
+#define GPIOD							((GPIOTypeDef*) 0x29)
+#define GPIOE							((GPIOTypeDef*) 0x2C)
+#define GPIOF							((GPIOTypeDef*) 0x2F)
 
 #define _PORTB							(1U<<8)
 #define _PORTC							(1U<<9)
@@ -101,10 +103,11 @@ typedef enum{
 } ModeTypeDef;
 
 typedef enum{
+	HI_Z,
 	HIGH,
 	LOW,
 	INVALID
-} State_TypeDef;
+} StateTypeDef;
 
 /*-----------------------------------Current pin configuration-------------------------------*/
 
@@ -136,9 +139,7 @@ typedef enum{
 
 
 /*-----------------------------------Prototypes-------------------------------*/
-void Keyboard_Init(void);
-void Keyscan(void);
-void pinMode(uint16_t Pin, ModeTypeDef Mode);
-void SetColumn(int index, bool state);
+void keyboardInit(void);
+void keyScan(void);
 
 #endif /* KEYBOARDHID_H_ */

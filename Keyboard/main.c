@@ -5,14 +5,16 @@
  *  Author: ianjr
  */ 
 
-#include <util/delay.h>
+//#include <util/delay.h>
 #include "Keyboard.h"
 #include "UserConfig.h"
 //LED = COL12 (PD7)
 
 int main(void)
 {	
+	keyboardInit();
     while(1)
     {
+		keyScan();
     }
 }
