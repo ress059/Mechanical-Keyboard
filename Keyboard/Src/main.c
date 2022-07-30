@@ -1,24 +1,18 @@
-/*
- * main.c
- *
- * Created: 2/1/2022 11:55:36 AM
- *  Author: ianjr
- */ 
+/** @file main.c
+*
+* @brief Runs the keyboard. Author: Ian Ress
+*
+*/ 
 
-//#include <util/delay.h>
-#include "Keyboard.h"
-#include "UserConfig.h"
-//LED = COL12 (PD7)
+#include "timer.h"
+#include "debug.h"
 
-int main(void)
-{
-	keyboardInit();
-    while(1)
-    {
-		keyScan();
-		if ((keypress_index[0] == 1) & (keypress_index[1] == 2)){//S18
-			PORTD ^= (1<<PORTD7);
-			_delay_ms(1000);
-		}		 
+#include <util/delay.h>
+
+int main(void) {
+	test_matrix();
+    while(1) {
+		// blink();
+		// _delay_ms(5000);
     }
 }

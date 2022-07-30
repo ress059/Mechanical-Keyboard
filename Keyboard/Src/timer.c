@@ -33,6 +33,8 @@ static const uint16_t prescalar_vals[PRESCALAR_OPTIONS] = {1, 8, 64, 256, 1024};
 
 void (*tim1_isr)(void); 
 void (*tim3_isr)(void);
+timer_t TIM1 = {timer1_init, timer1_start, timer1_stop};
+timer_t TIM3 = {timer3_init, timer3_start, timer3_stop};
 
 /**
  * @brief ISR that executes when Timer1 reaches the value stored in OCR1A register.
@@ -61,16 +63,16 @@ ISR(TIMER3_COMPA_vect) {
  * sending an interrupt request. 
  * 
  */
-void timer1_init(uint8_t period_ms) {
+void timer1_init(uint16_t period_ms) {
     uint8_t sreg;
-    uint16_t top;
-    uint32_t top32; /* Account for 16-bit overflow during timer top and prescalar calculation. */
+    uint16_t top = 0;
+    uint64_t top64 = 0; /* Account for 16-bit overflow during timer top and prescalar calculation. Ugly but will do for now. */
 
-    for (int i = 0; i < PRESCALAR_OPTIONS; i++) {
-        top32 = ((period_ms * SYS_CLOCK_FREQ)/(prescalar_vals[i] * 1000)) - 1;
+    for (int i = 0; i < PRESCALAR_OPTIONS; i++) {        
+        top64 = ((uint64_t)period_ms * (SYS_CLOCK_FREQ/1000)) / prescalar_vals[i] - 1;
 
-        if (top32 > 1 && top32 <= 65535) {
-            top = (uint16_t)top32;
+        if (top64 > 1 && top64 <= 65535) {
+            top = (uint16_t)top64;
             
             if (prescalar_vals[i] == 1) {
                 TCCR1B = (TIMER1_CTC_MODE | TIMER1_PRESCALAR_1);
@@ -91,17 +93,19 @@ void timer1_init(uint8_t period_ms) {
         }
 
         else if (i == (PRESCALAR_OPTIONS - 1)) {
-            #error "No valid top and prescalar value combination exists for provided input."
+            //TODO: throw real-time error
         }
     }
 
     /* TODO: add support for control registers B and C. */
-    TCCR1A = 0;
-    sreg = SREG;
-    cli();
-    OCR1A = top; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
-    SREG = sreg;
-    sei();
+    if (top) {
+        TCCR1A = 0;
+        sreg = SREG;
+        cli();
+        OCR1A = top; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
+        SREG = sreg;
+        sei();
+    }
 }
 
 /**
@@ -112,17 +116,23 @@ void timer1_init(uint8_t period_ms) {
  * 
  */
 void timer1_start(void (*isr)(void)) {
+    uint8_t sreg;
+
+    cli();
     tim1_isr = isr;
+    sreg = SREG;
+    TCNT1 = 0; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
+    SREG = sreg;
     TIMSK1 |= (1U << OCIE1A);
+    sei();
     PRR0 &= ~(1U << PRTIM1);
-    
 }
 
 /**
  * @brief Stops Timer1 and disables its output compare interrupt. 
  * 
  */
-void timer1_stop(timer16_t timer) {
+void timer1_stop(void) {
     TIMSK1 &= ~(1U << OCIE1A);
     PRR0 |= (1U << PRTIM1);
 }
@@ -134,16 +144,16 @@ void timer1_stop(timer16_t timer) {
  * sending an interrupt request. 
  * 
  */
-void timer3_init(uint8_t period_ms) {
+void timer3_init(uint16_t period_ms) {
     uint8_t sreg;
-    uint16_t top;
-    uint32_t top32; /* Account for 16-bit overflow during timer top and prescalar calculation. */
+    uint16_t top = 0;
+    uint64_t top64 = 0; /* Account for 16-bit overflow during timer top and prescalar calculation. Ugly but will do for now. */
 
     for (int i = 0; i < PRESCALAR_OPTIONS; i++) {
-        top32 = ((period_ms * SYS_CLOCK_FREQ)/(prescalar_vals[i] * 1000)) - 1;
+        top64 = ((uint64_t)period_ms * (SYS_CLOCK_FREQ/1000)) / prescalar_vals[i] - 1;
 
-        if (top32 > 1 && top32 <= 65535) {
-            top = (uint16_t)top32;
+        if (top64 > 1 && top64 <= 65535) {
+            top = (uint16_t)top64;
             
             if (prescalar_vals[i] == 1) {
                 TCCR3B = (TIMER3_CTC_MODE | TIMER3_PRESCALAR_1);
@@ -164,17 +174,19 @@ void timer3_init(uint8_t period_ms) {
         }
 
         else if (i == (PRESCALAR_OPTIONS - 1)) {
-            #error "No valid top and prescalar value combination exists for provided input."
+            //TODO: throw real-time error
         }
     }
 
     /* TODO: add support for control registers B and C. */
-    TCCR3A = 0;
-    sreg = SREG;
-    cli();
-    OCR3A = top; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
-    SREG = sreg;
-    sei();
+    if (top) {
+        TCCR3A = 0;
+        sreg = SREG;
+        cli();
+        OCR3A = top; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
+        SREG = sreg;
+        sei();
+    }
 }
 
 /**
@@ -185,7 +197,7 @@ void timer3_init(uint8_t period_ms) {
  * 
  */
 void timer3_start(void (*isr)(void)) {
-    tim1_isr = isr;
+    tim3_isr = isr;
     TIMSK3 |= (1U << OCIE3A);
     PRR1 &= ~(1U << PRTIM3);
 }
@@ -194,7 +206,7 @@ void timer3_start(void (*isr)(void)) {
  * @brief Stops Timer3 and disables its output compare interrupt. 
  * 
  */
-void timer3_stop(timer16_t timer) {
+void timer3_stop(void) {
     TIMSK3 &= ~(1U << OCIE3A);
     PRR1 |= (1U << PRTIM3);
 }

@@ -20,6 +20,7 @@ void gpio_set_output(uint8_t index, uint8_t pin);
 void gpio_set_inputpullup(uint8_t index, uint8_t pin);
 void gpio_output_low(uint8_t index, uint8_t pin);
 void gpio_output_high(uint8_t index, uint8_t pin);
+void gpio_toggle(uint8_t index, uint8_t pin);
 uint8_t gpio_read(uint8_t index, uint8_t pin);
 
 #endif /*GPIO_H*/
