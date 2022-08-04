@@ -22,7 +22,7 @@
  * @param KEY_LAYOUT The full key layout. KEY_NONE = no desired key in that position.  
  * 
  */
-#define DEBOUNCE_TIME				5 //ms
+#define DEBOUNCE_TIME				5000 //ms
 #define NUM_LAYERS					2
 #define NUM_ROWS					4
 #define NUM_COLUMNS					14

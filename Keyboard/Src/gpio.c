@@ -26,7 +26,8 @@
  * @param[in] pin pin number.
  * 
  */
-void gpio_set_input(uint8_t index, uint8_t pin) {
+void gpio_set_input(uint8_t index, uint8_t pin) 
+{
     *(gpio_reg[index].ddrx) &= (uint8_t)~(1U << pin);
 }
 
@@ -37,7 +38,8 @@ void gpio_set_input(uint8_t index, uint8_t pin) {
  * @param[in] pin pin number.
  * 
  */
-void gpio_set_output(uint8_t index, uint8_t pin) {
+void gpio_set_output(uint8_t index, uint8_t pin) 
+{
     *(gpio_reg[index].ddrx) |= (uint8_t)(1U << pin);
 }
 
@@ -48,7 +50,8 @@ void gpio_set_output(uint8_t index, uint8_t pin) {
  * @param[in] pin pin number.
  * 
  */
-void gpio_set_inputpullup(uint8_t index, uint8_t pin) {
+void gpio_set_inputpullup(uint8_t index, uint8_t pin) 
+{
     *(gpio_reg[index].ddrx) &= (uint8_t)~(1U << pin);
     *(gpio_reg[index].portx) |= (uint8_t)(1U << pin);
 }
@@ -60,7 +63,8 @@ void gpio_set_inputpullup(uint8_t index, uint8_t pin) {
  * @param[in] pin pin number.
  * 
  */
-void gpio_output_low(uint8_t index, uint8_t pin) {
+void gpio_output_low(uint8_t index, uint8_t pin) 
+{
     *(gpio_reg[index].portx) &= (uint8_t)~(1U << pin);
 }
 
@@ -71,7 +75,8 @@ void gpio_output_low(uint8_t index, uint8_t pin) {
  * @param[in] pin pin number.
  * 
  */
-void gpio_output_high(uint8_t index, uint8_t pin) {
+void gpio_output_high(uint8_t index, uint8_t pin) 
+{
     *(gpio_reg[index].portx) |= (uint8_t)(1U << pin);
 }
 
@@ -82,7 +87,8 @@ void gpio_output_high(uint8_t index, uint8_t pin) {
  * @param[in] pin pin number.
  * 
  */
-void gpio_toggle(uint8_t index, uint8_t pin) {
+void gpio_toggle(uint8_t index, uint8_t pin) 
+{
     *(gpio_reg[index].portx) ^= (uint8_t)(1U << pin);
 }
 
@@ -94,6 +100,7 @@ void gpio_toggle(uint8_t index, uint8_t pin) {
  * 
  * @return 1 if LOW (pressed), 0 if HIGH.
  */
-uint8_t gpio_read(uint8_t index, uint8_t pin) {
-    return (~(*(gpio_reg[index].pinx) & (uint8_t)(1U << pin)));
+uint8_t gpio_read(uint8_t index, uint8_t pin) 
+{
+    return (!(*(gpio_reg[index].pinx) & (uint8_t)(1U << pin)));
 }
