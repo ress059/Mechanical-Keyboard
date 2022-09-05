@@ -6,9 +6,7 @@
 
 #include "debug.h"
 
-#include <util/delay.h>
-
 int main(void) 
 {
-	test_matrix();
+	test_matrixinit();	
 }

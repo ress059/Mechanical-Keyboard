@@ -4,7 +4,6 @@
 *
 */
 
-#include <avr/io.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -47,18 +46,18 @@ static bool debounce_logic(uint8_t row, uint8_t col)
 void matrix_init(void) 
 {
 	/* Disable JTAG or else PF4, PF5, PF6, and PF7 will be pulled up HIGH permanently */
-	#ifdef __AVR_ATmega32U4__
+	#ifdef __AVR_ATMEGA32U4__
 		MCUCR |= (1U << 7);
 		MCUCR |= (1U << 7);
 	#endif
 
 	for (int r = 0; r < NUM_ROWS; r++) {
-		gpio_set_inputpullup(g_keyboard_rowpins[r].port_index, g_keyboard_rowpins[r].pin_number);
+		gpio_set_input(g_keyboard_rowpins[r].port_index, g_keyboard_rowpins[r].pin_mask);
 	}
 
 	for (int c = 0; c < NUM_COLUMNS; c++) {
-		gpio_set_output(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_number);
-		gpio_output_high(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_number);
+		gpio_set_output(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_mask);
+		gpio_output_high(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_mask);
 	}
 }
 
@@ -71,32 +70,33 @@ void matrix_scan(void)
 	uint8_t keypress = 0;
 
 	for (int c = 0; c < NUM_COLUMNS; c++) {
-		gpio_output_low(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_number);
+		gpio_output_low(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_mask);
 
 		for (int r = 0; r < NUM_ROWS; r++) {
 
-			if (matrix_state[r][c]) { /* Has debounce timer already started for this key? */
+			//if (matrix_state[r][c]) { /* Has debounce timer already started for this key? */
 
-				if (debounce_logic(r,c)) { /* Has the key been fully debounced? */
-					keypress = gpio_read(g_keyboard_rowpins[r].port_index, g_keyboard_rowpins[r].pin_number);
+				//if (debounce_logic(r,c)) { /* Has the key been fully debounced? */
+					keypress = gpio_read(g_keyboard_rowpins[r].port_index, g_keyboard_rowpins[r].pin_mask);
 					
 					if (keypress) {
 						//TODO: Store press loc, translate to keycode, store keymap in USB buffer
 
-						gpio_toggle(led.port_index, led.pin_number); /* DEBUG */
+						gpio_toggle(led.port_index, led.pin_mask); /* DEBUG */
 					}
-					matrix_state[r][c] = 0;
+					//matrix_state[r][c] = 0;
 				}
+				gpio_output_high(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_mask);
 			}
 
-			else { /* Otherwise start debounce timer if initial keypress detected */
-				keypress = gpio_read(g_keyboard_rowpins[r].port_index, g_keyboard_rowpins[r].pin_number);	
-				if (keypress) 
-				{
-					matrix_state[r][c] = g_ms; /* TODO: Handle unlucky case where g_ms = 0 */
-				}
-			}
-		}
-		gpio_output_high(g_keyboard_colpins[c].port_index, g_keyboard_colpins[c].pin_number);
+			// else { /* Otherwise start debounce timer if initial keypress detected */
+			// 	keypress = gpio_read(g_keyboard_rowpins[r].port_index, g_keyboard_rowpins[r].pin_mask);	
+			// 	if (keypress) 
+			// 	{
+			// 		matrix_state[r][c] = g_ms; /* TODO: Handle unlucky case where g_ms = 0 */
+			// 	}
+			// }
+		// }
+		
 	}
-}
+// }

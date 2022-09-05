@@ -8,6 +8,7 @@
 #define USER_CONFIG_H
 
 #include "keycodes.h"
+#include "pin_map.h"
 
 /**
  * @brief Keyboard configuration. User changes settings here.
@@ -43,5 +44,9 @@
 									 {KEY_TAB,			KEY_A,		KEY_S,		KEY_D,		KEY_F,		KEY_G,		KEY_H,		KEY_J,		KEY_K,		KEY_L,		KEY_SEMICOLON,	KEY_ENTER,			KEY_NONE,		KEY_CAPS_LOCK},		\
 									 {KEY_LEFT_SHIFT,	KEY_Z,		KEY_X,		KEY_C,		KEY_V,		KEY_B,		KEY_N,		KEY_M,		KEY_COMMA,	KEY_PERIOD,	KEY_SLASH,		KEY_UP,				KEY_NONE,		KEY_EQUAL},			\
 									 {KEY_CTRL,			KEY_GUI,	KEY_ALT,	KEY_NONE,	KEY_NONE,	KEY_NONE,	KEY_SPACE,	KEY_NONE,	KEY_NONE,	KEY_TILDE,	KEY_NONE,		KEY_DOWN,			KEY_NONE,		KEY_RIGHT}} //TODO - add back column 12 after done with debugging LED. Add layer 2
+
+/* Programmer declarations. Do not edit. */
+extern const pin_map_t g_keyboard_rowpins[NUM_ROWS];
+extern const pin_map_t g_keyboard_colpins[NUM_COLUMNS];
 
 #endif /* USER_CONFIG_H */

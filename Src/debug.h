@@ -14,7 +14,8 @@
 extern pin_map_t led;
 
 void blink(void);
-void test_matrix(void);
+void test_matrixinit(void);
+void test_matrixscan(void);
 
 
 #endif /* DEBUG_H */
