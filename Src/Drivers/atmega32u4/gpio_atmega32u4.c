@@ -1,14 +1,13 @@
-/** @file gpio.c
+/** @file gpio_atmega32u4.c
 *
 * @brief Basic GPIO driver for AVR. Author: Ian Ress
 *
 */
 
-#include "gpio.h"
+#include "gpio_atmega32u4.h"
 
 #include <avr/io.h>
 
-#if defined (__AVR_ATMEGA32U4__)
 static const gpio_reg_t gpio_reg[5] = 
 {
     {&DDRB, &PORTB, &PINB},
@@ -18,24 +17,8 @@ static const gpio_reg_t gpio_reg[5] =
     {&DDRF, &PORTF, &PINF}
 };
 
-#elif defined (__AVR_ATXMEGA64B3__)
-static const gpio_reg_t gpio_reg[7] =
-{
-    {&PORTB_DIR, &PORTB_OUT, &PORTB_IN},
-    {&PORTC_DIR, &PORTC_OUT, &PORTC_IN},
-    {&PORTD_DIR, &PORTD_OUT, &PORTD_IN},
-    {0, 0, 0}, //no PORTE on ATXMEGA64B3
-    {0, 0, 0}, //no PORTF on ATXMEGA64B3
-    {&PORTG_DIR, &PORTG_OUT, &PORTG_IN},
-    {&PORTM_DIR, &PORTM_OUT, &PORTM_IN}
-};
-
-#else
-    #error "Unsupported MCU."
-#endif
-
 /**
- * @brief Sets gpio pin as an input pullup. External pullups are used for ATXMEGA64B3 PCB.
+ * @brief Sets gpio pin as an input pullup.
  * 
  * @param[in] index index in gpio_reg containing memory mapped I/O address.
  * @param[in] mask  pin mask.
@@ -43,10 +26,8 @@ static const gpio_reg_t gpio_reg[7] =
  */
 void gpio_set_input(uint8_t index, uint8_t mask) 
 {
-    *(gpio_reg[index].dirx) &= ~mask;
-#if defined (__AVR_ATMEGA32U4__)
-    *(gpio_reg[index].outx) |= mask;
-#endif
+    *(gpio_reg[index].ddrx) &= ~mask;
+    *(gpio_reg[index].portx) |= mask;
 }
 
 /**
@@ -58,11 +39,11 @@ void gpio_set_input(uint8_t index, uint8_t mask)
  */
 void gpio_set_output(uint8_t index, uint8_t mask) 
 {
-    *(gpio_reg[index].dirx) |= mask;
+    *(gpio_reg[index].ddrx) |= mask;
 }
 
 /**
- * @brief Outputs a LOW signal on the gpio pin.
+ * @brief Outputs a LOW signal on the gpio pin. gpio_set_output() must be called once beforehand.
  * 
  * @param[in] index index in gpio_reg containing memory mapped I/O address.
  * @param[in] mask  pin mask.
@@ -70,11 +51,11 @@ void gpio_set_output(uint8_t index, uint8_t mask)
  */
 void gpio_output_low(uint8_t index, uint8_t mask) 
 {
-    *(gpio_reg[index].outx) &= ~mask;
+    *(gpio_reg[index].portx) &= ~mask;
 }
 
 /**
- * @brief Outputs a HIGH signal on the gpio pin.
+ * @brief Outputs a HIGH signal on the gpio pin. gpio_set_output() must be called once beforehand.
  * 
  * @param[in] index index in gpio_reg containing memory mapped I/O address.
  * @param[in] mask  pin mask.
@@ -82,11 +63,12 @@ void gpio_output_low(uint8_t index, uint8_t mask)
  */
 void gpio_output_high(uint8_t index, uint8_t mask) 
 {
-    *(gpio_reg[index].outx) |= mask;
+    *(gpio_reg[index].portx) |= mask;
 }
 
 /**
  * @brief Outputs LOW signal if the gpio is previously outputting HIGH and vise versa.
+ * gpio_set_output() must be called once beforehand.
  * 
  * @param[in] index index in gpio_reg containing memory mapped I/O address.
  * @param[in] mask  pin mask.
@@ -94,7 +76,7 @@ void gpio_output_high(uint8_t index, uint8_t mask)
  */
 void gpio_toggle(uint8_t index, uint8_t mask) 
 {
-    *(gpio_reg[index].outx) ^= mask;
+    *(gpio_reg[index].portx) ^= mask;
 }
 
 /**
@@ -107,5 +89,5 @@ void gpio_toggle(uint8_t index, uint8_t mask)
  */
 uint8_t gpio_read(uint8_t index, uint8_t mask) 
 {
-    return (!(*(gpio_reg[index].inx) & mask));
+    return (!(*(gpio_reg[index].pinx) & mask));
 }

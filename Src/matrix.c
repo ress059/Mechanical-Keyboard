@@ -6,18 +6,19 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <avr/io.h>
 
 #include "matrix.h"
-#include "gpio.h"
+#include "mcu_drivers.h"
 #include "user_config.h"
 #include "systick.h"
-#include "pin_map.h"
-
 #include "debug.h"
 
 static uint16_t matrix_state[NUM_ROWS][NUM_COLUMNS] = {{0}};
 
 static bool debounce_logic(uint8_t row, uint8_t col);
+uint8_t keypress = 0;
+uint8_t debugpress = 0;
 
 /**
  * @brief Reads the pressed key when it is debounced. If it is pressed, the relevant key is
@@ -46,7 +47,7 @@ static bool debounce_logic(uint8_t row, uint8_t col)
 void matrix_init(void) 
 {
 	/* Disable JTAG or else PF4, PF5, PF6, and PF7 will be pulled up HIGH permanently */
-	#ifdef __AVR_ATMEGA32U4__
+	#if defined(__AVR_ATmega32U4__)
 		MCUCR |= (1U << 7);
 		MCUCR |= (1U << 7);
 	#endif
@@ -63,7 +64,7 @@ void matrix_init(void)
 
 /**
  * @brief Scans the entire key matrix to detect debounced key presses.
- * TODO TODO TODO: DEBOUNCE ALGORITHM DOES NOT WORK IF KEY IS PRESSED OVER AND OVER AGAIN.
+ * 
  */
 void matrix_scan(void) 
 {
@@ -83,6 +84,7 @@ void matrix_scan(void)
 						//TODO: Store press loc, translate to keycode, store keymap in USB buffer
 
 						gpio_toggle(led.port_index, led.pin_mask); /* DEBUG */
+						debugpress = 1; /* DEBUG */
 					}
 					//matrix_state[r][c] = 0;
 				}

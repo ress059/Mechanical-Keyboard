@@ -1,4 +1,4 @@
-/** @file timer.c
+/** @file timer_atmega32u4.c
 *
 * @brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
 * output compare modes. Author: Ian Ress
@@ -8,9 +8,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "timer.h"
+#include "timer_atmega32u4.h"
 
-#ifdef __AVR_ATmega32U4__
 #define PRESCALAR_OPTIONS                 5
 #define SYS_CLOCK_FREQ                    2000000 /* Hz. 16MHz crystal divided by 8 for USB. */
 
@@ -29,7 +28,6 @@
 #define TIMER3_CTC_MODE                   (1U << WGM32)
 
 static const uint16_t prescalar_vals[PRESCALAR_OPTIONS] = {1, 8, 64, 256, 1024};
-#endif
 
 static void (*tim1_isr)(void); 
 static void (*tim3_isr)(void);
@@ -43,7 +41,7 @@ timer_t TIM3 = {timer3_init, timer3_start, timer3_stop};
  */
 ISR(TIMER1_COMPA_vect) 
 {
-    if (tim1_isr) {
+    if (tim1_isr) { /* Don't dereference NULL function pointer. */
         tim1_isr();
     }
 }
@@ -54,7 +52,7 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(TIMER3_COMPA_vect) 
 {
-    if (tim3_isr) {
+    if (tim3_isr) { /* Don't dereference NULL function pointer. */
         tim3_isr();
     }
 }
@@ -103,7 +101,9 @@ void timer1_init(uint16_t period_ms)
     /* TODO: add support for control registers B and C. */
     if (top) {
         TCCR1A = 0;
+        cli();
         OCR1A = top; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
+        sei();
     }
 }
 
@@ -111,16 +111,17 @@ void timer1_init(uint16_t period_ms)
  * @brief Starts Timer1 and enables its output compare interrupt. Call this function only
  * after calling timer1_init().
  * 
- * @param[in] isr callback that executes within the timer's ISR.
+ * @param[in] isr callback that executes within the timer's ISR. This makes it easier to
+ * pass in custom ISRs.
  * 
  */
 void timer1_start(void (*isr)(void)) 
 {
-    cli();
     tim1_isr = isr;
+    cli();
     TCNT1 = 0; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
-    TIMSK1 |= (1U << OCIE1A);
     sei();
+    TIMSK1 |= (1U << OCIE1A);
     PRR0 &= ~(1U << PRTIM1);
 }
 
@@ -178,7 +179,9 @@ void timer3_init(uint16_t period_ms)
     /* TODO: add support for control registers B and C. */
     if (top) {
         TCCR3A = 0;
-        OCR3A = top;
+        cli();
+        OCR3A = top; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
+        sei();
     }
 }
 
@@ -186,16 +189,17 @@ void timer3_init(uint16_t period_ms)
  * @brief Starts Timer3 and enables its output compare interrupt. Call this function only
  * after calling timer3_init().
  * 
- * @param[in] isr callback that executes within the timer's ISR.
+ * @param[in] isr callback that executes within the timer's ISR. This makes it easier to
+ * pass in custom ISRs.
  * 
  */
 void timer3_start(void (*isr)(void)) 
 {
-    cli();
     tim3_isr = isr;
+    cli();
     TCNT3 = 0; /* 16-bit register write on 8-bit machine. ATMega32U4, pgs. 113-116 */
-    TIMSK3 |= (1U << OCIE3A);
     sei();
+    TIMSK3 |= (1U << OCIE3A);
     PRR1 &= ~(1U << PRTIM3);
 }
 

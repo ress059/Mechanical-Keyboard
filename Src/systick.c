@@ -7,7 +7,7 @@
 #include <avr/interrupt.h>
 
 #include "systick.h"
-#include "timer.h"
+#include "mcu_drivers.h"
 
 volatile uint16_t g_ms = 0;
 

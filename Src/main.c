@@ -8,5 +8,5 @@
 
 int main(void) 
 {
-	test_matrixinit();	
+	test_keyboard();	
 }

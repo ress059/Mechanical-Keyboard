@@ -1,12 +1,12 @@
-/** @file timer.h
+/** @file timer_atmega32u4.h
 *
 * @brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
 * output compare modes. Author: Ian Ress
 *
 */ 
 
-#ifndef TIMER16_H
-#define TIMER16_H
+#ifndef TIMER_ATMEGA32U4_H
+#define TIMER_ATMEGA32U4_H
 
 #include <stdint.h>
 
@@ -26,4 +26,4 @@ void timer3_init(uint16_t period_ms);
 void timer3_start(void (*isr)(void));
 void timer3_stop(void); 
 
-#endif /* TIMER_H */
+#endif /* TIMER_ATMEGA32U4_H */

@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+extern uint8_t debugpress;
+
 void matrix_init(void);
 void matrix_scan(void);
 

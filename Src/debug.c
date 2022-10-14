@@ -5,9 +5,8 @@
 */ 
 
 #include "debug.h"
-#include "gpio.h"
 #include "matrix.h"
-#include "systick.h"
+#include "USBhandler.h" 
 
 #include <util/delay.h>
 
@@ -29,5 +28,18 @@ void test_matrixscan(void)
 
     while(1) {
         matrix_scan();
+    }
+}
+
+
+void test_keyboard(void) {
+    matrix_init();
+    SetupHardware();
+	GlobalInterruptEnable();
+
+    while (1) {
+        matrix_scan();
+        HID_Device_USBTask(&Keyboard_HID_Interface);
+		USB_USBTask();
     }
 }

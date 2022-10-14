@@ -8,7 +8,7 @@
 #define USER_CONFIG_H
 
 #include "keycodes.h"
-#include "pin_map.h"
+#include "mcu_drivers.h"
 
 /**
  * @brief Keyboard configuration. User changes settings here.
@@ -17,7 +17,6 @@
  * @param NUM_LAYERS The number of layers on the keyboard.
  * @param NUM_ROWS The number of rows on the keyboard.
  * @param NUM_COLUMNS The number of columns on the keyboard.
- * @param BUFFER_SIZE Max number of elements in the USB buffer.
  * @param ROW_PINS The GPIO pins connected to the rows.
  * @param COLUMN_PINS The GPIO pins connected to the columns.
  * @param KEY_LAYOUT The full key layout. KEY_NONE = no desired key in that position.  
@@ -27,7 +26,6 @@
 #define NUM_LAYERS					2
 #define NUM_ROWS					4
 #define NUM_COLUMNS					14
-#define BUFFER_SIZE					20
 #define ROW_PINS					{PIN_PD0, PIN_PD1, PIN_PD2, PIN_PD3}
 #define COLUMN_PINS					{PIN_PF0, PIN_PF1, PIN_PF4, PIN_PF5, PIN_PF6, PIN_PF7, PIN_PC7, PIN_PC6, PIN_PB6, PIN_PB5, PIN_PB4, PIN_PD6, PIN_PD4, PIN_PD5} //TODO - add PD7 (LED) after testing
 

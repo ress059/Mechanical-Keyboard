@@ -8,9 +8,8 @@
 #define SYSTICK_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
-#define SYSTICK_TIMER_SELECT        TIM1
+#define SYSTICK_TIMER_SELECT        TIM1 /* Throws compiler error if invalid timer selected */
 #define SYSTICK_PERIOD_MS           1
 
 extern volatile uint16_t g_ms;

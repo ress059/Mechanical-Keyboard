@@ -7,15 +7,15 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include "mcu_drivers.h"
 #include <stdint.h>
-
-#include "pin_map.h" 
 
 extern pin_map_t led;
 
 void blink(void);
 void test_matrixinit(void);
 void test_matrixscan(void);
+void test_keyboard(void);
 
 
 #endif /* DEBUG_H */
