@@ -1,8 +1,10 @@
-/*
- * keycodes.h
- * Author: Ian Ress
-*/ 
-
+/** @file keycodes.h
+*
+* @brief Keycodes values defined by USB spec. 
+*
+* Author: Ian Ress
+*
+*/
 
 #ifndef KEYCODES_H_
 #define KEYCODES_H_

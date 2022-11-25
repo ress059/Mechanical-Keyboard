@@ -1,10 +1,13 @@
-/** @file user_config.h
+/** @file user_config.c
 *
-* @brief User configures keyboard settings in user_config.h. Author: Ian Ress
+* @brief Defines the keyboard. User should not edit this file. Instead, the user configures 
+* all the keyboard settings within user_config.h. 
+*
+* Author: Ian Ress
 *
 */ 
 
 #include "user_config.h"
 
-const pin_map_t g_keyboard_rowpins[NUM_ROWS] = ROW_PINS;
-const pin_map_t g_keyboard_colpins[NUM_COLUMNS] = COLUMN_PINS;
+const pinmap_t g_keyboard_rowpins[NUM_ROWS] = ROW_PINS;
+const pinmap_t g_keyboard_colpins[NUM_COLUMNS] = COLUMN_PINS;

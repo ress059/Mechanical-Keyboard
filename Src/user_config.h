@@ -1,6 +1,8 @@
 /** @file user_config.h
 *
-* @brief User configures keyboard settings here. Author: Ian Ress
+* @brief User configures keyboard settings here. 
+*
+*Author: Ian Ress
 *
 */ 
 
@@ -8,7 +10,7 @@
 #define USER_CONFIG_H
 
 #include "keycodes.h"
-#include "mcu_drivers.h"
+#include "gpio.h"
 
 /**
  * @brief Keyboard configuration. User changes settings here.
@@ -44,7 +46,7 @@
 									 {KEY_CTRL,			KEY_GUI,	KEY_ALT,	KEY_NONE,	KEY_NONE,	KEY_NONE,	KEY_SPACE,	KEY_NONE,	KEY_NONE,	KEY_TILDE,	KEY_NONE,		KEY_DOWN,			KEY_NONE,		KEY_RIGHT}} //TODO - add back column 12 after done with debugging LED. Add layer 2
 
 /* Programmer declarations. Do not edit. */
-extern const pin_map_t g_keyboard_rowpins[NUM_ROWS];
-extern const pin_map_t g_keyboard_colpins[NUM_COLUMNS];
+extern const pinmap_t g_keyboard_rowpins[NUM_ROWS];
+extern const pinmap_t g_keyboard_colpins[NUM_COLUMNS];
 
 #endif /* USER_CONFIG_H */

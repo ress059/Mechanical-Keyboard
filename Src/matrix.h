@@ -1,6 +1,8 @@
 /** @file matrix.h
 *
-* @brief Keyboard scanning logic to detect keypresses. Author: Ian Ress
+* @brief Keyboard scanning logic to detect keypresses. 
+*
+* Author: Ian Ress
 *
 */
 

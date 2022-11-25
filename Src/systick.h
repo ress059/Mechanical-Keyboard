@@ -1,6 +1,13 @@
 /** @file systick.h
 *
-* @brief System timer configured to tick every 1ms. Author: Ian Ress
+* @brief System timer configured to tick every 1ms. In order to make the systick hardware
+* agnostic, this driver uses a general purpose timer as the systick, regardless if the 
+* microcontroller has a designated systick. It is essentially a collection of wrapper functions
+* that call timer functions specific to the target hardware.  All the user must do is
+* assign the systick to a specific timer in the microcontroller. A compilation error will occur
+* if the timer selected is invalid. 
+*
+* Author: Ian Ress
 *
 */
 
@@ -9,12 +16,12 @@
 
 #include <stdint.h>
 
-#define SYSTICK_TIMER_SELECT        TIM1 /* Throws compiler error if invalid timer selected */
-#define SYSTICK_PERIOD_MS           1
+#define SYSTICK_PERIOD_MS               1
 
 extern volatile uint16_t g_ms;
 
 void systick_init(void);
 void systick_start(void);
+void systick_stop(void);
 
 #endif /* SYSTICK_H */

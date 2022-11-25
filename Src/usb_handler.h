@@ -1,6 +1,8 @@
-/** @file USBhandler.h
+/** @file usb_handler.h
 *
-* @brief USB functionality for keyboard.
+* @brief USB functionality for keyboard. Using to test USB before making own driver.
+*
+* Author: Ian Ress
 *
 */
 
@@ -83,4 +85,3 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const uint16_t ReportSize);
 
 #endif /* USB_HANDLER_H_ */
-

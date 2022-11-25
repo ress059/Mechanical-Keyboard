@@ -1,10 +1,12 @@
-/** @file USBhandler.c
+/** @file usb_handler.c
 *
-* @brief USB functionality for keyboard.
+* @brief USB functionality for keyboard. Using to test USB before making own driver.
+*
+* Author: Ian Ress
 *
 */
 
-#include "USBhandler.h"
+#include "usb_handler.h"
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
  *  the string descriptor with index 0 (the first index). It is actually an array of 16-bit integers, which indicate

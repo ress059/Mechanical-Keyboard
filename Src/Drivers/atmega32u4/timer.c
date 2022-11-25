@@ -1,14 +1,16 @@
-/** @file timer_atmega32u4.c
+/** @file timer.c
 *
 * @brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
-* output compare modes. Author: Ian Ress
+* output compare modes.
+* 
+* Author: Ian Ress
 *
 */
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "timer_atmega32u4.h"
+#include "timer.h"
 
 #define PRESCALAR_OPTIONS                 5
 #define SYS_CLOCK_FREQ                    2000000 /* Hz. 16MHz crystal divided by 8 for USB. */
@@ -28,12 +30,36 @@
 #define TIMER3_CTC_MODE                   (1U << WGM32)
 
 static const uint16_t prescalar_vals[PRESCALAR_OPTIONS] = {1, 8, 64, 256, 1024};
-
 static void (*tim1_isr)(void); 
 static void (*tim3_isr)(void);
 
-timer_t TIM1 = {timer1_init, timer1_start, timer1_stop};
-timer_t TIM3 = {timer3_init, timer3_start, timer3_stop};
+/* The actual timer functions are declared static to prevent them from being directly used in 
+the application code. Instead a task should be assigned to a timer and referenced like in the
+example above. This is to prevent having to change large amounts of application code if the task
+requires a new timer due to a microcontroller change or general functionality change. */
+static void timer1_init(uint16_t period_ms);
+static void timer1_start(void (*isr)(void));
+static void timer1_stop(void);
+static void timer3_init(uint16_t period_ms);
+static void timer3_start(void (*isr)(void));
+static void timer3_stop(void);
+
+/* Collection of timer methods to more easily assign timers to different tasks. Based on the timer,
+the functions associated with it and corresponding arguments may be different. So each timer is
+declared with a unique type. To assign a timer to a specific functionality (e.g. systick), a pointer to
+the timer object can be created and referenced 
+
+    For example:
+    const timer1_t* const systick = &TIM1;
+    systick->init(1);
+    systick->stop();
+
+If a desired timer function doesn't exist or a timer that isn't supported by a specific MCU is used, 
+the user will get a compilation error. Only the initial definition of the pointer must be changed 
+to an appropriate timer instead of having to go through and change all the application code. */
+const timer1_t TIM1 = {timer1_init, timer1_start, timer1_stop};
+const timer3_t TIM3 = {timer3_init, timer3_start, timer3_stop};
+
 
 /**
  * @brief ISR that executes when Timer1 reaches the value stored in OCR1A register.
@@ -41,7 +67,8 @@ timer_t TIM3 = {timer3_init, timer3_start, timer3_stop};
  */
 ISR(TIMER1_COMPA_vect) 
 {
-    if (tim1_isr) { /* Don't dereference NULL function pointer. */
+    if (tim1_isr) 
+    {
         tim1_isr();
     }
 }
@@ -52,7 +79,8 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(TIMER3_COMPA_vect) 
 {
-    if (tim3_isr) { /* Don't dereference NULL function pointer. */
+    if (tim3_isr) 
+    {
         tim3_isr();
     }
 }
@@ -64,7 +92,7 @@ ISR(TIMER3_COMPA_vect)
  * sending an interrupt request. 
  * 
  */
-void timer1_init(uint16_t period_ms) 
+static void timer1_init(uint16_t period_ms) 
 {
     uint16_t top = 0;
     uint64_t top64 = 0; /* Account for 16-bit overflow during timer top and prescalar calculation. Ugly but will do for now. */
@@ -72,7 +100,7 @@ void timer1_init(uint16_t period_ms)
     for (int i = 0; i < PRESCALAR_OPTIONS; i++) {        
         top64 = ((uint64_t)period_ms * (SYS_CLOCK_FREQ/1000)) / prescalar_vals[i] - 1;
 
-        if (top64 > 1 && top64 <= 65535) {
+        if (top64 > 1 && top64 <= 65535) { /* Did we find a valid prescalar value for our desired frequency? */
             top = (uint16_t)top64;
             
             if (prescalar_vals[i] == 1) {
@@ -115,7 +143,7 @@ void timer1_init(uint16_t period_ms)
  * pass in custom ISRs.
  * 
  */
-void timer1_start(void (*isr)(void)) 
+static void timer1_start(void (*isr)(void)) 
 {
     tim1_isr = isr;
     cli();
@@ -129,7 +157,7 @@ void timer1_start(void (*isr)(void))
  * @brief Stops Timer1 and disables its output compare interrupt. 
  * 
  */
-void timer1_stop(void) 
+static void timer1_stop(void) 
 {
     TIMSK1 &= ~(1U << OCIE1A);
     PRR0 |= (1U << PRTIM1);
@@ -142,7 +170,7 @@ void timer1_stop(void)
  * sending an interrupt request. 
  * 
  */
-void timer3_init(uint16_t period_ms) 
+static void timer3_init(uint16_t period_ms) 
 {
     uint16_t top = 0;
     uint64_t top64 = 0; /* Account for 16-bit overflow during timer top and prescalar calculation. Ugly but will do for now. */
@@ -193,7 +221,7 @@ void timer3_init(uint16_t period_ms)
  * pass in custom ISRs.
  * 
  */
-void timer3_start(void (*isr)(void)) 
+static void timer3_start(void (*isr)(void)) 
 {
     tim3_isr = isr;
     cli();
@@ -207,7 +235,7 @@ void timer3_start(void (*isr)(void))
  * @brief Stops Timer3 and disables its output compare interrupt. 
  * 
  */
-void timer3_stop(void) 
+static void timer3_stop(void) 
 {
     TIMSK3 &= ~(1U << OCIE3A);
     PRR1 |= (1U << PRTIM3);

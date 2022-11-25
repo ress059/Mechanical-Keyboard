@@ -1,6 +1,8 @@
 /** @file circbuf.h
 *
-* @brief Circular buffer for USB buffer. Author: Ian Ress
+* @brief Circular buffer for USB buffer. 
+*
+* Author: Ian Ress
 *
 */
 
