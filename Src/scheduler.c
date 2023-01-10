@@ -7,11 +7,11 @@
 */
 
 #include <stddef.h>
+#include <util/atomic.h>
 
 #include "scheduler.h"
-#include "systick.h"
 
-static int isempty(void);
+static systick_wordsize_t g_ms_copy = 0;
 
 static Task_t tasks[MAX_TASKS] =
 {
@@ -30,6 +30,7 @@ static Task_t tasks[MAX_TASKS] =
  * if no more tasks can be added to the scheduler 
  * 
  */
+static int isempty(void);
 static int isempty(void)
 {
     for (uint8_t i = 0; i < (uint8_t)MAX_TASKS; i++)
@@ -41,6 +42,7 @@ static int isempty(void)
     }
     return -1;
 }
+
 
 /**
  * @brief Deletes the task in the scheduler slot.
@@ -67,7 +69,7 @@ void delete_task(Task_t* task)
  * if a non-NULL object is returned and also to not dereference a NULL-returned object.
  * 
  */
-Task_t* const create_task(void(*task)(void), uint16_t taskfreq)
+Task_t* const create_task(void(*task)(void), systick_wordsize_t taskfreq)
 {
     int idx = isempty();
     if (idx >= 0)
@@ -82,6 +84,7 @@ Task_t* const create_task(void(*task)(void), uint16_t taskfreq)
     }
 }
 
+
 /**
  * @brief Must be called periodically (e.g. within super loop). The scheduler uses a 1ms 
  * systick interrupt to keep track of time and determine which tasks are ready to execute.
@@ -94,18 +97,28 @@ void begin_scheduler(void)
     {
         if (tasks[i].handler != NULL)
         {
-            if ( ((uint16_t)(tasks[i].now - tasks[i].start)) >= tasks[i].freq )
+            if ( ((systick_wordsize_t)(tasks[i].now - tasks[i].start)) >= tasks[i].freq )
             {
                 tasks[i].handler();
-                tasks[i].start = g_ms;
+
+                ATOMIC_BLOCK(ATOMIC_FORCEON) /* Get most recent systick value after task handler executes. */
+                {
+                    g_ms_copy = g_ms;
+                }
+                tasks[i].start = g_ms_copy;
             }
             else
             {
-                tasks[i].now = g_ms;
+                ATOMIC_BLOCK(ATOMIC_FORCEON)
+                {
+                    g_ms_copy = g_ms;
+                }
+                tasks[i].now = g_ms_copy;
             }
         }
     }
 }
+
 
 /**
  * @brief Clears all of the scheduler slots.

@@ -13,13 +13,11 @@
 #include "matrix.h"
 #include "usb_handler.h"
 #include "timer.h"
-#include "systick.h"
 
 const pinmap_t led = PIN_PD7;
 const timer1_t* const blinktimer = &TIM1;
 
 static void timer_isr(void);
-
 static void timer_isr(void)
 {
     gpio_toggle(led);
@@ -61,19 +59,27 @@ void timer_blink(uint16_t freq)
  * 
  * @param freq The frequency to toggle the GPIO output pin.
  */
-void systick_blink(uint16_t freq)
+void systick_blink(systick_wordsize_t freq)
 {
+    static systick_wordsize_t wait = 0;
+    static systick_wordsize_t g_ms_copy = 0;
+
     gpio_set_output(led);
     systick_init();
     systick_start();
 
     while (1)
     {
-        static uint16_t wait = 0;
-        if ( ((uint16_t)(g_ms - wait)) >= freq )
+
+        ATOMIC_BLOCK(ATOMIC_FORCEON)
+        {
+            g_ms_copy = g_ms;
+        }
+
+        if ( ((systick_wordsize_t)(g_ms_copy - wait)) >= freq )
         {
             gpio_toggle(led);
-            wait = g_ms;
+            wait = g_ms_copy;
         }
     }
 }

@@ -35,7 +35,7 @@ static void (*tim3_isr)(void);
 
 /* The actual timer functions are declared static to prevent them from being directly used in 
 the application code. Instead a task should be assigned to a timer and referenced like in the
-example above. This is to prevent having to change large amounts of application code if the task
+example below. This is to prevent having to change large amounts of application code if the task
 requires a new timer due to a microcontroller change or general functionality change. */
 static void timer1_init(uint16_t period_ms);
 static void timer1_start(void (*isr)(void));

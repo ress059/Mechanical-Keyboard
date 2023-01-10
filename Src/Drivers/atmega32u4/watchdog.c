@@ -65,7 +65,8 @@ static void watchdog_reset(void) {
  */
 ISR(WDT_vect) 
 {
-    if (wdt_isr) { /* Don't dereference NULL function pointer. */
+    if (wdt_isr) 
+    {
         wdt_isr();
     }
 }

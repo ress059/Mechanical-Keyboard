@@ -35,7 +35,7 @@
      * if it appears that the function is not referenced.
      * 
      */
-    #define GCCATTRIBUTE_USED                   __attribute__((used))
+    #define GCCATTRIBUTE_USED                   __attribute__ ((used))
 
     /**
      * @brief Marks a variable or struct element for packing into the smallest space available, omitting any

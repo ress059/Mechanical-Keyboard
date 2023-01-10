@@ -25,9 +25,9 @@
  * 
  */
 #define DEBOUNCE_TIME				5000 //ms
-#define NUM_LAYERS					2
 #define NUM_ROWS					4
 #define NUM_COLUMNS					14
+#define NUM_LAYERS					2
 #define ROW_PINS					{PIN_PD0, PIN_PD1, PIN_PD2, PIN_PD3}
 #define COLUMN_PINS					{PIN_PF0, PIN_PF1, PIN_PF4, PIN_PF5, PIN_PF6, PIN_PF7, PIN_PC7, PIN_PC6, PIN_PB6, PIN_PB5, PIN_PB4, PIN_PD6, PIN_PD4, PIN_PD5} //TODO - add PD7 (LED) after testing
 

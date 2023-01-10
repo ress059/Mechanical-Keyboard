@@ -150,7 +150,6 @@
   <ItemGroup>
     <Folder Include="Debug\" />
     <Folder Include="Src\" />
-    <Folder Include="Src\Common\" />
     <Folder Include="Src\Drivers\" />
     <Folder Include="Src\Drivers\atmega32u4\" />
     <Folder Include="Src\LUFA\" />
@@ -179,9 +178,6 @@
     <Compile Include="Src\circbuf.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Src\Common\gcc_attributes.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="Src\debug.c">
       <SubType>compile</SubType>
     </Compile>
@@ -198,6 +194,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Src\Drivers\atmega32u4\timer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Src\gcc_attributes.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Src\keycodes.h">

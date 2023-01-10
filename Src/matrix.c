@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <avr/io.h>
+#include <util/atomic.h>
 
 #include "matrix.h"
 #include "gpio.h"
@@ -19,6 +20,8 @@
 static uint16_t matrix_state[NUM_ROWS][NUM_COLUMNS] = {{0}};
 
 static bool debounce_logic(uint8_t row, uint8_t col);
+
+static systick_wordsize_t g_ms_copy = 0;
 uint8_t keypress = 0;
 uint8_t debugpress = 0;
 
@@ -32,9 +35,15 @@ uint8_t debugpress = 0;
  */
 static bool debounce_logic(uint8_t row, uint8_t col)
 {
-	/* Handle lower-bound overflow cases. E.g. (uint16_t)(5-65535) = 5 which is desired since
-	g_ms wraps around to 0 on overflow, so this still gives us the amount of time passed */
-	if ((uint16_t)(g_ms - matrix_state[row][col]) >= (uint16_t)DEBOUNCE_TIME) 
+	ATOMIC_BLOCK(ATOMIC_FORCEON)
+	{
+		g_ms_copy = g_ms;
+	}
+	
+	/* Handle lower-bound overflow cases. E.g. (systick_wordsize_t)(5-65535) = 5 which is desired since
+	g_ms wraps around to 0 on overflow, so this still gives us the amount of time passed. This example
+	is if systick_wordsize_t definition is set to uint16_t. */
+	if ((systick_wordsize_t)(g_ms_copy - matrix_state[row][col]) >= (systick_wordsize_t)DEBOUNCE_TIME) 
 	{
 		return true;
 	}

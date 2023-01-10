@@ -16,12 +16,17 @@
 
 #include <stdint.h>
 
-#define SYSTICK_PERIOD_MS               1
+#define SYSTICK_PERIOD_MS                       1
 
-extern volatile uint16_t g_ms;
+typdef uint16_t systick_wordsize_t;
+
+extern volatile systick_wordsize_t g_ms;
 
 void systick_init(void);
 void systick_start(void);
 void systick_stop(void);
+// void ATOMIC_SET_SYSTICK(uint16_t);
+// uint16_t ATOMIC_GET_SYSTICK(void);
+
 
 #endif /* SYSTICK_H */

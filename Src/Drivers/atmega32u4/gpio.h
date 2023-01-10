@@ -32,7 +32,7 @@
 
 typedef struct {
 	uint8_t index;
-    uint8_t mask;
+	uint8_t mask;
 } pinmap_t;
 
 typedef struct {

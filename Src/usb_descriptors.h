@@ -1,6 +1,8 @@
 /** @file usb_descriptors.h
 *
-* @brief USB descriptor headers and macros
+* @brief USB descriptor headers and macros. The descriptor declarations are packed so a uint8_t pointer
+* can be used to send data across the bus. Struct padding won't matter for 8-bit machines however we
+* need to use this attribute to make this portable across 16-bit and 32-bit AVRs.
 *
 * Author: Ian Ress
 *
@@ -10,6 +12,18 @@
 #define USB_DESCRIPTORS_H
 
 #include <stdint.h>
+
+#include "gcc_attributes.h"
+
+/* --------------------------------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------- DESCRIPTOR TYPE DEFINES --------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------------------------------------------- */
+#define DEVICE_DESCRIPTOR_TYPE                      0x01
+#define CONFIGURATION_DESCRIPTOR_TYPE               0x02
+#define INTERFACE_DESCRIPTOR_TYPE                   0x04
+#define ENDPOINT_DESCRIPTOR_TYPE                    0x05
+#define STRING_DESCRIPTOR_TYPE                      0x03
+
 
 /* --------------------------------------------------------------------------------------------------------------------------------- */
 /* --------------------------------------------- USB CONFIGURATION DESCRIPTOR DEFINES ---------------------------------------------- */
@@ -28,11 +42,11 @@
                                                                 support. */
 
 /** @brief Macro to calculate the power value for the configuration descriptor, from a given number of milliamperes. Set bMaxPower
- *  member equal to this macro. For example to set a max of 200mA, bMaxPower = USB_CONFIG_POWER_MA(200).
+ *  member equal to this macro. For example to set a max of 200mA, bMaxPower = CONFIG_MAX_CURRENT_MA(200).
  *
  *  @param[in] mA  Maximum number of milliamps the device consumes when the given configuration is selected.
  */
-#define USB_CONFIG_POWER_MA(mA)                     ((mA) >> 1)
+#define CONFIG_MAX_CURRENT_MA(mA)                   ((mA) >> 1)
 
 
 
@@ -102,7 +116,7 @@ typedef struct
                                                     a result set the bDeviceClass as 0x00. This allows for the one device to support 
                                                     multiple classes. */
 
-    uint8_t  bMaxPacketSize;                    /*  Max data packet size in bytes for Endpoint0. Valid sizes = 8, 16, 32, 64 */
+    uint8_t  bMaxPacketSize0;                   /*  Max data packet size in bytes for Endpoint0. Valid sizes = 8, 16, 32, 64 */
 
     uint16_t idVendor;                          /*  Vendor ID for the USB product (Assigned by USB org) */
     uint16_t idProduct;                         /*  Unique manufacturer product ID for keyboard */
@@ -120,7 +134,7 @@ typedef struct
                                                     descriptors. If no string descriptor is present, a index of zero should be used. */
 
     uint8_t  bNumConfigurations;                /*  Number of possible configurations */
-} USB_Device_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Device_Descriptor_t;
 
 
 /* ------------------------------------------------------------------------------------------------------------------------------------ */
@@ -141,14 +155,14 @@ typedef struct
     uint8_t  bConfigurationValue;               /*  Value to use to as an argument to select this configuration. (Index) */
     uint8_t  iConfiguration;                    /*  Index of a string descriptor describing the configuration. */
 
-    uint8_t  bmAttributes;                      /*  Bitmap. */
+    uint8_t  bmAttributes;                      /*  Bitfield. */
                                                 /*  Bit 7 = Reserved, set to 1 (USB 1.0 Bus Powered)
                                                     Bit 6 = Device is self powered if set to 1. (set to 0 for keyboard since it's bus powered)
                                                     Bit 5 = Remote wakeup if set to 1. (set to 0 for keyboard)
                                                     Bits 4 to 0 = Reserved, set to 0. */
 
     uint8_t  bMaxPower;                         /*  Max power consumption in 2mA units. For example, bMaxPower = 100 means 200mA max consumption. */
-} USB_Configuration_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Configuration_Descriptor_t;
 
 
 /* ------------------------------------------------------------------------------------------------------------------------------------ */
@@ -202,7 +216,7 @@ typedef struct
                                                         0 = Endpoint OUT (receive data from host)
                                                         1 = Endpoint IN (send data to host) */
 
-    uint8_t  bmAttributes;                      /*  Bitmap. */
+    uint8_t  bmAttributes;                      /*  Bitfield. */
                                                 /*  Bits 0 to 1 = Transfer Type:
                                                         00 = Control
                                                         01 = Isochronous
@@ -233,11 +247,11 @@ typedef struct
                                                     So bInterval = 5 means every 5 frames. bInterval must be set to 1 for Isochronous and can
                                                     range from 1 to 255 for Interrupt transfers. Since the value equates to frame counts,
                                                     this equates to either 1ms for low/full speed devices or 125us for high speed devices */
-} USB_Endpoint_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Endpoint_Descriptor_t;
 
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* --------------------------------------------- THE USB STANDARD STRING DESCRIPTORS ------------------------------------------------- */ 
+/* --------------------------------------------- THE USB STANDARD STRING DESCRIPTORS ------------------------------------------------ */ 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 /* String Descriptor 0 is used to return a list of supported languages for the device. The host reads this descriptor to determine 
 what languages are available. If a language is supported, it can then be referenced by sending the language ID in the wIndex 
@@ -250,7 +264,7 @@ typedef struct
                                                 /*  The keyboard only supports English so this should be the only entry.
                                                     If more languages are supported in the future, successive wLANDID members should be
                                                     added with the corresponding Language ID unicode value. */
-} USB_String_Descriptor_Zero_t;
+} GCCATTRIBUTE_PACKED USB_String_Descriptor_Zero_t;
 
 
 /* Any string descriptors after String Descriptor Zero are optional and are just used to provide human readable information. 
@@ -266,7 +280,7 @@ typedef struct
                                                     Under GCC, strings prefixed with the "L" character (before the opening string quotation mark) 
                                                     are considered to be Unicode strings, and may be used instead of an explicit array of ASCII 
                                                     characters. */
-} USB_String_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_String_Descriptor_t;
 
 
 
