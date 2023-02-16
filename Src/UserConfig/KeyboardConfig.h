@@ -1,5 +1,5 @@
 /**
- * @file UserConfig.h
+ * @file KeyboardConfig.h
  * @author Ian Ress
  * @brief User configures keyboard settings here.
  * @date 2023-02-15
@@ -8,8 +8,8 @@
  * 
  */
 
-#ifndef USERCONFIG_H
-#define USERCONFIG_H
+#ifndef KEYBOARDCONFIG_H
+#define KEYBOARDCONFIG_H
 
 #include "Gpio.h"
 #include "KeyCodes.h"
@@ -51,4 +51,4 @@
 extern const pinmap_t g_keyboard_rowpins[NUM_ROWS];
 extern const pinmap_t g_keyboard_colpins[NUM_COLUMNS];
 
-#endif /* USERCONFIG_H */
+#endif /* KEYBOARDCONFIG_H */

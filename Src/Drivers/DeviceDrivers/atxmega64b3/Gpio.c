@@ -22,7 +22,7 @@ static gpioreg_t * const gpio[5] =
 /**
  * @brief Sets gpio pin as an input. External pullups are used for ATXMEGA64B3 PCB.
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -34,7 +34,7 @@ void gpio_set_input(pinmap_t pin)
 /**
  * @brief Sets gpio pin as an output.
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -46,7 +46,7 @@ void gpio_set_output(pinmap_t pin)
 /**
  * @brief Outputs a LOW signal on the gpio pin. gpio_set_output() must be called once beforehand.
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -58,7 +58,7 @@ void gpio_output_low(pinmap_t pin)
 /**
  * @brief Outputs a HIGH signal on the gpio pin. gpio_set_output() must be called once beforehand.
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -71,7 +71,7 @@ void gpio_output_high(pinmap_t pin)
  * @brief Outputs LOW signal if the gpio is previously outputting HIGH and vise versa.
  * gpio_set_output() must be called once beforehand.
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -83,7 +83,7 @@ void gpio_toggle(pinmap_t pin)
 /**
  * @brief Reads the status of the gpio pin.
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  * @return 1 if LOW (pressed), 0 if HIGH.

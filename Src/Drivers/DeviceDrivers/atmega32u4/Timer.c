@@ -140,7 +140,7 @@ static void timer1_init(uint16_t period_ms)
  * @brief Starts Timer1 and enables its output compare interrupt. Call this function only
  * after calling timer1_init().
  * 
- * @param[in] isr callback that executes within the timer's ISR. This makes it easier to
+ * @param isr callback that executes within the timer's ISR. This makes it easier to
  * pass in custom ISRs.
  * 
  */
@@ -167,7 +167,7 @@ static void timer1_stop(void)
 /**
  * @brief Initializes Timer3 that generates an ISR every 'period_ms'.
  * 
- * @param[in] period_ms Amount of milliseconds timer increments before 
+ * @param period_ms Amount of milliseconds timer increments before 
  * sending an interrupt request. 
  * 
  */
@@ -218,7 +218,7 @@ static void timer3_init(uint16_t period_ms)
  * @brief Starts Timer3 and enables its output compare interrupt. Call this function only
  * after calling timer3_init().
  * 
- * @param[in] isr callback that executes within the timer's ISR. This makes it easier to
+ * @param isr callback that executes within the timer's ISR. This makes it easier to
  * pass in custom ISRs.
  * 
  */

@@ -30,7 +30,7 @@
      * @param SectionIndex  Initialization section number where the function should be placed.
      * 
      */
-    #define GCCATTRIBUTE_SECTION(SectionIndex)  __attribute__ ((section (".init" #SectionIndex )))
+    #define GCCATTRIBUTE_SECTION(SectionIndex)  __attribute__ ((section (".init" #SectionIndex)))
 
     /**
      * @brief This attribute, attached to a function, means that code must be emitted for the function even 
@@ -50,6 +50,34 @@
      * 
      */
     #define GCCATTRIBUTE_PACKED                 __attribute__ ((packed))
+
+    /**
+     * @brief Marks a function as a weak symbol during linkage. This allows the function to be overwritten
+     * by another function with the same name. If it is overwritten, the weak function is discarded.
+     * 
+     * \note Only works for .ELF or .out builds.
+     * 
+     */
+    #define GCCATTRIBUTE_WEAK                   __attribute__((weak))
+
+    /**
+     * @brief Aliases the function to another, previously declared function. If this isn't
+     * overwritten this function will have the same definition as the targetted function.
+     * If it is overwritten, the aliased definition will be discarded and replaced with
+     * the overwritten definition.
+     * 
+     * @param func Name of the target function. This must have the same parameters
+     * and return type as the function being declared with this attribute.
+     * 
+     */
+    #define GCCATTRIBUTE_WEAK_ALIAS(func)      __attribute__((weak, alias(#func)))
+
+    /**
+     * @brief The function is meant to be possibly unused. GCC does not produce 
+     * a warning for an unused function that has this attribute.
+     * 
+     */
+    #define GCCATTRIBUTE_UNUSED                __attribute__((unused))
 #endif
 
 #endif /* ATTRIBUTES_H */

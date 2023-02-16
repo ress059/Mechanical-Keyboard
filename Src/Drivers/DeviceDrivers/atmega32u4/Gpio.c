@@ -22,7 +22,7 @@ static gpioreg_t * const gpio[5] =
 /**
  * @brief Sets gpio pin as an input pullup. Example call: gpio_set_input(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -35,7 +35,7 @@ void gpio_set_input(pinmap_t pin)
 /**
  * @brief Sets gpio pin as an output. Example call: gpio_set_output(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -48,7 +48,7 @@ void gpio_set_output(pinmap_t pin)
  * @brief Outputs a LOW signal on the gpio pin. gpio_set_output() must be called once beforehand.
  * Example call: gpio_output_low(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -61,7 +61,7 @@ void gpio_output_low(pinmap_t pin)
  * @brief Outputs a HIGH signal on the gpio pin. gpio_set_output() must be called once beforehand.
  * Example call: gpio_output_high(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -74,7 +74,7 @@ void gpio_output_high(pinmap_t pin)
  * @brief Outputs LOW signal if the gpio is previously outputting HIGH and vise versa.
  * gpio_set_output() must be called once beforehand. Example call: gpio_toggle(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  */
@@ -86,7 +86,7 @@ void gpio_toggle(pinmap_t pin)
 /**
  * @brief Reads the status of the gpio pin. Example call: uint8_t val = gpio_read(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin pinmap_t struct containing the pin's index in gpio array 
  * and it's pin mask.
  * 
  * @return 1 if LOW (pressed), 0 if HIGH.

@@ -9,10 +9,36 @@
  */
 
 /* TODO: Major cleanup and work */
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include "AVRArch.h"
 #include "USB.h"
+#include "USBConfig.h"
+#include "USBRegisters.h"
+
+
+/**
+ * @brief Can connect the VBUS pad to the USB controller and enable the 
+ * controller's internal regulator, based on how the user configures settings
+ * in USBConfig.h.
+ * 
+ */
+static inline void USB_PowerOn(void);
+static inline void USB_PowerOn(void)
+{
+    #if defined(USB_USE_VBUS_WAKEUP)
+        USBReg_Enable_VBus();
+    #endif
+
+    #if defined(USB_USE_INTERNAL_REGULATOR)
+        USBReg_Enable_USBRegulator();
+    #endif
+}
+
+
+static inline void USB_Configure_PLL(void);
+static inline void USB_Configure_PLL(void)
+{
+    
+}
+
 
 
 /**
@@ -21,17 +47,11 @@
  */
 void USBHardwareInit(void)
 {
-     /* ATMega32U4 specific. Will generalize once have a baseline down.
+    USB_PowerOn();
+    USB_Configure_PLL();
 
-     Step 1) Power on USB pads regulator
-     * - Make sure USBE bit is set (enables the controller)
-     * - Make sure OTGPADE is set (allow VBUS to go into regulator)
-     * - Make sure FRZCLK bit is not set.
-     * - Make sure DETACH bit is not set.
-     * - Make sure SUSPI bit is not set.
-     * - Make sure OTGPADE bit is set to actually power up the controller (enables voltage regulator)
-      */
-     
+
+
 USBReg_Enable_USBRegulator();
 USBReg_Unfreeze_Clock(); /* Clear FRZCLK bit */
 

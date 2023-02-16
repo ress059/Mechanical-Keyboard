@@ -18,6 +18,7 @@
 #define ENDIAN_H
 
 #include <stdint.h>
+#include "DeviceSpecific.h"
 
 
 /**
@@ -53,24 +54,6 @@
  */
 #define SWAPENDIAN_COMPILETIME_32(x)            ((((x) & 0xFF000000) >> 24U) | (((x) & 0x00FF0000) >> 8U) | \
                                                 (((x) & 0x0000FF00) << 8U)  | (((x) & 0x000000FF) << 24U))
-
-
-/* Determining Endianness of MCU */
-#if defined(__AVR_ATmega32U4__) || defined(__AVR_ATxmega64B3__) /* PUT LITTLE ENDIAN MCUS HERE */
-    #define AVR_LITTLE_ENDIAN
-
-// #elif defined() /* PUT BIG ENDIAN MCUS HERE */
-    // #define AVR_BIG_ENDIAN
-#else
-    #error "Target microcontroller unsupported at this time."
-#endif
-
-/* Preprocessor checks on determined Endianness */
-#if !(defined(AVR_BIG_ENDIAN) || defined(AVR_LITTLE_ENDIAN))
-	#error "AVR_BIG_ENDIAN or AVR_LITTLE_ENDIAN not set for the specified architecture."
-#elif defined(AVR_BIG_ENDIAN) && defined(AVR_LITTLE_ENDIAN)
-    #error "AVR_BIG_ENDIAN and AVR_LITTLE_ENDIAN are both defined."
-#endif
 
 /* Swap macros depending on MCU's Endianness */
 #if defined(AVR_LITTLE_ENDIAN)
@@ -126,7 +109,6 @@
     Convert it to the MCUs Endianness. */
     #define BE16_FROM_OS_RUNTIME(x)                 (x)
     #define BE32_FROM_OS_RUNTIME(x)                 (x)
-
 #endif
 
 
@@ -143,6 +125,7 @@
  * @param Word uint16_t variable to swap.
  * 
  * @return Copy of input variable with swapped endianness.
+ * 
  */
 static inline uint16_t SwapEndian_RunTime_16(const uint16_t Word);
 static inline uint16_t SwapEndian_RunTime_16(const uint16_t Word)
@@ -170,6 +153,7 @@ static inline uint16_t SwapEndian_RunTime_16(const uint16_t Word)
  * @param Word uint32_t variable to swap.
  * 
  * @return Copy of input variable with swapped endianness.
+ * 
  */
 static inline uint32_t SwapEndian_RunTime_32(const uint32_t Word);
 static inline uint32_t SwapEndian_RunTime_32(const uint32_t Word)

@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "cstdint": "cpp",
+        "keyboardconfig.h": "c",
+        "devicespecific.h": "c",
+        "compilechecks.h": "c",
+        "attributes.h": "c"
+    },
+    "search.useIgnoreFiles": true
+}
