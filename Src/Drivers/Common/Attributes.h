@@ -78,6 +78,9 @@
      * 
      */
     #define GCCATTRIBUTE_UNUSED                __attribute__((unused))
+
+#else
+    #error "This must be compmiled with AVR GCC v3.1 and greater."
 #endif
 
 #endif /* ATTRIBUTES_H */

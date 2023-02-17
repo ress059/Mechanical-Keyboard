@@ -15,28 +15,120 @@
 
 
 /**
- * @brief Can connect the VBUS pad to the USB controller and enable the 
- * controller's internal regulator, based on how the user configures settings
- * in USBConfig.h.
+ * @brief When initializing the USB controller, a clock source must be selected
+ * and enabled. This defines the maximum number of times to check if the clock
+ * is successfully enabled before throwing a user-defined error event.
  * 
  */
-static inline void USB_PowerOn(void);
-static inline void USB_PowerOn(void)
+#define MAX_CLOCK_ENABLE_POLLS                  20
+
+/**
+ * @brief After the PLL is enabled you must wait for the PLL to lock before
+ * proceeding. This defines the maximum number of times to check if the
+ * PLL is locked before throwing a user-defined error event.
+ * 
+ */
+#define MAX_PLL_LOCK_POLLS                      20
+
+
+/**
+ * @brief Connects the VBUS pad to the USB controller and enables the 
+ * controller's internal regulator, depending how the user configures
+ * settings in USBConfig.h and which target MCU is used.
+ * 
+ */
+static inline void USB_Power_On(void);
+static inline void USB_Power_On(void)
 {
     #if defined(USB_USE_VBUS_WAKEUP)
         USBReg_Enable_VBus();
+    #else
+        USBReg_Disable_VBus();
     #endif
 
     #if defined(USB_USE_INTERNAL_REGULATOR)
         USBReg_Enable_USBRegulator();
+    #else
+        USBReg_Disable_USBRegulator();
     #endif
 }
 
 
+/**
+ * @brief Configures the PLL for the USB controller's clock source. This
+ * configures the input clock source to the PLL, configures the PLL's
+ * output clock going to the USB controller, and enables the PLL.
+ * 
+ * \warning If source clock fails to enable after \p MAX_CLOCK_ENABLE_POLLS
+ * iterations or the PLL fails to lock after \p MAX_PLL_LOCK_POLLS iterations,
+ * user-defined error handlers will execute. It is up to the user how to handle
+ * these errors - otherwise nothing will occur and initialization will resume
+ * as normal.
+ * 
+ * \note The exact configuration will be different depending on the user's
+ * clock configuration and target MCU. As this is meant to be a general driver
+ * for all targets, this device-specific code is structured to be handled 
+ * within the inlined function calls used throughout USB_Configure_PLL().
+ * 
+ */
 static inline void USB_Configure_PLL(void);
 static inline void USB_Configure_PLL(void)
 {
-    
+    #if defined(USB_USE_INTERNAL_OSCILLATOR)
+        PLL_Select_InternalOsc();
+        Enable_InternalOsc();
+    #else
+        PLL_Select_ExternalOsc();
+        Enable_ExternalOsc();
+    #endif
+
+    for (uint8_t polls = 0;
+        #if defined(USB_USE_INTERNAL_OSCILLATOR)
+        ( (polls < (MAX_CLOCK_ENABLE_POLLS)) && (!Is_InternalOsc_Ready()) );
+        #else
+        ( (polls < (MAX_CLOCK_ENABLE_POLLS)) && (!Is_ExternalOsc_Ready()) );
+        #endif
+        polls++)
+    {
+        if (polls == (MAX_CLOCK_ENABLE_POLLS - 1))
+        {
+            USB_EVENT_Clock_Enable_Failure();
+        }
+    }
+    PLL_Set_Prescalar();
+    PLL_Set_Postscalar();
+    PLL_Enable();
+
+    for (uint8_t polls = 0; ( (polls < (MAX_PLL_LOCK_POLLS)) && (!Is_PLL_Ready()) ); polls++)
+    {
+        if (polls == (MAX_PLL_LOCK_POLLS - 1))
+        {
+            USB_EVENT_PLL_Lock_Failure();
+        }
+    }
+
+
+    /**
+     * 
+     * 0) Call PLL_Select_ExternalOsc() or PLL_Select_InternalOsc() depending on user's choice.
+     * 
+     * 1) Depending on user input, Enable External oscillator or Internal oscillator 
+     * Call Enable_InternalOsc() or Enable_ExternalOsc().
+     * 
+     * 2) Do 10 polls to check if internal oscillator or external oscillator is ready.
+     * Call Is_InternalOsc_Ready() or Is_ExternalOsc_Ready().
+     * 2b) If after 10 polls it isn't ready, signal a failure (return false).
+     * 
+     * 3) TODO: Must figure out if user is using 8MHz or 16MHz clock source.
+     * 3b) If 16MHz clock source, call PLL_Set_Prescalar().
+     * 
+     * 4) Call PLL_Set_Postscalar() to output 48MHz to PLL.
+     * 
+     * 5) Call PLL_Enable()??? or should I hold off.
+     * 
+     * 
+     */
+
 }
 
 
@@ -45,9 +137,9 @@ static inline void USB_Configure_PLL(void)
  * @brief Initializes the hardware registers of the USB peripheral.
  * 
  */
-void USBHardwareInit(void)
+void USB_Hardware_Init(void)
 {
-    USB_PowerOn();
+    USB_Power_On();
     USB_Configure_PLL();
 
 
@@ -66,6 +158,15 @@ USBReg_Unfreeze_Clock(); /* Clear FRZCLK bit */
      * Step 2) Setup any USB interrupts you want.
      * Step 3) 
      */
+}
+
+// void USB_Init(void)
+{
+    cli();
+    /* TODO: Disable watchdog */
+    /* TODO: Disable PLL, disable USB controller, disable watchdog, disable global interrupts, and other things you deem fit. */
+    USB_Power_Off();
+
 }
 
 
