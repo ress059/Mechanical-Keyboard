@@ -108,9 +108,40 @@ static inline bool USBReg_Can_Receive_In_DataPacket(void);
 static inline void USBReg_Send_In_DataPacket(void);
 static inline bool USBReg_Can_ReadWrite_Bank(void);
 
-
+/* TODO: MUST SET CLKS BIT TO SELECT WHICH CLOCK TO USE */
 #if defined(AVR_DEVICE_FAMILY1)
-/* Comes with prescalar of 8 programmed in fuse bits. */
+    /**
+     * @brief Determines whether the CPU clock is running from an External
+     * Oscillator or the Internal RC Oscillator.
+     * 
+     * @return true if CPU is running from an External Oscillator. False
+     * if CPU is running from Internal RC Oscillator.
+     * 
+     * \warning In order to use the External Oscillator for the PLL,
+     * the CPU MUST be running from an External Oscillator.
+     *  
+     */
+    static inline bool Is_CPU_Clock_ExternalOsc(void)
+    {
+        return ((CLKSEL0 & (1 << CLKS)) ? true : false);
+    }
+
+
+    /**
+     * @brief Sets the External Oscillator as the CPU clock.
+     * 
+     * \warning Before calling this function, \p Enable_ExternalOsc()
+     * must be called. \p Is_ExternalOsc_Ready() must then be called 
+     * and return true. You must check to see if the External Oscillator 
+     * is properly running before setting it as the CPU clock.
+     * 
+     */
+    static inline void Set_CPU_Clock_ExternalOsc(void)
+    {
+        CLKSEL0 |= (1 << CLKS);
+    }
+
+
     /**
      * @brief Enables the Internal RC Oscillator.
      * 

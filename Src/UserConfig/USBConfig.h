@@ -50,6 +50,8 @@
  * @brief When this is defined, the internal RC oscillator will be used to clock
  * the USB controller.
  * 
+ * \warning This will also set the CPU to use the Internal Oscillator.
+ * 
  * \note A compile-time error will occur if this is defined while using a target
  * MCU that does not have an internal oscillator. USB_USE_INTERNAL_OSCILLATOR or 
  * USB_USE_EXTERNAL_OSCILLATOR must be defined. A compile-time error will occur 
@@ -61,6 +63,8 @@
 /**
  * @brief When this is defined, an external oscillator will be used to clock
  * the USB controller.
+ * 
+ * \warning This will also set the CPU to use the External Oscillator.
  * 
  * \note USB_USE_INTERNAL_OSCILLATOR or USB_USE_EXTERNAL_OSCILLATOR must be defined. 
  * A compile-time error will occur if both are defined or if none are defined.

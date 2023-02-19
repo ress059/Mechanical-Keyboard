@@ -74,6 +74,12 @@ static inline void USB_Power_On(void)
 static inline void USB_Configure_PLL(void);
 static inline void USB_Configure_PLL(void)
 {
+    /**
+     * TODO: Fixing up. Call Set_CPU_Clock_ExternalOsc()
+     * See Section 6.10 Clock Switch Algorithm!!!!
+     */
+    
+     Must Set_CPU_Clock_ExternalOsc()*/
     #if defined(USB_USE_INTERNAL_OSCILLATOR)
         PLL_Select_InternalOsc();
         Enable_InternalOsc();
