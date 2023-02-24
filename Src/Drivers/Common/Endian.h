@@ -1,7 +1,7 @@
 /**
  * @file Endian.h
  * @author Ian Ress
- * @brief Determines endianness and appropriate byte swapping macros according to which MCU
+ * \brief Determines endianness and appropriate byte swapping macros according to which MCU
  * is used. USB Specification requires certain fields to be in either Little or Big Endian 
  * format. We have to handle this differently according to our microcontroller's Endianness.
  * This file provides a portable way to do so across various AVR microcontrollers added to
@@ -22,7 +22,7 @@
 
 
 /**
- * @brief Swap the endianness of a 16-bit variable that is determined at compile-time. A macro is
+ * \brief Swap the endianness of a 16-bit variable that is determined at compile-time. A macro is
  * needed because a function cannot swap the endianness of compile-time variable initializations.
  * Conversely, this macro cannot be used for run-time variables as the pre-processor expands 
  * the macro and afterwards it is up to the compiler on how to define 'x'. 'x' will be
@@ -30,16 +30,16 @@
  * is used for run-time variables. Use the static inline function variant for run-time endianness
  * swapping instead.
  * 
- * @param x 16-bit compile-time variable to swap.
+ * \param x 16-bit compile-time variable to swap.
  * 
- * @return Swapped 16-bit variable
+ * \return Swapped 16-bit variable
  * 
  */
 #define SWAPENDIAN_COMPILETIME_16(x)            ((((x) & 0xFF00) >> 8U) | (((x) & 0x00FF) << 8U))
 
 
 /**
- * @brief Swap the endianness of a 32-bit variable that is determined at compile-time. A macro is
+ * \brief Swap the endianness of a 32-bit variable that is determined at compile-time. A macro is
  * needed because a function cannot swap the endianness of compile-time variable initializations.
  * Conversely, this macro cannot be used for run-time variables as the pre-processor expands 
  * the macro and afterwards it is up to the compiler on how to define 'x'. 'x' will be
@@ -47,9 +47,9 @@
  * is used for run-time variables. Use the static inline function variant for run-time endianness
  * swapping instead.
  * 
- * @param x 32-bit compile-time variable to swap.
+ * \param x 32-bit compile-time variable to swap.
  * 
- * @return Swapped 32-bit variable
+ * \return Swapped 32-bit variable
  * 
  */
 #define SWAPENDIAN_COMPILETIME_32(x)            ((((x) & 0xFF000000) >> 24U) | (((x) & 0x00FF0000) >> 8U) | \
@@ -114,7 +114,7 @@
 
 /* TODO: Cleanup, use union instead. */
 /**
- * @brief Swap the endianness of a 16-bit variable that is determined during run-time.
+ * \brief Swap the endianness of a 16-bit variable that is determined during run-time.
  * A copy of the function's argument is explicitly made within the body. If the 
  * compiler decides to inline the function it will have the same scope as the caller and
  * we don't want to accidently overwrite the function's argument unless we explicitly write
@@ -122,9 +122,9 @@
  * the potential optimization benefits of no function call overhead while also having 
  * the ability to preserve the original variable's value.
  * 
- * @param Word uint16_t variable to swap.
+ * \param Word uint16_t variable to swap.
  * 
- * @return Copy of input variable with swapped endianness.
+ * \return Copy of input variable with swapped endianness.
  * 
  */
 static inline uint16_t SwapEndian_RunTime_16(const uint16_t Word);
@@ -142,7 +142,7 @@ static inline uint16_t SwapEndian_RunTime_16(const uint16_t Word)
 
 /* TODO: Cleanup, use union instead. */
 /**
- * @brief Swap the endianness of a 32-bit variable that is determined during run-time.
+ * \brief Swap the endianness of a 32-bit variable that is determined during run-time.
  * A copy of the function's argument is explicitly made within the body. If the 
  * compiler decides to inline the function it will have the same scope as the caller and
  * we don't want to accidently overwrite the function's argument unless we explicitly write
@@ -150,9 +150,9 @@ static inline uint16_t SwapEndian_RunTime_16(const uint16_t Word)
  * the potential optimization benefits of no function call overhead while also having 
  * the ability to preserve the original variable's value.
  * 
- * @param Word uint32_t variable to swap.
+ * \param Word uint32_t variable to swap.
  * 
- * @return Copy of input variable with swapped endianness.
+ * \return Copy of input variable with swapped endianness.
  * 
  */
 static inline uint32_t SwapEndian_RunTime_32(const uint32_t Word);

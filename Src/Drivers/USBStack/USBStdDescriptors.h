@@ -1,105 +1,19 @@
 /**
- * @file USBDescriptors.h
+ * @file USBStdDescriptors.h
  * @author Ian Ress
- * \brief USB descriptor headers and macros. The descriptor declarations are packed so a 
- * uint8_t pointer can be used to send data across the bus. Struct padding won't matter 
- * for 8-bit machines however we need to use this attribute to make this portable across 
- * 16-bit and 32-bit AVRs.
- * @date 2023-02-15
+ * @brief Standard descriptor headers defined by the USB spec.
+ * @date 2023-02-21
  * 
  * @copyright Copyright (c) 2023
  * 
  */
 
-/* TODO: Cleanup */
-#ifndef USBDESCRIPTORS_H
-#define USBDESCRIPTORS_H
+#ifndef USBSTDDESCRIPTORS_H
+#define USBSTDDESCRIPTORS_H
 
 #include <stdint.h>
 #include "Attributes.h"
 
-/* --------------------------------------------------------------------------------------------------------------------------------- */
-/* ----------------------------------------------- DESCRIPTOR TYPE DEFINES --------------------------------------------------------- */
-/* --------------------------------------------------------------------------------------------------------------------------------- */
-#define DEVICE_DESCRIPTOR_TYPE                      0x01
-#define CONFIGURATION_DESCRIPTOR_TYPE               0x02
-#define INTERFACE_DESCRIPTOR_TYPE                   0x04
-#define ENDPOINT_DESCRIPTOR_TYPE                    0x05
-#define STRING_DESCRIPTOR_TYPE                      0x03
-
-
-/* --------------------------------------------------------------------------------------------------------------------------------- */
-/* --------------------------------------------- USB CONFIGURATION DESCRIPTOR DEFINES ---------------------------------------------- */
-/* --------------------------------------------------------------------------------------------------------------------------------- */
-/** Defines for the bmAttributes member in USB_Configuration_Descriptor_t. Set bmAttributes equal to CONFIGURATION_RESERVED OR'd with 
- *  any of the other desired settings. For example, bmAttributes = CONFIGURATION_RESERVED | CONFIGURATION_REMOTE_WAKEUP.
- *  bmAttributes must always be OR'd with CONFIGURATION_RESERVED!
- */
-#define CONFIGURATION_RESERVED                      (1 << 7) /* Must always be set in bmAttributes. */
-
-#define CONFIGURATION_SELF_POWERED                  (1 << 6)
-
-#define CONFIGURATION_REMOTE_WAKEUP                 (1 << 5) /* The specified configuration supports the remote wakeup feature of 
-                                                                the USB standard, allowing a suspended USB device to wake up the host upon
-                                                                request. If set, the host will dynamically enable and disable remote wakeup 
-                                                                support. */
-
-/** \brief Macro to calculate the power value for the configuration descriptor, from a given number of milliamperes. Set bMaxPower
- *  member equal to this macro. For example to set a max of 200mA, bMaxPower = CONFIG_MAX_CURRENT_MA(200).
- *
- *  \param mA  Maximum number of milliamps the device consumes when the given configuration is selected.
- */
-#define CONFIG_MAX_CURRENT_MA(mA)                   ((mA) >> 1)
-
-
-
-/* --------------------------------------------------------------------------------------------------------------------------------- */
-/* --------------------------------------------- USB ENDPOINT DESCRIPTOR DEFINES --------------------------------------------------- */
-/* --------------------------------------------------------------------------------------------------------------------------------- */
-/** Defines for the bmAttributes member in USB_Endpoint_Descriptor_t. These can be used to set the Transfer Type to control, bulk, or
- *  isochronous, or interrupt. Set bmAttributes equal to one of these defines. 
- */
-#define ENDPOINT_CONTROL_TRANSFER_TYPE              0
-
-#define ENDPOINT_BULK_TRANSFER_TYPE                 (1 << 0)
-
-#define ENDPOINT_ISOCHRONOUS_TRANSFER_TYPE          (1 << 1)
-
-#define ENDPOINT_INTERRUPT_TRANSFER_TYPE            (1 << 1) | (1 << 0)
-
-/** Masks for the bmAttributes member in USB_Endpoint_Descriptor_t. These are used exclusively for the Isochronous Transfer Type 
- *  These should be OR'd with ENDPOINT_ISOCHRONOUS_TRANSFER_TYPE to set the synchronisation and data usage type. For example,
- *  bmAttributes = ENDPOINT_ISOCHRONOUS_TRANSFER_TYPE | ENDPOINT_ISO_ADAPTIVE | ENDPOINT_ISO_DATA_ENDPOINT.
- */ 
-#define ENDPOINT_ISO_NOSYNC                         0
-
-#define ENDPOINT_ISO_ASYNC                          (1 << 2)
-
-#define ENDPOINT_ISO_ADAPTIVE                       (1 << 3)
-
-#define ENDPOINT_ISO_SYNC                           (1 << 3) | (1 << 2)
-
-#define ENDPOINT_ISO_DATA_ENDPOINT                  0
-
-#define ENDPOINT_ISO_FEEDBACK_ENDPOINT              (1 << 4)
-
-#define ENDPOINT_ISO_EXPLICIT_FEEDBACK_ENDPOINT     (1 << 5)
-
-
-/* ------------------------------------------------------------------------------------------------------------------------------- */
-/* --------------------------------------------- USB STRING DESCRIPTOR DEFINES --------------------------------------------------- */
-/* ------------------------------------------------------------------------------------------------------------------------------- */
-/** String language ID for the English language. Should be used in USB_String_Descriptor_Zero_t descriptors to indicate 
- *  that the English language is supported by the device in its string descriptors.
- */
-#define LANGUAGE_ID_ENG                   0x0409
-
-
-
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* --------------------------------------------- THE USB STANDARD DEVICE DESCRIPTOR --------------------------------------------------- */
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* This represents the entire USB device, so there can only be one definition. Regardless of CPU architecture, store as Little Endian.  */
 typedef struct
 {
     uint8_t bLength;                            /*  Size of descriptor in bytes. Set to 18 since device descriptor is 18 bytes long. */
@@ -140,11 +54,6 @@ typedef struct
 } GCCATTRIBUTE_PACKED USB_Device_Descriptor_t;
 
 
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* --------------------------------------------- THE USB STANDARD CONFIGURATION DESCRIPTOR -------------------------------------------- */
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* Devices can have multiple configurations, however for this keyboard there only needs to be one Configuration Descriptor. 
-Regardless of CPU architecture, store as Little Endian. */
 typedef struct
 {
     uint8_t bLength;                            /*  Size of descriptor in bytes. */
@@ -168,11 +77,6 @@ typedef struct
 } GCCATTRIBUTE_PACKED USB_Configuration_Descriptor_t;
 
 
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* --------------------------------------------- THE USB STANDARD INTERFACE DESCRIPTOR ------------------------------------------------ */
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* The interface descriptor could be seen as a header or grouping of the endpoints into a functional group performing a single 
-feature of the device. Regardless of CPU architecture, store as Little Endian. */
 typedef struct
 {
     uint8_t bLength;                            /*  Size of the descriptor in bytes. */
@@ -202,12 +106,6 @@ typedef struct
 } USB_Interface_Descriptor_t;
 
 
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* --------------------------------------------- THE USB STANDARD ENDPOINT DESCRIPTOR ------------------------------------------------- */ 
-/* ------------------------------------------------------------------------------------------------------------------------------------ */
-/* Endpoint descriptors are used to describe endpoints other than endpoint zero. Endpoint zero is always assumed to be a control 
-endpoint and is configured before any descriptors are even requested. The host will use the information returned from these 
-descriptors to determine the bandwidth requirements of the bus. Regardless of CPU architecture, store as Little Endian. */
 typedef struct
 {
     uint8_t  bLength;                           /*  Size of the descriptor in bytes. */
@@ -253,12 +151,6 @@ typedef struct
 } GCCATTRIBUTE_PACKED USB_Endpoint_Descriptor_t;
 
 
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* --------------------------------------------- THE USB STANDARD STRING DESCRIPTORS ------------------------------------------------ */ 
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* String Descriptor 0 is used to return a list of supported languages for the device. The host reads this descriptor to determine 
-what languages are available. If a language is supported, it can then be referenced by sending the language ID in the wIndex 
-field of a Get Descriptor String request. */
 typedef struct
 {
     uint8_t  bLength;                           /*  Size of the descriptor in bytes. */
@@ -270,8 +162,6 @@ typedef struct
 } GCCATTRIBUTE_PACKED USB_String_Descriptor_Zero_t;
 
 
-/* Any string descriptors after String Descriptor Zero are optional and are just used to provide human readable information. 
-If they are not used, any string index fields of descriptors must be set to zero indicating there is no string descriptor available. */
 typedef struct
 {
     uint8_t  bLength;                           /*  Size of the descriptor in bytes. */
@@ -285,20 +175,4 @@ typedef struct
                                                     characters. */
 } GCCATTRIBUTE_PACKED USB_String_Descriptor_t;
 
-
-
-
-// TODO: Setup
-// 1) Set to full speed or low speed mode (low speed mode for you)
-//     - UDCON register
-// 2) 
-
-
-// Two interrupt sources:
-// 1) Endpoint interrupt
-//     - UEINT register to check which endpoint (endpoints 1 to 6) triggered the interrupt.
-// 2) General interrupt
-//     - UDINT register to check interrupt source
-//     - UDIEN register to enable source to trigger interrupt
-
-#endif /* USBDESCRIPTORS_H */
+#endif

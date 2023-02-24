@@ -1,7 +1,7 @@
 /**
  * @file KeyCodes.h
  * @author Ian Ress
- * @brief Keycode values defined by USB HID spec. For normal keys, these are 
+ * \brief Keycode values defined by USB HID spec. For normal keys, these are 
  * the Usage IDs that correspond to the Keyboard Usage Page. For modifier keys,
  * these are the bit mapped position that correlates to the appropriate modifier key.
  * In the Report Descriptor, the first byte of data is represented as an 8-bit bitmap

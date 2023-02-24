@@ -1,7 +1,7 @@
 /**
  * @file CircBuf.h
  * @author Ian Ress
- * @brief Circular buffer for USB buffer.
+ * \brief Circular buffer for USB buffer.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023

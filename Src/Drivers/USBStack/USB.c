@@ -1,7 +1,7 @@
 /**
  * @file USB.c
  * @author Ian Ress
- * @brief TODO: Description
+ * \brief TODO: Description
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -9,13 +9,15 @@
  */
 
 /* TODO: Major cleanup and work */
+#include <stdbool.h>
 #include "USB.h"
 #include "USBConfig.h"
+#include "USBEventHandler.h"
 #include "USBRegisters.h"
 
 
 /**
- * @brief When initializing the USB controller, a clock source must be selected
+ * \brief When initializing the USB controller, a clock source must be selected
  * and enabled. This defines the maximum number of times to check if the clock
  * is successfully enabled before throwing a user-defined error event.
  * 
@@ -23,7 +25,7 @@
 #define MAX_CLOCK_ENABLE_POLLS                  20
 
 /**
- * @brief After the PLL is enabled you must wait for the PLL to lock before
+ * \brief After the PLL is enabled you must wait for the PLL to lock before
  * proceeding. This defines the maximum number of times to check if the
  * PLL is locked before throwing a user-defined error event.
  * 
@@ -32,13 +34,13 @@
 
 
 /**
- * @brief Connects the VBUS pad to the USB controller and enables the 
+ * \brief Connects the VBUS pad to the USB controller and enables the 
  * controller's internal regulator, depending how the user configures
  * settings in USBConfig.h and which target MCU is used.
  * 
  */
-static inline void USB_Power_On(void);
-static inline void USB_Power_On(void)
+static void USB_Controller_Power_On(void);
+static void USB_Controller_Power_On(void)
 {
     #if defined(USB_USE_VBUS_WAKEUP)
         USBReg_Enable_VBus();
@@ -55,147 +57,232 @@ static inline void USB_Power_On(void)
 
 
 /**
- * @brief Configures the PLL for the USB controller's clock source. This
- * configures the input clock source to the PLL, configures the PLL's
- * output clock going to the USB controller, and enables the PLL.
+ * \brief Sets the PLL to use the oscillator chosen in \p USBConfig.h
  * 
- * \warning If source clock fails to enable after \p MAX_CLOCK_ENABLE_POLLS
- * iterations or the PLL fails to lock after \p MAX_PLL_LOCK_POLLS iterations,
- * user-defined error handlers will execute. It is up to the user how to handle
- * these errors - otherwise nothing will occur and initialization will resume
- * as normal.
+ * \warning This also sets the CPU clock to the selected oscillator, and disables the other.
+ * For example if PLL is configured to use the Internal Oscillator, the CPU uses the Internal
+ * Oscillator and the External Oscillator is disabled.
  * 
- * \note The exact configuration will be different depending on the user's
- * clock configuration and target MCU. As this is meant to be a general driver
- * for all targets, this device-specific code is structured to be handled 
- * within the inlined function calls used throughout USB_Configure_PLL().
+ * \return true if successful. False if the selected clock source is not successfully enabled
+ * after a user-defined amount of polls, \p MAX_CLOCK_ENABLE_POLLS 
  * 
  */
-static inline void USB_Configure_PLL(void);
-static inline void USB_Configure_PLL(void)
+static bool USB_Set_PLL_Clock(void);
+static bool USB_Set_PLL_Clock(void)
 {
-    /**
-     * TODO: Fixing up. Call Set_CPU_Clock_ExternalOsc()
-     * See Section 6.10 Clock Switch Algorithm!!!!
-     */
-    
-     Must Set_CPU_Clock_ExternalOsc()*/
+    bool success = true;
+
+    //USBReg_PLL_Disable(); /* Disable PLL. May just put in startup instead */
     #if defined(USB_USE_INTERNAL_OSCILLATOR)
-        PLL_Select_InternalOsc();
-        Enable_InternalOsc();
+        USBReg_Enable_InternalOsc();
+        for (uint8_t polls = 0; ( (polls < (MAX_CLOCK_ENABLE_POLLS)) && (!USBReg_Is_InternalOsc_Ready()) ); polls++)
     #else
-        PLL_Select_ExternalOsc();
-        Enable_ExternalOsc();
+        USBReg_Enable_ExternalOsc();
+        for (uint8_t polls = 0; ( (polls < (MAX_CLOCK_ENABLE_POLLS)) && (!USBReg_Is_ExternalOsc_Ready()) ); polls++)
+    #endif
+        {
+            if (polls == (MAX_CLOCK_ENABLE_POLLS - 1))
+            {
+                success = false;
+            }
+        }
+
+    #if defined(USB_USE_INTERNAL_OSCILLATOR)
+        USBReg_Set_CPU_Clock_InternalOsc();
+        USBReg_Disable_ExternalOsc();
+        USBReg_PLL_Select_InternalOsc();
+    #else
+        USBReg_Set_CPU_Clock_ExternalOsc();
+        USBReg_Disable_InternalOsc();
+        USBReg_PLL_Select_ExternalOsc();
     #endif
 
-    for (uint8_t polls = 0;
-        #if defined(USB_USE_INTERNAL_OSCILLATOR)
-        ( (polls < (MAX_CLOCK_ENABLE_POLLS)) && (!Is_InternalOsc_Ready()) );
-        #else
-        ( (polls < (MAX_CLOCK_ENABLE_POLLS)) && (!Is_ExternalOsc_Ready()) );
-        #endif
-        polls++)
-    {
-        if (polls == (MAX_CLOCK_ENABLE_POLLS - 1))
-        {
-            USB_EVENT_Clock_Enable_Failure();
-        }
-    }
-    PLL_Set_Prescalar();
-    PLL_Set_Postscalar();
-    PLL_Enable();
-
-    for (uint8_t polls = 0; ( (polls < (MAX_PLL_LOCK_POLLS)) && (!Is_PLL_Ready()) ); polls++)
-    {
-        if (polls == (MAX_PLL_LOCK_POLLS - 1))
-        {
-            USB_EVENT_PLL_Lock_Failure();
-        }
-    }
-
-
-    /**
-     * 
-     * 0) Call PLL_Select_ExternalOsc() or PLL_Select_InternalOsc() depending on user's choice.
-     * 
-     * 1) Depending on user input, Enable External oscillator or Internal oscillator 
-     * Call Enable_InternalOsc() or Enable_ExternalOsc().
-     * 
-     * 2) Do 10 polls to check if internal oscillator or external oscillator is ready.
-     * Call Is_InternalOsc_Ready() or Is_ExternalOsc_Ready().
-     * 2b) If after 10 polls it isn't ready, signal a failure (return false).
-     * 
-     * 3) TODO: Must figure out if user is using 8MHz or 16MHz clock source.
-     * 3b) If 16MHz clock source, call PLL_Set_Prescalar().
-     * 
-     * 4) Call PLL_Set_Postscalar() to output 48MHz to PLL.
-     * 
-     * 5) Call PLL_Enable()??? or should I hold off.
-     * 
-     * 
-     */
-
+    return success;
 }
 
 
+/**
+ * \brief Configures the PLL and CPU clock. Also enables the PLL. 
+ * 
+ * \note Both the PLL and CPU will use the same clock source.
+ * 
+ * \return true if successful. False if the PLL does not lock after a 
+ * user-defined amount of polls, \p MAX_PLL_LOCK_POLLS
+ * 
+ */
+static bool USB_Set_PLL_Prescalars_And_Enable(void);
+static bool USB_Set_PLL_Prescalars_And_Enable(void)
+{
+    bool success = true;
+
+    USBReg_PLL_Set_Prescalar();
+    USBReg_PLL_Set_Postscalar();
+    USBReg_PLL_Enable();
+
+    for (uint8_t polls = 0; ( (polls < (MAX_PLL_LOCK_POLLS)) && (!USBReg_Is_PLL_Ready()) ); polls++)
+    {
+        if (polls == (MAX_PLL_LOCK_POLLS - 1))
+        {
+            success = false;
+        }
+    }
+
+    return success;
+}
+
 
 /**
- * @brief Initializes the hardware registers of the USB peripheral.
+ * \brief Enables the USB controller's clock and sets the proper speed.
+ * 
+ */
+static void USB_Configure_USB_Speed(void);
+static void USB_Configure_USB_Speed(void)
+{
+    #if defined(USB_LOW_SPEED_DEVICE)
+        USBReg_Set_Low_Speed();
+    #elif defined(USB_FULL_SPEED_DEVICE)
+        USBReg_Set_Full_Speed();
+    #else
+        "Currently only support Low and Full Speed."
+    #endif
+}
+
+
+/**
+ * \brief Sets up the Control Endpoint with a single bank.
+ * The endpoint's size is user-definable by changing
+ * the value of \p CONTROL_ENDPOINT_SIZE
+ * 
+ * \return true if endpoint configuration was successful. 
+ * False otherwise
+ * 
+ */
+static bool USB_Configure_Control_Endpoint(void);
+static bool USB_Configure_Control_Endpoint(void)
+{
+    USBReg_Set_Current_Endpoint(0);
+    USBReg_Disable_Endpoint();
+    USBReg_Deallocate_Endpoint_Memory();
+    USBReg_Enable_Endpoint();
+    USBReg_Reset_Endpoint_Configuration();
+    /* TODO: Can we do multiple writes like this to UECFG0X and UECFG1X registers? */
+    USBReg_Set_Endpoint_Direction(ENDPOINT_DIR_OUT);
+    USBReg_Set_Endpoint_Type(ENDPOINT_CONTROL);
+    USBReg_Set_Number_Of_Banks(ENDPOINT_SINGLE_BANK);
+    USBReg_Set_Endpoint_Size(CONTROL_ENDPOINT_SIZE); /* Valid size is checked at compile-time in CompileChecks.h */
+    USBReg_Allocate_Endpoint_Memory();
+    USBReg_Disable_All_Endpoint_Interrupts();
+
+    return (USBReg_Is_Endpoint_Configured());
+}
+
+
+/**
+ * \brief Sets up the HID Endpoint as an Interrupt IN Endpoint
+ * with a single bank. The endpoint's size is user-definable 
+ * by changing the value of \p HID_ENDPOINT_SIZE
+ * 
+ * \note This function sets up the HID Endpoint as
+ * Endpoint 1. Adjust \p USBReg_Set_Current_Endpoint()
+ * call to change this if desired.
+ * 
+ * \note Only an Interrupt IN endpoint is configured as the
+ * USB HID spec does not require an Interrupt OUT endpoint.
+ * As a result, HID output reports generated by the host
+ * are transmitted to the control endpoint. You must program
+ * the Interrupt OUT endpoint configuration and define an
+ * additional endpoint descriptor if desired.
+ * 
+ * \return true if endpoint configuration was successful. 
+ * False otherwise
+ * 
+ */
+static bool USB_Configure_HID_Endpoint(void);
+static bool USB_Configure_HID_Endpoint(void)
+{   
+    USBReg_Set_Current_Endpoint(1);
+    USBReg_Disable_Endpoint();
+    USBReg_Deallocate_Endpoint_Memory();
+    USBReg_Enable_Endpoint();
+    USBReg_Reset_Endpoint_Configuration();
+    /* TODO: Can we do multiple writes like this to UECFG0X and UECFG1X registers? */
+    USBReg_Set_Endpoint_Direction(ENDPOINT_DIR_IN);
+    USBReg_Set_Endpoint_Type(ENDPOINT_INTERRUPT);
+    USBReg_Set_Number_Of_Banks(ENDPOINT_SINGLE_BANK);
+    USBReg_Set_Endpoint_Size(HID_ENDPOINT_SIZE); /* Valid size is checked at compile-time in CompileChecks.h */
+    USBReg_Allocate_Endpoint_Memory();
+    USBReg_Disable_All_Endpoint_Interrupts();
+
+    return (USBReg_Is_Endpoint_Configured());
+}
+
+
+/**
+ * \brief Starts the USB Controller.
+ * 
+ */
+static inline void USB_Controller_Begin(void);
+static inline void USB_Controller_Begin(void)
+{
+    USBReg_Enable_USB_Controller();
+    USBReg_USB_Attach();
+}
+
+
+/**
+ * \brief Initializes the hardware registers of the USB peripheral. If an error
+ * occurs, a user-defined error handler will execute. These events have the prefix
+ * \p USB_EVENT_ERROR
+ * See the specific USB_EVENT_ERROR function of interest for more in-depth .
+ * comments pertaining to it.
  * 
  */
 void USB_Hardware_Init(void)
 {
-    USB_Power_On();
-    USB_Configure_PLL();
+    USB_Controller_Power_On();
 
+    if (!USB_Set_PLL_Clock())
+    {
+        USB_EVENT_ERROR_Clock_Enable_Failure();
+    }
 
+    if (!USB_Set_PLL_Prescalars_And_Enable())
+    {
+        USB_EVENT_ERROR_PLL_Lock_Failure();
+    }
 
-USBReg_Enable_USBRegulator();
-USBReg_Unfreeze_Clock(); /* Clear FRZCLK bit */
+    USBReg_Unfreeze_Clock();
+    USB_Configure_USB_Speed();
 
-     /* Step 2) Setup PLL frequency
-        *- LSM bit determines if D+ or D- pullup is enabled (low speed or high speed device)
+    if ( (!USB_Configure_Control_Endpoint()) || (!USB_Configure_HID_Endpoint()) )
+    {
+        USB_EVENT_ERROR_Endpoint_Setup_Failure();
+    }
 
-
-*/
-     /* 
-
-     * 
-     * Step 2) Setup any USB interrupts you want.
-     * Step 3) 
-     */
+    USB_Controller_Begin();
 }
+
+
+
+
+
+
+
 
 // void USB_Init(void)
 {
-    cli();
-    /* TODO: Disable watchdog */
-    /* TODO: Disable PLL, disable USB controller, disable watchdog, disable global interrupts, and other things you deem fit. */
+    /* TODO: Detach USB (UDCON DETACH bit) Disable PLL, disable USB controller, disable watchdog, disable global interrupts, and other things you deem fit. */
     USB_Power_Off();
 
+    USB_Hardware_Init();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
 
 
 /**
- * @brief USB Endpoint ISR.
+ * \brief USB Endpoint ISR.
  * 
  */
 ISR(USB_COM_vect)
@@ -205,7 +292,7 @@ ISR(USB_COM_vect)
 }
 
 /**
- * @brief TODO: Reads the UEINTx register  the type of packet 
+ * \brief TODO: Reads the UEINTx register  the type of packet 
  * 
  */
 static inline uint8_t USB_Get_Endpoint_Flag(void);
@@ -216,7 +303,7 @@ static inline uint8_t USB_Get_Endpoint_Flag(void)
 
 
 /**
- * @brief Initializes USB peripheral. TODO: Perhaps break out into separate MCU-specific driver??
+ * \brief Initializes USB peripheral. TODO: Perhaps break out into separate MCU-specific driver??
  * 
  */
 static void USB_Hardware_Init(void);
@@ -229,7 +316,7 @@ static void USB_Hardware_Init(void)
 }
 
 /**
- * @brief TODO: Reads the endpoint buffer
+ * \brief TODO: Reads the endpoint buffer
  * 
  */
 static void USB_Endpoint_Read(void);
@@ -268,7 +355,7 @@ static void USB_Endpoint_Read(void)
 
 
 /**
- * @brief TODO: Control Endpoint
+ * \brief TODO: Control Endpoint
  * 
  */
 static void USB_Control_Endpoint(void);
@@ -321,7 +408,7 @@ static void USB_Control_Endpoint(void)
 
 
 /**
- * @brief TODO:
+ * \brief TODO:
  * 
  */
 // void USB_Init(void)

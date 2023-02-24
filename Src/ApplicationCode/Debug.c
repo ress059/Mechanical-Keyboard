@@ -1,7 +1,7 @@
 /**
  * @file Debug.c
  * @author Ian Ress
- * @brief For internal debugging.
+ * \brief For internal debugging.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -25,7 +25,7 @@ static void timer_isr(void)
 }
 
 /**
- * @brief Bare bones test of the GPIO driver. Blinks the onboard LED. Timing does not matter here,
+ * \brief Bare bones test of the GPIO driver. Blinks the onboard LED. Timing does not matter here,
  * all that is being tested is that the GPIO output functions work and toggled the LED.
  * 
  */
@@ -40,10 +40,10 @@ void blink(void)
 }
 
 /**
- * @brief Tests the timer driver. Assign blinktimer object to any timer to test it. A GPIO output
+ * \brief Tests the timer driver. Assign blinktimer object to any timer to test it. A GPIO output
  * pin is toggled within the timer ISR to verify timer frequency.
  * 
- * @param freq The frequency to generate a compare match ISR.
+ * \param freq The frequency to generate a compare match ISR.
  */
 void timer_blink(uint16_t freq)
 {
@@ -55,10 +55,10 @@ void timer_blink(uint16_t freq)
 }
 
 /**
- * @brief Tests the systick. The systick ISR is generated every 1ms and is tracked via
+ * \brief Tests the systick. The systick ISR is generated every 1ms and is tracked via
  * variable 'g_ms'.
  * 
- * @param freq The frequency to toggle the GPIO output pin.
+ * \param freq The frequency to toggle the GPIO output pin.
  */
 void systick_blink(systick_wordsize_t freq)
 {
@@ -86,7 +86,7 @@ void systick_blink(systick_wordsize_t freq)
 }
 
 /**
- * @brief Tests the remaining GPIO driver and user_config.h setup file. All rows
+ * \brief Tests the remaining GPIO driver and user_config.h setup file. All rows
  * on the keyboard should be pulled HIGH (input pullup). All columns should also
  * be HIGH (output HIGH). 
  * 
@@ -97,7 +97,7 @@ void test_matrixinit(void)
 }
 
 /**
- * @brief Tests the matrix scanning function which scans through the entire keyboard
+ * \brief Tests the matrix scanning function which scans through the entire keyboard
  * for keypresses.
  * 
  */
@@ -112,7 +112,7 @@ void test_matrixscan(void)
 
 
 /**
- * @brief Tests the matrix scanning and USB functionality.
+ * \brief Tests the matrix scanning and USB functionality.
  * 
  */
 void test_keyboard(void) 

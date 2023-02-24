@@ -1,7 +1,7 @@
 /**
  * @file USBDescriptors.c
  * @author Ian Ress
- * @brief Defines the USB descriptors for the keyboard.
+ * \brief Defines the USB descriptors for the keyboard.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -51,10 +51,10 @@ const USB_Device_Descriptor_t Keyboard_Device_Descriptor =
     .bDeviceSubClass                = 0x00,                                 /*  Set to 0 because bDeviceClass is 0. */
 
     .bDeviceProtocol                = 0x00,                                 /*  We don't use class-specific protocols on the Device Level since 
-                                                                            we specify HID class in the Interface Descriptor. */
+                                                                                we specify HID class in the Interface Descriptor. */
 
-    .bMaxPacketSize0                = ENDPOINT0_MAX_BUFFER_SIZE,            /*  Make sure Endpoint0 registers of microcontroller are programmed so max size is 
-                                                                            set to this value. */
+    .bMaxPacketSize0                = CONTROL_ENDPOINT_SIZE,                /*  Make sure Endpoint0 registers of microcontroller are programmed so max size is 
+                                                                                set to this value. */
 
     .idVendor                       = LE16_TO_OS_COMPILETIME(0xFF00),       /*  Use 0xFF00 to 0xFFFF for development */
 

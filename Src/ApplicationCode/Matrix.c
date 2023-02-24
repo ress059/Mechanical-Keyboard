@@ -1,7 +1,7 @@
 /**
  * @file Matrix.c
  * @author Ian Ress
- * @brief Keyboard scanning logic to detect keypresses. 
+ * \brief Keyboard scanning logic to detect keypresses. 
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -27,11 +27,11 @@ uint8_t keypress = 0;
 uint8_t debugpress = 0;
 
 /**
- * @brief Reads the pressed key when it is debounced. If it is pressed, the relevant key is
+ * \brief Reads the pressed key when it is debounced. If it is pressed, the relevant key is
  * stored in a USB transmit buffer.
  * 
- * @param row Matrix row index of the key.
- * @param col Matrix column index of the key. 
+ * \param row Matrix row index of the key.
+ * \param col Matrix column index of the key. 
  * 
  */
 static bool debounce_logic(uint8_t row, uint8_t col)
@@ -55,7 +55,7 @@ static bool debounce_logic(uint8_t row, uint8_t col)
 }
 
 /**
- * @brief Initializes the key matrix. 
+ * \brief Initializes the key matrix. 
  * 
  */
 void matrix_init(void) 
@@ -78,7 +78,7 @@ void matrix_init(void)
 }
 
 /**
- * @brief Scans the entire key matrix to detect debounced key presses.
+ * \brief Scans the entire key matrix to detect debounced key presses.
  * 
  */
 void matrix_scan(void) 

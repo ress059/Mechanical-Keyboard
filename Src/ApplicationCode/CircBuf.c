@@ -1,7 +1,7 @@
 /**
  * @file CircBuf.c
  * @author Ian Ress
- * @brief Circular buffer for USB buffer.
+ * \brief Circular buffer for USB buffer.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -11,12 +11,12 @@
 #include "CircBuf.h"
 
 /**
- * @brief Writes data to the circular buffer if there's space. Increments the head accordingly.
+ * \brief Writes data to the circular buffer if there's space. Increments the head accordingly.
  * 
- * @param cb pointer to circbuf_t struct.
- * @param data the data to write.
+ * \param cb pointer to circbuf_t struct.
+ * \param data the data to write.
  * 
- * @return 0 if the write failed (buffer full). 0 if write successful.
+ * \return 0 if the write failed (buffer full). 0 if write successful.
  * 
  */
 uint8_t circbuf_write(circbuf_t * const cb, uint8_t data) {
@@ -37,13 +37,13 @@ uint8_t circbuf_write(circbuf_t * const cb, uint8_t data) {
 }
 
 /**
- * @brief Reads data to the circular buffer if there's data available. 
+ * \brief Reads data to the circular buffer if there's data available. 
  * Increments the tail accordingly.
  * 
- * @param cb pointer to circbuf_t struct.
- * @param data the data to read.
+ * \param cb pointer to circbuf_t struct.
+ * \param data the data to read.
  * 
- * @return 0 if the buffer is empty. 1 on successful read.
+ * \return 0 if the buffer is empty. 1 on successful read.
  * 
  */
 uint8_t circbuf_read(circbuf_t * const cb, uint8_t * data) {

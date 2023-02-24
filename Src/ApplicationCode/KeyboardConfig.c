@@ -1,7 +1,7 @@
 /**
  * @file KeyboardConfig.c
  * @author Ian Ress
- * @brief Defines the keyboard layout. User should not edit this file. Instead, the 
+ * \brief Defines the keyboard layout. User should not edit this file. Instead, the 
  * user configures all the keyboard settings within KeyboardConfig.h. 
  * @date 2023-02-15
  * 

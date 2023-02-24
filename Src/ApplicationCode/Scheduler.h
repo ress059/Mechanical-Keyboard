@@ -1,7 +1,7 @@
 /**
  * @file Scheduler.h
  * @author Ian Ress
- * @brief Software implementation of scheduler. Uses 1ms systick interrupt to keep 
+ * \brief Software implementation of scheduler. Uses 1ms systick interrupt to keep 
  * track of time. Currently uses a round-robin non-preemptive approach.
  * @date 2023-02-15
  * 
@@ -17,7 +17,7 @@
 #include "SysTick.h"
 
 /**
- * @brief The maximum number of tasks the scheduler is allowed to run.
+ * \brief The maximum number of tasks the scheduler is allowed to run.
  * 
  */
 #define MAX_TASKS                               5 

@@ -1,7 +1,7 @@
 /**
  * @file Main.c
  * @author Ian Ress
- * @brief Runs the keyboard.
+ * \brief Runs the keyboard.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023

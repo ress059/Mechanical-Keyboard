@@ -1,7 +1,7 @@
 /**
  * @file Scheduler.c
  * @author Ian Ress
- * @brief Software implementation of scheduler. Uses 1ms systick interrupt to keep 
+ * \brief Software implementation of scheduler. Uses 1ms systick interrupt to keep 
  * track of time. Currently uses a round-robin non-preemptive approach.
  * @date 2023-02-15
  * 
@@ -26,9 +26,9 @@ static Task_t tasks[MAX_TASKS] =
 
 
 /**
- * @brief Checks if the scheudler slot is occupied with a task.
+ * \brief Checks if the scheudler slot is occupied with a task.
  * 
- * @return The first index in the scheduler where a task is not assigned. Returns -1 
+ * \return The first index in the scheduler where a task is not assigned. Returns -1 
  * if no more tasks can be added to the scheduler 
  * 
  */
@@ -47,7 +47,7 @@ static int isempty(void)
 
 
 /**
- * @brief Deletes the task in the scheduler slot.
+ * \brief Deletes the task in the scheduler slot.
  * 
  */
 void delete_task(Task_t* task)
@@ -60,13 +60,13 @@ void delete_task(Task_t* task)
 
 
 /**
- * @brief Create a task object and adds it to an available scheduler slot.
+ * \brief Create a task object and adds it to an available scheduler slot.
  * 
- * @param taskhandler Callback to the task's function for the scheduler to execute. If the function requires
+ * \param taskhandler Callback to the task's function for the scheduler to execute. If the function requires
  * different arguments, the user should place it inside a wrapper function.
- * @param taskfreq How often the task should execute.
+ * \param taskfreq How often the task should execute.
  * 
- * @return Constant pointer where the task object is stored in the scheduler if successful. Returns NULL if 
+ * \return Constant pointer where the task object is stored in the scheduler if successful. Returns NULL if 
  * there is no room in the scheduler to add another task. It is up to the end user to check 
  * if a non-NULL object is returned and also to not dereference a NULL-returned object.
  * 
@@ -88,7 +88,7 @@ Task_t* const create_task(void(*task)(void), systick_wordsize_t taskfreq)
 
 
 /**
- * @brief Must be called periodically (e.g. within super loop). The scheduler uses a 1ms 
+ * \brief Must be called periodically (e.g. within super loop). The scheduler uses a 1ms 
  * systick interrupt to keep track of time and determine which tasks are ready to execute.
  * The scheduler is non-preemptive.
  * 
@@ -123,7 +123,7 @@ void begin_scheduler(void)
 
 
 /**
- * @brief Clears all of the scheduler slots.
+ * \brief Clears all of the scheduler slots.
  * 
  */
 void clear_scheduler(void)

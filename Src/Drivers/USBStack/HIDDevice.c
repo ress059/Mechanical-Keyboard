@@ -1,7 +1,7 @@
 /**
  * @file HIDDevice.c
  * @author Ian Ress
- * @brief TODO: Description
+ * \brief TODO: Description
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023

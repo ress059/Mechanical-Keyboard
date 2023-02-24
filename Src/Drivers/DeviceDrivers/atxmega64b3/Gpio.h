@@ -1,7 +1,7 @@
 /**
  * @file Gpio.h
  * @author Ian Ress
- * @brief Basic GPIO driver for ATxMega64B3. Pins specific to the microcontroller are also declared here
+ * \brief Basic GPIO driver for ATxMega64B3. Pins specific to the microcontroller are also declared here
  * and are defined as a pinmap_t type in userconfig.h. The pinmap_t struct contains two members:
  * 
  * 1) index = index in the gpio array defined in gpio.c. This array contains the base address
