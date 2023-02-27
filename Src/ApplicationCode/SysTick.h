@@ -24,11 +24,9 @@ typedef uint16_t systick_wordsize_t;
 
 extern volatile systick_wordsize_t g_ms;
 
-void systick_init(void);
-void systick_start(void);
-void systick_stop(void);
-// void ATOMIC_SET_SYSTICK(uint16_t);
-// uint16_t ATOMIC_GET_SYSTICK(void);
+void Systick_Init(void);
+void Systick_Start(void);
+void Systick_Stop(void);
 
 
 #endif /* SYSTICK_H */

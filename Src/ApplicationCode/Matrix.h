@@ -15,7 +15,7 @@
 
 extern uint8_t debugpress; /* TODO: DEBUGGING */
 
-void matrix_init(void);
-void matrix_scan(void);
+void Matrix_Init(void);
+void Matrix_Scan(void);
 
 #endif /* MATRIX_H */

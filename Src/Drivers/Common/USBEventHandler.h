@@ -72,4 +72,32 @@ void USB_EVENT_ERROR_PLL_Lock_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_
 void USB_EVENT_ERROR_Endpoint_Setup_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
+/**
+ * \brief Executes if the host does not send a reset signal after the device
+ * boots up (either due to an internal reset or device is powered on). This
+ * reset signal must be received within a user-defined amount of polling iterations
+ * 
+ * \note The number of polling iterations is defined by \p MAX_HOST_RESET_POLLS
+ * in \p USB.c
+ * 
+ */
+void USB_EVENT_ERROR_Host_Reset_Not_Received(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+
+
+/**
+ * \brief Executes if \p USB_Device_State ends up being changed to a value not defined
+ * in the \p USB_Device_State_t enum. This could suggest a race condition since
+ * \p USB_Device_State is accessed in multiple threads. 
+ * 
+ */
+void USB_EVENT_ERROR_USB_State_Machine_Corrupted(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+
+
+/**
+ * \brief TODO: 
+ * 
+ */
+void USB_EVENT_ERROR_Enumeration_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+
+
 #endif /* USBEVENTHANDLER_H */

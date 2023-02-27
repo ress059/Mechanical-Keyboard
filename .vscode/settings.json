@@ -7,7 +7,8 @@
         "attributes.h": "c",
         "usbconfig.h": "c",
         "usbregisters.h": "c",
-        "usbeventhandler.h": "c"
+        "usbeventhandler.h": "c",
+        "endpoint.h": "c"
     },
     "search.useIgnoreFiles": true
 }

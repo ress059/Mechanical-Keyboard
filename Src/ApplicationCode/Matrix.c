@@ -58,7 +58,7 @@ static bool debounce_logic(uint8_t row, uint8_t col)
  * \brief Initializes the key matrix. 
  * 
  */
-void matrix_init(void) 
+void Matrix_Init(void) 
 {
 	/* Disable JTAG or else PF4, PF5, PF6, and PF7 will be pulled up HIGH permanently */
 	/* TODO: Make portable across all targets */
@@ -81,7 +81,7 @@ void matrix_init(void)
  * \brief Scans the entire key matrix to detect debounced key presses.
  * 
  */
-void matrix_scan(void) 
+void Matrix_Scan(void) 
 {
 	uint8_t keypress = 0;
 

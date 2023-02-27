@@ -29,9 +29,9 @@ typedef struct {
     systick_wordsize_t freq;    /* Frequency task should execute at in ms. Example: freq = 5 executes the task every 5ms. */
 } Task_t;
 
-Task_t* const create_task(void(*task)(void), systick_wordsize_t taskfreq);
-void delete_task(Task_t* task);
-void begin_scheduler(void);
-void clear_scheduler(void);
+Task_t* const Create_Task(void(*task)(void), systick_wordsize_t taskfreq);
+void Delete_Task(Task_t* task);
+void Begin_Scheduler(void);
+void Clear_Scheduler(void);
 
 #endif /* SCHEDULER_H */

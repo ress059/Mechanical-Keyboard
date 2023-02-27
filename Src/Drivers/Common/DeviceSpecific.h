@@ -64,12 +64,6 @@
     #define ENDPOINT0_MAX_FIFO_SIZE                     64
 
     /**
-     * \brief Maximum size, in bytes, that the Endpoint 1 bank can be programmed to.
-     * 
-     */
-    #define ENDPOINT1_MAX_FIFO_SIZE                     256
-
-    /**
      * \brief The MCU's USB controller has an internal regulator that can be enabled/disabled.
      * 
      */

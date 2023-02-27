@@ -26,8 +26,8 @@ volatile systick_wordsize_t g_ms = 0;
  * \brief ISR that executes each timer tick.
  * 
  */
-static void systick_isr(void);
-static void systick_isr(void) 
+static void Systick_ISR(void);
+static void Systick_ISR(void) 
 {
     g_ms++;
     // if (g_ms == 0) 
@@ -38,11 +38,12 @@ static void systick_isr(void)
 
 
 /**
- * \brief Initializes the systick to count every 1ms without starting. To change the tick frequency
- * update the SYSTICK_PERIOD_MS definition in systick.h
+ * \brief Initializes the systick to count every \p SYSTICK_PERIOD_MS 
+ * milliseconds without starting. To change the tick frequency
+ * update the \p SYSTICK_PERIOD_MS definition in Systick.h
  * 
  */
-void systick_init(void) 
+void Systick_Init(void) 
 {
     systick->init(SYSTICK_PERIOD_MS);
 }
@@ -52,7 +53,7 @@ void systick_init(void)
  * \brief Starts the systick.
  * 
  */
-void systick_start(void) 
+void Systick_Start(void) 
 {
     systick->start(systick_isr);
 }
@@ -62,43 +63,7 @@ void systick_start(void)
  * \brief Stops the systick.
  * 
  */
-void systick_stop(void)
+void Systick_Stop(void)
 {
     systick->stop();
 }
-
-
-// /**
-//  * \brief Can be called within application to set the systick counter in 
-//  * a thread-safe manner. Disabling interrupts prevents a possible race condition
-//  * when g_ms is incremented in the systick ISR. Unable to be inlined because I would
-//  * like g_ms to have internal linkage and only have it be able to be changed 
-//  * through this function call.
-//  * 
-//  * \param val Value to set systick counter to.
-//  */
-// void ATOMIC_SET_SYSTICK(uint16_t)
-// {
-//     cli();
-//     g_ms = val;
-//     sei();
-// }
-
-
-// /**
-//  * \brief Can be called within application to get the systick counter value in 
-//  * a thread-safe manner. Disabling interrupts prevents a possible race condition
-//  * when g_ms is incremented in the systick ISR. Unable to be inlined because I would
-//  * like g_ms to have internal linkage and only have it be able to be accessed 
-//  * through this function call.
-//  * 
-//  * \return The current systick timer counter.
-//  */
-// uint16_t ATOMIC_GET_SYSTICK(void)
-// {
-//     uint16_t val;
-//     cli();
-//     val = g_ms;
-//     sei();
-//     return val;
-// }

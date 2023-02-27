@@ -8,8 +8,12 @@
  * 
  */
 
+
+#define ONLY_INCLUDE_USBREGISTERS_H_IN_USB_C_
+
 /* TODO: Major cleanup and work */
 #include <stdbool.h>
+#include <util/atomic.h>
 #include "USB.h"
 #include "USBConfig.h"
 #include "USBEventHandler.h"
@@ -32,6 +36,25 @@
  */
 #define MAX_PLL_LOCK_POLLS                      20
 
+/**
+ * \brief When the device boots up, it waits for the host to send a
+ * a reset signal. This defines the maximum number of times to check
+ * if the host sent a reset signal on the bus before throwing a
+ * user-defined error.
+ * 
+ * \note The way the USB stack is structured, everytime the bus boots
+ * up, it will first detach the USB Controller from the bus and reset
+ * the controller. This should cause the host to send a bus reset signal.
+ * 
+ */
+#define MAX_HOST_RESET_POLLS                    100
+
+/**
+ * \brief TODO:
+ * 
+ */
+#define MAX_ENUMERATION_POLLS                   100
+
 
 /**
  * \brief Connects the VBUS pad to the USB controller and enables the 
@@ -39,8 +62,8 @@
  * settings in USBConfig.h and which target MCU is used.
  * 
  */
-static void USB_Controller_Power_On(void);
-static void USB_Controller_Power_On(void)
+static void USB_Power_On(void);
+static void USB_Power_On(void)
 {
     #if defined(USB_USE_VBUS_WAKEUP)
         USBReg_Enable_VBus();
@@ -200,7 +223,7 @@ static bool USB_Configure_Control_Endpoint(void)
 static bool USB_Configure_HID_Endpoint(void);
 static bool USB_Configure_HID_Endpoint(void)
 {   
-    USBReg_Set_Current_Endpoint(1);
+    USBReg_Set_Current_Endpoint(HID_ENDPOINT_NUMBER);
     USBReg_Disable_Endpoint();
     USBReg_Deallocate_Endpoint_Memory();
     USBReg_Enable_Endpoint();
@@ -218,14 +241,18 @@ static bool USB_Configure_HID_Endpoint(void)
 
 
 /**
- * \brief Starts the USB Controller.
+ * \brief TODO: 
  * 
  */
-static inline void USB_Controller_Begin(void);
-static inline void USB_Controller_Begin(void)
+static void USB_Power_Off(void);
+static void USB_Power_Off(void)
 {
-    USBReg_Enable_USB_Controller();
-    USBReg_USB_Attach();
+    USBReg_Disable_All_USB_Interrupts();
+    USBReg_Clear_All_Endpoints();
+    USBReg_Detach_USB_Controller();
+    USBReg_Disable_USB_Controller();
+    USBReg_PLL_Disable();
+    USBReg_Disable_USBRegulator();
 }
 
 
@@ -237,9 +264,10 @@ static inline void USB_Controller_Begin(void)
  * comments pertaining to it.
  * 
  */
-void USB_Hardware_Init(void)
+static void USB_Hardware_Init(void);
+static void USB_Hardware_Init(void)
 {
-    USB_Controller_Power_On();
+    USB_Power_On();
 
     if (!USB_Set_PLL_Clock())
     {
@@ -258,109 +286,37 @@ void USB_Hardware_Init(void)
     {
         USB_EVENT_ERROR_Endpoint_Setup_Failure();
     }
-
-    USB_Controller_Begin();
-}
-
-
-
-
-
-
-
-
-// void USB_Init(void)
-{
-    /* TODO: Detach USB (UDCON DETACH bit) Disable PLL, disable USB controller, disable watchdog, disable global interrupts, and other things you deem fit. */
-    USB_Power_Off();
-
-    USB_Hardware_Init();
-}
-
-
-
-
-
-/**
- * \brief USB Endpoint ISR.
- * 
- */
-ISR(USB_COM_vect)
-{
-    
-
-}
-
-/**
- * \brief TODO: Reads the UEINTx register  the type of packet 
- * 
- */
-static inline uint8_t USB_Get_Endpoint_Flag(void);
-static inline uint8_t USB_Get_Endpoint_Flag(void)
-{
-    return UEINTX;
 }
 
 
 /**
- * \brief Initializes USB peripheral. TODO: Perhaps break out into separate MCU-specific driver??
+ * \brief Enables the USB controller. Before attaching the controller
+ * to the bus, the end of reset interrupt is enabled. This interrupt
+ * is categorized under a general USB interrupt and executes whenever
+ * the host requests a device reset (new device plugged into the bus,
+ * there's an error, etc.) This interrupt MUST be enabled as it is
+ * the driving force behind the USB_Device_State state machine.
  * 
  */
-static void USB_Hardware_Init(void);
-static void USB_Hardware_Init(void)
+static void USB_Controller_Begin(void);
+static void USB_Controller_Begin(void)
 {
-    /* 0) Configure Endpoint0 on device */
-
-    /* 1) Allocate memory in DPRAM for each endpoint.
-            Will probably be 64 bytes for Endpoint 0 and 256 bytes for Endpoint 1. See Section 21.9 of ATMega32U4 */
-}
-
-/**
- * \brief TODO: Reads the endpoint buffer
- * 
- */
-static void USB_Endpoint_Read(void);
-static void USB_Endpoint_Read(void)
-{
-    /* OUT Endpoint notification (receiving data from host): */
-    /* 0) Hardware sets the FIFOCON and RXOUTI bits in the UEINTx register */
-    /* NOTE: Optional interrupt can be enabled (RXOUTE bit). */
-    /* 1) Whether interrupt is enabled or not, read data in buffer bank then clear RXOUTI bit. */
-    /* 2) Clear FIFOCON bit in the following instruction (CAN'T clear FIFOCON and RXOUTI at same time). 
-        If there's more data in the bank, clearing FIFOCON will cause hardware to switch to the next
-        bank automatically and set FIFOCON/RXOUTI bits accordingly depending on type of data after. */
-
-    /* RWAL bit in UEINTx register is set to 1 if firmware can read data in bank. Hardware automatically
-    clears this bit if the bank's empty. */
-
-    if (UEINTx)
-
-    (1 << RWAL) | (1 << FIFOCON) | (1 << RXOUTI)
-
-
-    /* SETUP Endpoint notification: */
-    /* 0) Hardware sets the FIFOCON and RXSPTI bits in the UEINTx register */
-
-    /* IN Endpoint (sending data to host): */
-    /* 0) Hardware sets the FIFOCON and TXIN bits in the UEINTx register when the endpoint buffer 
-        is free. */
-
-
-    /*  0)   Hardware sets the RXOUTI bit in the UEINTx register when there's data placed 
-    in the endpoint buffer. Can optionally enable an endpoint interrupt to trigger when this happens.
-
-        1)   RXSPTI bit */
-
+    USBReg_Enable_USB_Controller();
+    USBReg_Enable_USB_Interrupt(USB_END_OF_RESET_INTERRUPT);
+    USBReg_Attach_USB_Controller();
 }
 
 
 /**
- * \brief TODO: Control Endpoint
+ * \brief TODO: 
  * 
  */
-static void USB_Control_Endpoint(void);
-static void USB_Control_Endpoint(void)
+static void USB_Process_Control_Transfer(void);
+static void USB_Process_Control_Transfer(void)
 {
+    /* Read endpoint bank */
+
+
     /*          CONTROL WRITE - READING DATA FROM HOST
     
         1) CONTROL TRANSFER - SETUP STAGE
@@ -404,6 +360,191 @@ static void USB_Control_Endpoint(void)
             - Clear TXINI bit in UEINTx register. This sends a Zero Length DATA packet
          */
 }
+
+
+/* Disable global interrupts before this init call and reenable after this init call. */
+// void USB_Init(void)
+{
+    USB_Power_Off();
+    USB_Hardware_Init();
+    USB_Controller_Begin();
+}
+
+
+/**
+ * \brief Updates the USB Controller's state machine.
+ * 
+ */
+static void USB_Poll(void);
+static void USB_Poll(void)
+{
+    /* Reset is highest priority */
+    if (USBReg_Is_Bus_Reset())
+    {
+        USBReg_Clear_Bus_Reset_Flag();
+        USB_Device_State = USB_DEVICE_STATE_HOST_RESET;
+    }
+
+    else if ((USBReg_Is_Setup_TokenPacket_Received()) && (USB_Device_State != USB_DEVICE_STATE_HOST_RESET))
+    {
+        USB_Device_State = USB_DEVICE_STATE_ENUMERATION;
+    }
+}
+
+
+void USB_ControlEP_Task(void)
+{
+    static uint16_t Polls = 0;
+
+    USBReg_Set_Current_Endpoint(0);
+    USBReg_Set_Endpoint_Direction(ENDPOINT_DIR_OUT);
+    
+    /* TODO: Try to make a macro that only disables the general usb interrupt and endpoint interrupts 
+    as I still want systick interrupt to be running. */
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        USB_Device_State_t USB_Device_State_Copy, USB_Device_State_Prev = USB_Device_State;
+    }
+
+    switch (USB_Device_State_Copy)
+    {
+        case USB_DEVICE_STATE_STARTUP:
+            if ((Polls++) > MAX_HOST_RESET_POLLS)
+            {
+                USB_EVENT_ERROR_Host_Reset_Not_Received();
+            }
+            break;
+
+        case USB_DEVICE_STATE_HOST_RESET:
+            if ( (!USB_Configure_Control_Endpoint()) || (!USB_Configure_HID_Endpoint()) )
+            {
+                USB_EVENT_ERROR_Endpoint_Setup_Failure();
+            }
+
+            Polls = 0;
+            USB_Device_State_Copy = USB_DEVICE_STATE_CONFIGURED;
+            break;
+
+        case USB_DEVICE_STATE_CONFIGURED:
+            /* TODO: */
+            if (token packet received)
+            {
+                process control transfer
+                if (token packet is address setup)
+                {
+                    Polls = 0;
+                    USB_Device_State_Copy = USB_DEVICE_STATE_ADDRESS_SETUP;
+                }
+                
+            }
+            else if ((Polls++) > MAX_ENUMERATION_POLLS)
+            {
+                USB_EVENT_ERROR_Enumeration_Failure();
+            }
+
+            break;
+        
+        case USB_DEVICE_STATE_ADDRESS_SETUP:
+            /* TODO: Go through address setup Once done: */
+            USB_Device_State_Copy = USB_DEVICE_STATE_ENUMERATION;
+        
+        case USB_DEVICE_STATE_ENUMERATION:
+            /* TODO: Go through enumeration. Once done: */
+            USB_Device_State_Copy = USB_DEVICE_STATE_OPERATIONAL;
+
+        case USB_DEVICE_STATE_OPERATIONAL:
+            break;
+
+        default:
+            USB_EVENT_ERROR_USB_State_Machine_Corrupted();
+            break;
+    }
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        /* If an interrupt that changes USB_Device_State fires in the middle of executing 
+        this state machine, we would miss this change of state by overwriting USB_Device_State. 
+        Prevent this from happening. */
+        if (USB_Device_State == USB_Device_State_Prev)
+        {
+            USB_Device_State = USB_Device_State_Copy;
+        }    
+    }
+}
+
+
+    if (USBReg_Is_Bus_Reset())
+    {
+        USBReg_Clear_Bus_Reset_Flag();
+        if ( (!USB_Configure_Control_Endpoint()) || (!USB_Configure_HID_Endpoint()) )
+        {
+            USB_EVENT_ERROR_Endpoint_Setup_Failure();
+        }
+    }
+
+    /* Enumeration*/
+
+
+    if (USBReg_Is_Setup_TokenPacket_Received())
+    {
+        USB_Process_Control_Transfer();
+    }
+}
+
+
+
+void USB_HID_Task(void)
+{
+    USBReg_Set_Current_Endpoint(1);
+    USBReg_Set_Endpoint_Direction(ENDPOINT_DIR_OUT);
+
+}
+
+
+
+
+
+
+
+/**
+ * \brief TODO: Reads the endpoint buffer
+ * 
+ */
+static void USB_Endpoint_Read(void);
+static void USB_Endpoint_Read(void)
+{
+    /* OUT Endpoint notification (receiving data from host): */
+    /* 0) Hardware sets the FIFOCON and RXOUTI bits in the UEINTx register */
+    /* NOTE: Optional interrupt can be enabled (RXOUTE bit). */
+    /* 1) Whether interrupt is enabled or not, read data in buffer bank then clear RXOUTI bit. */
+    /* 2) Clear FIFOCON bit in the following instruction (CAN'T clear FIFOCON and RXOUTI at same time). 
+        If there's more data in the bank, clearing FIFOCON will cause hardware to switch to the next
+        bank automatically and set FIFOCON/RXOUTI bits accordingly depending on type of data after. */
+
+    /* RWAL bit in UEINTx register is set to 1 if firmware can read data in bank. Hardware automatically
+    clears this bit if the bank's empty. */
+
+    if (UEINTx)
+
+    (1 << RWAL) | (1 << FIFOCON) | (1 << RXOUTI)
+
+
+    /* SETUP Endpoint notification: */
+    /* 0) Hardware sets the FIFOCON and RXSPTI bits in the UEINTx register */
+
+    /* IN Endpoint (sending data to host): */
+    /* 0) Hardware sets the FIFOCON and TXIN bits in the UEINTx register when the endpoint buffer 
+        is free. */
+
+
+    /*  0)   Hardware sets the RXOUTI bit in the UEINTx register when there's data placed 
+    in the endpoint buffer. Can optionally enable an endpoint interrupt to trigger when this happens.
+
+        1)   RXSPTI bit */
+
+}
+
+
 
 
 

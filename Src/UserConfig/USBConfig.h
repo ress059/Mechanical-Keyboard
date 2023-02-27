@@ -106,13 +106,34 @@
  * can receive/send. This is for the HID Report sent to the host. This is
  * wMaxPacketSize of the Endpoint 1 Descriptor.
  * 
- * \note This value must be less than \p ENDPOINT1_MAX_FIFO_SIZE which is a
- * property of the target MCU. This must be 8 bytes or less for Low-Speed 
- * Devices. This must be 64 bytes or less for Full-Speed Devices. These
- * conditions are automatically checked at compile-time.
+ * \warning This must be 8 bytes or less for Low-Speed Devices. This must 
+ * be 64 bytes or less for Full-Speed Devices. These conditions are 
+ * automatically checked at compile-time.
+ * 
+ * \warning This must also be less than the selected endpoint's max FIFO
+ * size. This check is only done (at run-time) for targets that check 
+ * this via hardware. E.g. For \p AVR_DEVICE_FAMILY1 devices, the CFGOK 
+ * bit is set by hardware if the configured endpoint's size is less 
+ * than the max FIFO size. Therefore this check is done at run-time when 
+ * \p USBReg_Is_Endpoint_Configured() executes for these devices. Otherwise
+ * this check is not done and it is up to the user to ensure the sizes
+ * are set up correctly.
  * 
  */
 #define HID_ENDPOINT_SIZE                   64
+
+/**
+ * \brief The endpoint number to assign the HID endpoint to. Depending on
+ * the target, there may be multiple endpoint numbers that have different
+ * max FIFO sizes. Therefore it may be useful to assign the HID endpoint
+ * number to one with the largest FIFO size.
+ * 
+ * \warning Do not assign this to Endpoint 0. Endpoint 0 is always
+ * reserved for the Control Endpoint. This condition is checked
+ * at compile-time.
+ * 
+ */
+#define HID_ENDPOINT_NUMBER                 1
 
 
 /* TODO: */

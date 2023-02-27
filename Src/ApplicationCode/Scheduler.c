@@ -50,7 +50,7 @@ static int isempty(void)
  * \brief Deletes the task in the scheduler slot.
  * 
  */
-void delete_task(Task_t* task)
+void Delete_Task(Task_t* task)
 {
     task->handler = NULL;
     task->start = 0;
@@ -64,14 +64,14 @@ void delete_task(Task_t* task)
  * 
  * \param taskhandler Callback to the task's function for the scheduler to execute. If the function requires
  * different arguments, the user should place it inside a wrapper function.
- * \param taskfreq How often the task should execute.
+ * \param taskfreq How often the task should execute in ms.
  * 
  * \return Constant pointer where the task object is stored in the scheduler if successful. Returns NULL if 
  * there is no room in the scheduler to add another task. It is up to the end user to check 
  * if a non-NULL object is returned and also to not dereference a NULL-returned object.
  * 
  */
-Task_t* const create_task(void(*task)(void), systick_wordsize_t taskfreq)
+Task_t* const Create_Task(void(*task)(void), systick_wordsize_t taskfreq)
 {
     int idx = isempty();
     if (idx >= 0)
@@ -93,7 +93,7 @@ Task_t* const create_task(void(*task)(void), systick_wordsize_t taskfreq)
  * The scheduler is non-preemptive.
  * 
  */
-void begin_scheduler(void)
+void Begin_Scheduler(void)
 {
     for (uint8_t i = 0; i < (uint8_t)MAX_TASKS; i++)
     {
@@ -126,10 +126,10 @@ void begin_scheduler(void)
  * \brief Clears all of the scheduler slots.
  * 
  */
-void clear_scheduler(void)
+void Clear_Scheduler(void)
 {
     for (uint8_t i = 0; i < (uint8_t)MAX_TASKS; i++)
     {
-        delete_task(&tasks[i]);
+        Delete_Task(&tasks[i]);
     }
 }

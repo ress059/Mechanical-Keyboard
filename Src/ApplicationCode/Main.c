@@ -9,6 +9,9 @@
  */
 
 #include "Debug.h"
+#include "Matrix.h"
+#include "Scheduler.h"
+#include "SysTick.h"
 
 int main(void) 
 {
@@ -18,4 +21,24 @@ int main(void)
 	test_matrixinit(); /* All rows and columns should be HIGH */
 	// test_matrixscan();
 	// test_keyboard();
+
+
+	// cli();
+	// /* TODO: Watchdog Disable */
+	// Systick_Init();
+	// Matrix_Init();
+	// /* Other initializations */
+	// USB_Init();
+	// /* Wait for enumeration phase to complete */
+
+	// (void)Create_Task(Matrix_Scan, 20);
+	// (void)Create_Task(USB_HIDTask, 5);
+
+	// Systick_Start();
+	// sei();
+	
+	// while(1)
+	// {
+	// 	Begin_Scheduler();
+	// }
 }

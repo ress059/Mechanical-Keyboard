@@ -66,8 +66,8 @@ void systick_blink(systick_wordsize_t freq)
     static systick_wordsize_t g_ms_copy = 0;
 
     gpio_set_output(led);
-    systick_init();
-    systick_start();
+    Systick_Init();
+    Systick_Start();
 
     while (1)
     {
@@ -93,7 +93,7 @@ void systick_blink(systick_wordsize_t freq)
  */
 void test_matrixinit(void) 
 {
-    matrix_init();
+    Matrix_Init();
 }
 
 /**
@@ -103,10 +103,10 @@ void test_matrixinit(void)
  */
 void test_matrixscan(void) 
 {
-    matrix_init();
+    Matrix_Init();
 
     while(1) {
-        matrix_scan();
+        Matrix_Scan();
     }
 }
 
@@ -117,12 +117,12 @@ void test_matrixscan(void)
  */
 void test_keyboard(void) 
 {
-    matrix_init();
+    Matrix_Init();
     SetupHardware();
 	GlobalInterruptEnable();
 
     while (1) {
-        matrix_scan();
+        Matrix_Scan();
         HID_Device_USBTask(&Keyboard_HID_Interface);
 		USB_USBTask();
     }

@@ -9,26 +9,6 @@
  * 
  */
 
-#include "Attributes.h"
+#define ONLY_INCLUDE_COMPILECHECKS_H_IN_COMPILECHECKS_C_
+
 #include "CompileChecks.h"
-
-
-/**
- * \brief Used to check if AVR_reg_t typedef is defined. This typedef is the target CPU's
- * word-size.
- * 
- */
-#define AVR_REG_T_CHECK                     (void)sizeof(char[(2*(sizeof(AVR_reg_t))) - 1])
-
-
-/**
- * \brief Solely used to check that AVR_reg_t typedef is defined and greater than 0. If AVR_reg_t is not defined there will be
- * a compile-time error. If AVR_reg_t is equal to 0, the AVR_REG_T_CHECK macro expands to (void)sizeof(char[-1]) which
- * will also get a compile-time error. Otherwise, the check passes.
- * 
- */
-static void AVR_Reg_Check(void) GCCATTRIBUTE_UNUSED;
-static void AVR_Reg_Check(void)
-{
-    AVR_REG_T_CHECK;
-}
