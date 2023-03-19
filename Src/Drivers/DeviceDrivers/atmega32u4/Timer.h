@@ -1,7 +1,7 @@
 /**
  * @file Timer.h
  * @author Ian Ress
- * \brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
+ * @brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
  * output compare modes.
  * @date 2023-02-15
  * 

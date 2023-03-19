@@ -1,7 +1,7 @@
 /**
  * @file HIDDevice.h
  * @author Ian Ress
- * \brief USB descriptor declarations and macros for HID Keyboard devices. This is 
+ * @brief USB descriptor declarations and macros for HID Keyboard devices. This is 
  * separated out from the standard descriptor declarations for cleaner organization.
  * @date 2023-02-15
  * 

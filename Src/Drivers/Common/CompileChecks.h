@@ -1,7 +1,7 @@
 /**
  * @file CompileChecks.h
  * @author Ian Ress
- * \brief Solely used for compile-time checks. CompileChecks.h/.c is meant to be compiled in 
+ * @brief Solely used for compile-time checks. CompileChecks.h/.c is meant to be compiled in 
  * its own translation unit, never being included in any other source/header file.
  * @date 2023-02-16
  * 
@@ -22,7 +22,7 @@
 
 
         /**
-         * \brief Only used to check if the CPU wordsize in DeviceSpecific.h is
+         * @brief Only used to check if the CPU wordsize in DeviceSpecific.h is
          * configured with a valid value. Never used.
          * 
          */

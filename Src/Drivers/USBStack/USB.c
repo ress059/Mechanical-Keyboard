@@ -1,7 +1,7 @@
 /**
  * @file USB.c
  * @author Ian Ress
- * \brief TODO: Description
+ * @brief TODO: Description
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -21,7 +21,7 @@
 
 
 /**
- * \brief When initializing the USB controller, a clock source must be selected
+ * @brief When initializing the USB controller, a clock source must be selected
  * and enabled. This defines the maximum number of times to check if the clock
  * is successfully enabled before throwing a user-defined error event.
  * 
@@ -29,7 +29,7 @@
 #define MAX_CLOCK_ENABLE_POLLS                  20
 
 /**
- * \brief After the PLL is enabled you must wait for the PLL to lock before
+ * @brief After the PLL is enabled you must wait for the PLL to lock before
  * proceeding. This defines the maximum number of times to check if the
  * PLL is locked before throwing a user-defined error event.
  * 
@@ -37,12 +37,12 @@
 #define MAX_PLL_LOCK_POLLS                      20
 
 /**
- * \brief When the device boots up, it waits for the host to send a
+ * @brief When the device boots up, it waits for the host to send a
  * a reset signal. This defines the maximum number of times to check
  * if the host sent a reset signal on the bus before throwing a
  * user-defined error.
  * 
- * \note The way the USB stack is structured, everytime the bus boots
+ * @note The way the USB stack is structured, everytime the bus boots
  * up, it will first detach the USB Controller from the bus and reset
  * the controller. This should cause the host to send a bus reset signal.
  * 
@@ -50,14 +50,14 @@
 #define MAX_HOST_RESET_POLLS                    100
 
 /**
- * \brief TODO:
+ * @brief TODO:
  * 
  */
 #define MAX_ENUMERATION_POLLS                   100
 
 
 /**
- * \brief Connects the VBUS pad to the USB controller and enables the 
+ * @brief Connects the VBUS pad to the USB controller and enables the 
  * controller's internal regulator, depending how the user configures
  * settings in USBConfig.h and which target MCU is used.
  * 
@@ -80,14 +80,14 @@ static void USB_Power_On(void)
 
 
 /**
- * \brief Sets the PLL to use the oscillator chosen in \p USBConfig.h
+ * @brief Sets the PLL to use the oscillator chosen in @p USBConfig.h
  * 
- * \warning This also sets the CPU clock to the selected oscillator, and disables the other.
+ * @warning This also sets the CPU clock to the selected oscillator, and disables the other.
  * For example if PLL is configured to use the Internal Oscillator, the CPU uses the Internal
  * Oscillator and the External Oscillator is disabled.
  * 
- * \return true if successful. False if the selected clock source is not successfully enabled
- * after a user-defined amount of polls, \p MAX_CLOCK_ENABLE_POLLS 
+ * @return true if successful. False if the selected clock source is not successfully enabled
+ * after a user-defined amount of polls, @p MAX_CLOCK_ENABLE_POLLS 
  * 
  */
 static bool USB_Set_PLL_Clock(void);
@@ -125,12 +125,12 @@ static bool USB_Set_PLL_Clock(void)
 
 
 /**
- * \brief Configures the PLL and CPU clock. Also enables the PLL. 
+ * @brief Configures the PLL and CPU clock. Also enables the PLL. 
  * 
- * \note Both the PLL and CPU will use the same clock source.
+ * @note Both the PLL and CPU will use the same clock source.
  * 
- * \return true if successful. False if the PLL does not lock after a 
- * user-defined amount of polls, \p MAX_PLL_LOCK_POLLS
+ * @return true if successful. False if the PLL does not lock after a 
+ * user-defined amount of polls, @p MAX_PLL_LOCK_POLLS
  * 
  */
 static bool USB_Set_PLL_Prescalars_And_Enable(void);
@@ -155,7 +155,7 @@ static bool USB_Set_PLL_Prescalars_And_Enable(void)
 
 
 /**
- * \brief Enables the USB controller's clock and sets the proper speed.
+ * @brief Enables the USB controller's clock and sets the proper speed.
  * 
  */
 static void USB_Configure_USB_Speed(void);
@@ -172,11 +172,11 @@ static void USB_Configure_USB_Speed(void)
 
 
 /**
- * \brief Sets up the Control Endpoint with a single bank.
+ * @brief Sets up the Control Endpoint with a single bank.
  * The endpoint's size is user-definable by changing
- * the value of \p CONTROL_ENDPOINT_SIZE
+ * the value of @p CONTROL_ENDPOINT_SIZE
  * 
- * \return true if endpoint configuration was successful. 
+ * @return true if endpoint configuration was successful. 
  * False otherwise
  * 
  */
@@ -201,22 +201,22 @@ static bool USB_Configure_Control_Endpoint(void)
 
 
 /**
- * \brief Sets up the HID Endpoint as an Interrupt IN Endpoint
+ * @brief Sets up the HID Endpoint as an Interrupt IN Endpoint
  * with a single bank. The endpoint's size is user-definable 
- * by changing the value of \p HID_ENDPOINT_SIZE
+ * by changing the value of @p HID_ENDPOINT_SIZE
  * 
- * \note This function sets up the HID Endpoint as
- * Endpoint 1. Adjust \p USBReg_Set_Current_Endpoint()
+ * @note This function sets up the HID Endpoint as
+ * Endpoint 1. Adjust @p USBReg_Set_Current_Endpoint()
  * call to change this if desired.
  * 
- * \note Only an Interrupt IN endpoint is configured as the
+ * @note Only an Interrupt IN endpoint is configured as the
  * USB HID spec does not require an Interrupt OUT endpoint.
  * As a result, HID output reports generated by the host
  * are transmitted to the control endpoint. You must program
  * the Interrupt OUT endpoint configuration and define an
  * additional endpoint descriptor if desired.
  * 
- * \return true if endpoint configuration was successful. 
+ * @return true if endpoint configuration was successful. 
  * False otherwise
  * 
  */
@@ -241,7 +241,7 @@ static bool USB_Configure_HID_Endpoint(void)
 
 
 /**
- * \brief TODO: 
+ * @brief TODO: 
  * 
  */
 static void USB_Power_Off(void);
@@ -257,9 +257,9 @@ static void USB_Power_Off(void)
 
 
 /**
- * \brief Initializes the hardware registers of the USB peripheral. If an error
+ * @brief Initializes the hardware registers of the USB peripheral. If an error
  * occurs, a user-defined error handler will execute. These events have the prefix
- * \p USB_EVENT_ERROR
+ * @p USB_EVENT_ERROR
  * See the specific USB_EVENT_ERROR function of interest for more in-depth .
  * comments pertaining to it.
  * 
@@ -290,7 +290,7 @@ static void USB_Hardware_Init(void)
 
 
 /**
- * \brief Enables the USB controller. Before attaching the controller
+ * @brief Enables the USB controller. Before attaching the controller
  * to the bus, the end of reset interrupt is enabled. This interrupt
  * is categorized under a general USB interrupt and executes whenever
  * the host requests a device reset (new device plugged into the bus,
@@ -308,7 +308,7 @@ static void USB_Controller_Begin(void)
 
 
 /**
- * \brief TODO: 
+ * @brief TODO: 
  * 
  */
 static void USB_Process_Control_Transfer(void);
@@ -372,7 +372,7 @@ static void USB_Process_Control_Transfer(void)
 
 
 /**
- * \brief Updates the USB Controller's state machine.
+ * @brief Updates the USB Controller's state machine.
  * 
  */
 static void USB_Poll(void);
@@ -507,7 +507,7 @@ void USB_HID_Task(void)
 
 
 /**
- * \brief TODO: Reads the endpoint buffer
+ * @brief TODO: Reads the endpoint buffer
  * 
  */
 static void USB_Endpoint_Read(void);
@@ -549,7 +549,7 @@ static void USB_Endpoint_Read(void)
 
 
 /**
- * \brief TODO:
+ * @brief TODO:
  * 
  */
 // void USB_Init(void)

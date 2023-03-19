@@ -1,7 +1,7 @@
 /**
  * @file Debug.h
  * @author Ian Ress
- * \brief For internal debugging.
+ * @brief For internal debugging.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023

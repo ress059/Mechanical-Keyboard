@@ -1,7 +1,7 @@
 /**
  * @file Timer.c
  * @author Ian Ress
- * \brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
+ * @brief Basic timer driver for ATmega32U4. Currently only supports Timers 1 and 3 in
  * output compare modes.
  * @date 2023-02-15
  * 
@@ -63,7 +63,7 @@ const timer3_t TIM3 = {timer3_init, timer3_start, timer3_stop};
 
 
 /**
- * \brief ISR that executes when Timer1 reaches the value stored in OCR1A register.
+ * @brief ISR that executes when Timer1 reaches the value stored in OCR1A register.
  * 
  */
 ISR(TIMER1_COMPA_vect) 
@@ -75,7 +75,7 @@ ISR(TIMER1_COMPA_vect)
 }
 
 /**
- * \brief ISR that executes when Timer3 reaches the value stored in OCR3A register.
+ * @brief ISR that executes when Timer3 reaches the value stored in OCR3A register.
  * 
  */
 ISR(TIMER3_COMPA_vect) 
@@ -87,9 +87,9 @@ ISR(TIMER3_COMPA_vect)
 }
 
 /**
- * \brief Initializes Timer1 that generates an ISR every 'period_ms'.
+ * @brief Initializes Timer1 that generates an ISR every 'period_ms'.
  * 
- * \param period_ms Amount of milliseconds timer increments before 
+ * @param[in] period_ms Amount of milliseconds timer increments before 
  * sending an interrupt request. 
  * 
  */
@@ -137,10 +137,10 @@ static void timer1_init(uint16_t period_ms)
 }
 
 /**
- * \brief Starts Timer1 and enables its output compare interrupt. Call this function only
+ * @brief Starts Timer1 and enables its output compare interrupt. Call this function only
  * after calling timer1_init().
  * 
- * \param isr callback that executes within the timer's ISR. This makes it easier to
+ * @param[in] isr callback that executes within the timer's ISR. This makes it easier to
  * pass in custom ISRs.
  * 
  */
@@ -155,7 +155,7 @@ static void timer1_start(void (*isr)(void))
 }
 
 /**
- * \brief Stops Timer1 and disables its output compare interrupt. 
+ * @brief Stops Timer1 and disables its output compare interrupt. 
  * 
  */
 static void timer1_stop(void) 
@@ -165,9 +165,9 @@ static void timer1_stop(void)
 }
 
 /**
- * \brief Initializes Timer3 that generates an ISR every 'period_ms'.
+ * @brief Initializes Timer3 that generates an ISR every 'period_ms'.
  * 
- * \param period_ms Amount of milliseconds timer increments before 
+ * @param[in] period_ms Amount of milliseconds timer increments before 
  * sending an interrupt request. 
  * 
  */
@@ -215,10 +215,10 @@ static void timer3_init(uint16_t period_ms)
 }
 
 /**
- * \brief Starts Timer3 and enables its output compare interrupt. Call this function only
+ * @brief Starts Timer3 and enables its output compare interrupt. Call this function only
  * after calling timer3_init().
  * 
- * \param isr callback that executes within the timer's ISR. This makes it easier to
+ * @param[in] isr callback that executes within the timer's ISR. This makes it easier to
  * pass in custom ISRs.
  * 
  */
@@ -233,7 +233,7 @@ static void timer3_start(void (*isr)(void))
 }
 
 /**
- * \brief Stops Timer3 and disables its output compare interrupt. 
+ * @brief Stops Timer3 and disables its output compare interrupt. 
  * 
  */
 static void timer3_stop(void) 

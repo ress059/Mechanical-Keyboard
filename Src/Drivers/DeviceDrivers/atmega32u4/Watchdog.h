@@ -1,7 +1,7 @@
 /**
  * @file Watchdog.h
  * @author Ian Ress
- * \brief Basic watchdog timer driver for ATmega32U4. Care must be taken whenever the watchdog registers are 
+ * @brief Basic watchdog timer driver for ATmega32U4. Care must be taken whenever the watchdog registers are 
  * changed. In all functions, a "wdr" instruction is first sent. This resets the watchdog timer and prevents it 
  * from accidently firing. The WDRF flag must then be cleared since it overwrites the WDE bit. 
  * The watchdog registers are then edited in the necessary sequence outlined in ATMega32U4 pg. 56:

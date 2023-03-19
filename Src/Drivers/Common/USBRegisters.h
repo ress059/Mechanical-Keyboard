@@ -1,7 +1,7 @@
 /**
  * @file USBRegisters.h
  * @author Ian Ress
- * \brief Direct manipulation of the USB controller's registers. These registers will change depending
+ * @brief Direct manipulation of the USB controller's registers. These registers will change depending
  * on the target device, so all device-specific code relating to this is contained within this file.
  * The capabilities of the USB controller will also be different depending on the target. For example, some
  * controllers may not support Low Speed operation. A master list of all inlined register manipulations
@@ -171,9 +171,9 @@
 
 
             /**
-             * \brief Enables the USB controller.
+             * @brief Enables the USB controller.
              * 
-             * \note This MUST be called to start the USB controller.
+             * @note This MUST be called to start the USB controller.
              * 
              */
             static inline void USBReg_Enable_USB_Controller(void)
@@ -183,7 +183,7 @@
 
 
             /**
-             * \brief Resets the USB controller.
+             * @brief Resets the USB controller.
              * 
              */
             static inline void USBReg_Disable_USB_Controller(void)
@@ -193,10 +193,10 @@
 
 
             /**
-             * \brief Connects the D+/D- pullups to VBUS, thus attaching
+             * @brief Connects the D+/D- pullups to VBUS, thus attaching
              * the USB controller to the bus.
              * 
-             * \note This MUST be called to start the USB controller.
+             * @note This MUST be called to start the USB controller.
              * 
              */
             static inline void USBReg_Attach_USB_Controller(void)
@@ -206,7 +206,7 @@
 
 
             /**
-             * \brief Disconnects VBUS from the D+/D- pullups, thus
+             * @brief Disconnects VBUS from the D+/D- pullups, thus
              * resetting the USB controller.
              * 
              */
@@ -217,9 +217,9 @@
 
 
             /**
-             * \brief Unfreezes the USB clock. 
+             * @brief Unfreezes the USB clock. 
              * 
-             * \note The FRZCLK bit will automatically be set by hardware after a reset. Firmware MUST
+             * @note The FRZCLK bit will automatically be set by hardware after a reset. Firmware MUST
              * call this during USB initialization to start the controller's clock.
              * 
              */
@@ -230,9 +230,9 @@
 
 
             /**
-             * \brief Disables the USB controller's clock. Usually used to reduce power-consumption.
+             * @brief Disables the USB controller's clock. Usually used to reduce power-consumption.
              * 
-             * \note The FRZCLK bit will automatically be set by hardware after a reset.
+             * @note The FRZCLK bit will automatically be set by hardware after a reset.
              * 
              */
             static inline void USBReg_Freeze_Clock(void)
@@ -242,9 +242,9 @@
 
 
             /**
-             * \brief Enables the VBUS pad connected to the USB controller.
+             * @brief Enables the VBUS pad connected to the USB controller.
              * 
-             * \note This is not used to power up the USB controller. It is mainly used to detect
+             * @note This is not used to power up the USB controller. It is mainly used to detect
              * when a device is present by allowing you to read the VBUS voltage level.
              * 
              */
@@ -255,7 +255,7 @@
 
 
             /**
-             * \brief Disables the VBUS pad connected to the USB controller.
+             * @brief Disables the VBUS pad connected to the USB controller.
              * 
              */
             static inline void USBReg_Disable_VBus(void)
@@ -265,9 +265,9 @@
 
 
             /**
-             * \brief Enables the USB controller's internal voltage regulator.
+             * @brief Enables the USB controller's internal voltage regulator.
              * 
-             * \note The internal voltage regulator should be enabled/disabled depending on the PCB
+             * @note The internal voltage regulator should be enabled/disabled depending on the PCB
              * layout and whether the device will be bus powered or self powered.
              * 
              * If the device is bus powered the internal regulator must be enabled in all cases
@@ -284,7 +284,7 @@
 
 
             /**
-             * \brief Disables the USB controller's internal voltage regulator and powers off the
+             * @brief Disables the USB controller's internal voltage regulator and powers off the
              * controller.
              * 
              */
@@ -295,12 +295,12 @@
 
 
             /**
-             * \brief Sets the External Oscillator as the CPU clock.
+             * @brief Sets the External Oscillator as the CPU clock.
              * 
-             * \warning Before calling this function, you must first enable the
+             * @warning Before calling this function, you must first enable the
              * External Oscillator then ensure it is operating properly. This can
-             * be done by calling \p USBReg_Enable_ExternalOsc() then polling
-             * \p USBReg_Is_ExternalOsc_Ready() until it returns true.
+             * be done by calling @p USBReg_Enable_ExternalOsc() then polling
+             * @p USBReg_Is_ExternalOsc_Ready() until it returns true.
              * 
              */
             static inline void USBReg_Set_CPU_Clock_ExternalOsc(void)
@@ -310,12 +310,12 @@
 
 
             /**
-             * \brief Sets the Internal Oscillator as the CPU clock.
+             * @brief Sets the Internal Oscillator as the CPU clock.
              * 
-             * \warning Before calling this function, you must first enable the
+             * @warning Before calling this function, you must first enable the
              * External Oscillator then ensure it is operating properly. This can
-             * be done by calling \p USBReg_Enable_InternalOsc() then polling
-             * \p USBReg_Is_InternalOsc_Ready() until it returns true.
+             * be done by calling @p USBReg_Enable_InternalOsc() then polling
+             * @p USBReg_Is_InternalOsc_Ready() until it returns true.
              * 
              */
             static inline void USBReg_Set_CPU_Clock_InternalOsc(void)
@@ -325,9 +325,9 @@
 
 
             /**
-             * \brief Enables the Internal RC Oscillator.
+             * @brief Enables the Internal RC Oscillator.
              * 
-             * \warning By default, AVR_DEVICE_FAMILY1 devices calibrate the internal 
+             * @warning By default, AVR_DEVICE_FAMILY1 devices calibrate the internal 
              * RC oscillator to 8MHz on reset. This value is not changed because an
              * 8MHz input must be fed into the PLL for the USB controller. Do not
              * set the OSCCAL register to change this calibration value.
@@ -340,7 +340,7 @@
 
 
             /**
-             * \brief Disables the Internal RC Oscillator.
+             * @brief Disables the Internal RC Oscillator.
              * 
              */
             static inline void USBReg_Disable_InternalOsc(void)
@@ -350,12 +350,12 @@
 
 
             /**
-             * \brief Polls Clock status register to see if the Internal RC Oscillator
+             * @brief Polls Clock status register to see if the Internal RC Oscillator
              * is running.
              * 
-             * \return true if the Internal RC Oscillator is running. False otherwise.
+             * @return true if the Internal RC Oscillator is running. False otherwise.
              * 
-             * \note For this to return true you must first enable the Internal RC
+             * @note For this to return true you must first enable the Internal RC
              * Oscillator by calling USBReg_Enable_InternalOsc().
              * 
              */
@@ -366,9 +366,9 @@
 
 
             /**
-             * \brief Enables the External Oscillator.
+             * @brief Enables the External Oscillator.
              * 
-             * \warning AVR_DEVICE_FAMILY1 devices support a maximum clock frequency
+             * @warning AVR_DEVICE_FAMILY1 devices support a maximum clock frequency
              * of 16MHz. This is under the assumption the device is powered with 5V
              * (from VBUS for keyboard). If the device is powered with a lower voltage,
              * this maximum frequency will be even lower. See ATMega32U4 datasheet,
@@ -382,7 +382,7 @@
 
 
             /**
-             * \brief Disables the External Oscillator.
+             * @brief Disables the External Oscillator.
              * 
              */
             static inline void USBReg_Disable_ExternalOsc(void)
@@ -392,12 +392,12 @@
 
 
             /**
-             * \brief Polls Clock status register to see if the External Oscillator
+             * @brief Polls Clock status register to see if the External Oscillator
              * is running.
              * 
-             * \return true if the External Oscillator is running. False otherwise.
+             * @return true if the External Oscillator is running. False otherwise.
              * 
-             * \note For this to return true you must first enable the External
+             * @note For this to return true you must first enable the External
              * Oscillator by calling USBReg_Enable_ExternalOsc().
              * 
              */
@@ -408,10 +408,10 @@
 
 
             /**
-             * \brief Sets the PLL prescalar so the input clock to the PLL is
+             * @brief Sets the PLL prescalar so the input clock to the PLL is
              * 8MHz. 
              * 
-             * \note Based on user configurations in USBConfig.h, this function
+             * @note Based on user configurations in USBConfig.h, this function
              * will determine at compile-time what to set the PLL prescalar to.
              * 
              */
@@ -426,9 +426,9 @@
 
 
             /**
-             * \brief Selects the External Oscillator to go into the PLL.
+             * @brief Selects the External Oscillator to go into the PLL.
              * 
-             * \warning If this is selected, the user must ensure that the External
+             * @warning If this is selected, the user must ensure that the External
              * Oscillator is prescaled down to 8MHz BEFORE calling this function.
              * This must be done by using the PLL prescalar and NOT the system 
              * clock prescalar by calling the USBReg_PLL_Set_Prescalar() function.
@@ -441,7 +441,7 @@
 
 
             /**
-             * \brief Selects the Internal RC Oscillator to go into the PLL.
+             * @brief Selects the Internal RC Oscillator to go into the PLL.
              * 
              */
             static inline void USBReg_PLL_Select_InternalOsc(void)
@@ -451,10 +451,10 @@
 
 
             /**
-             * \brief Sets the PLL Postscalar to output a 48MHz clock into the USB
+             * @brief Sets the PLL Postscalar to output a 48MHz clock into the USB
              * controller.
              * 
-             * \warning This assumes the input clock to the PLL is correctly prescaled
+             * @warning This assumes the input clock to the PLL is correctly prescaled
              * to 8MHz.
              * 
              */
@@ -465,7 +465,7 @@
 
 
             /**
-             * \brief Enables the PLL.
+             * @brief Enables the PLL.
              * 
              */
             static inline void USBReg_PLL_Enable(void)
@@ -475,7 +475,7 @@
 
 
             /**
-             * \brief Disables the PLL.
+             * @brief Disables the PLL.
              * 
              */
             static inline void USBReg_PLL_Disable(void)
@@ -485,12 +485,12 @@
 
 
             /**
-             * \brief Checks if PLL is locked to the reference clock, and ready for operation.
+             * @brief Checks if PLL is locked to the reference clock, and ready for operation.
              * After the PLL is enabled, it takes about several ms for the PLL to lock.
              * 
-             * \return true If the PLL is ready, false otherwise.
+             * @return true If the PLL is ready, false otherwise.
              * 
-             * \warning Before doing any task that depends on the PLL, you should first
+             * @warning Before doing any task that depends on the PLL, you should first
              * verify that the PLL is locked.
              *
              */
@@ -501,9 +501,9 @@
 
 
             /**
-             * \brief Read the Endpoint Number currently being accessed by the CPU.
+             * @brief Read the Endpoint Number currently being accessed by the CPU.
              * 
-             * \return AVR_reg_t: The Endpoint Number currently being accessed by the CPU.
+             * @return AVR_reg_t: The Endpoint Number currently being accessed by the CPU.
              * 
              */
             static inline AVR_reg_t USBReg_Get_Current_Endpoint(void)
@@ -513,11 +513,11 @@
 
 
             /**
-             * \brief Set the Endpoint Number that will be accessed by the CPU.
+             * @brief Set the Endpoint Number that will be accessed by the CPU.
              * 
-             * \param var Endpoint Number to set, starting at 0.
+             * @param[in] var Endpoint Number to set, starting at 0.
              * 
-             * \warning \p AVR_DEVICE_FAMILY1 devices have 7 endpoints, so \p var 
+             * @warning @p AVR_DEVICE_FAMILY1 devices have 7 endpoints, so @p var 
              * must be less than 7.
              *
              */
@@ -531,7 +531,7 @@
 
 
             /**
-             * \brief Connects the USB Controller's internal pullup resistor to the D- line.
+             * @brief Connects the USB Controller's internal pullup resistor to the D- line.
              * 
              */
             static inline void USBReg_Set_Low_Speed(void)
@@ -541,7 +541,7 @@
 
 
             /**
-             * \brief Connects the USB Controller's internal pullup resistor to the D+ line.
+             * @brief Connects the USB Controller's internal pullup resistor to the D+ line.
              * 
              */
             static inline void USBReg_Set_Full_Speed(void)
@@ -551,9 +551,9 @@
 
 
             /**
-             * \brief Activates the endpoint. This must be called to use the endpoint.  
+             * @brief Activates the endpoint. This must be called to use the endpoint.  
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Enable_Endpoint(void)
@@ -563,11 +563,11 @@
 
 
             /**
-             * \brief Disables the endpoint.
+             * @brief Disables the endpoint.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
-             * \note Disabling the endpoint does not clear it's memory bank from DPRAM. You must
+             * @note Disabling the endpoint does not clear it's memory bank from DPRAM. You must
              * call USBReg_Deallocate_Endpoint_Memory() to free up memory in the DPRAM.
              * 
              */
@@ -578,16 +578,16 @@
 
 
             /**
-             * \brief Allocates the selected endpoint's memory bank into DPRAM.
+             * @brief Allocates the selected endpoint's memory bank into DPRAM.
              * 
-             * \warning See Section 21.9 Memory Management of ATMega32U4 datasheet.
+             * @warning See Section 21.9 Memory Management of ATMega32U4 datasheet.
              * Memory in DPRAM containing other endpoint banks may be corrupted 
              * depending on which endpoint is deallocated.
              * 
-             * \note You must specify the endpoint bank's size before allocating
+             * @note You must specify the endpoint bank's size before allocating
              * memory.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Allocate_Endpoint_Memory(void)
@@ -597,13 +597,13 @@
 
 
             /**
-             * \brief Removes the selected endpoint's memory bank from DPRAM.
+             * @brief Removes the selected endpoint's memory bank from DPRAM.
              * 
-             * \warning See Section 21.9 Memory Management of ATMega32U4 datasheet.
+             * @warning See Section 21.9 Memory Management of ATMega32U4 datasheet.
              * Memory in DPRAM containing other endpoint banks may be corrupted 
              * depending on which endpoint is deallocated.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Deallocate_Endpoint_Memory(void)
@@ -613,10 +613,10 @@
 
 
             /**
-             * \brief Clears all of the endpoint's configuration settings and restores
+             * @brief Clears all of the endpoint's configuration settings and restores
              * them to the default values. Also clears all interrupt flags.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Reset_Endpoint_Configuration(void)
@@ -629,14 +629,14 @@
 
 
             /**
-             * \brief Call to configure either the IN or OUT bank of the selected
+             * @brief Call to configure either the IN or OUT bank of the selected
              * endpoint.
              * 
-             * \param var Either ENDPOINT_DIR_IN or ENDPOINT_DIR_OUT.
+             * @param[in] var Either ENDPOINT_DIR_IN or ENDPOINT_DIR_OUT.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
-             * \note This must also be called before configuring the endpoint type (Control, Bulk,
+             * @note This must also be called before configuring the endpoint type (Control, Bulk,
              * Interrupt, etc.)
              * 
              */
@@ -651,12 +651,12 @@
 
 
             /**
-             * \brief Set the endpoint type.
+             * @brief Set the endpoint type.
              * 
-             * \param var Either ENDPOINT_CONTROL, ENDPOINT_ISOCHRONOUS,
+             * @param[in] var Either ENDPOINT_CONTROL, ENDPOINT_ISOCHRONOUS,
              * ENDPOINT_BULK, or ENDPOINT_INTERRUPT.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Set_Endpoint_Type(const Endpoint_Type_t var)
@@ -670,11 +670,11 @@
 
 
             /**
-             * \brief Set the endpoint to either a single or double bank.
+             * @brief Set the endpoint to either a single or double bank.
              * 
-             * \param var Input 0 for a single bank or 1 for a double-banked endpoint.
+             * @param[in] var Input 0 for a single bank or 1 for a double-banked endpoint.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Set_Number_Of_Banks(const Endpoint_Bank_t var)
@@ -685,11 +685,11 @@
 
 
             /**
-             * \brief Sets the endpoint bank's size.
+             * @brief Sets the endpoint bank's size.
              * 
-             * \param var Can be ENDPOINT_BYTES_8 to ENDPOINT_BYTES_512.
+             * @param[in] var Can be ENDPOINT_BYTES_8 to ENDPOINT_BYTES_512.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * 
              */
             static inline void USBReg_Set_Endpoint_Size(const Endpoint_Size_t var)
@@ -731,7 +731,7 @@
 
 
             /**
-             * \brief Clears interrupt flags, resets the configuration to default settings, 
+             * @brief Clears interrupt flags, resets the configuration to default settings, 
              * and clears any previously allocated DPRAM space for all endpoints.
              * 
              */
@@ -750,13 +750,13 @@
 
 
             /**
-             * \brief Determines if the endpoint's size and banks are configured
+             * @brief Determines if the endpoint's size and banks are configured
              * correctly. This is compared against the target MCU's max FIFO size and
              * possible bank configurations. 
              * 
-             * \return true if properly configured. False otherwise
+             * @return true if properly configured. False otherwise
              * 
-             * \note This only checks for the endpoint's size and bank configuration.
+             * @note This only checks for the endpoint's size and bank configuration.
              * This will return true even if memory allocation of the endpoint's
              * bank caused memory corruption in the DPRAM.
              *
@@ -768,12 +768,12 @@
 
 
             /**
-             * \brief Reads if a valid SETUP token packet was sent to the device.
+             * @brief Reads if a valid SETUP token packet was sent to the device.
              * 
-             * \return Boolean: true if there's a valid SETUP token packet in the device's currently
+             * @return Boolean: true if there's a valid SETUP token packet in the device's currently
              * selected endpoint buffer. False otherwise.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              *
              */
             static inline bool USBReg_Is_Setup_TokenPacket_Received(void)
@@ -783,9 +783,9 @@
 
 
             /**
-             * \brief Clears the SETUP packet received flag for the currently selected endpoint. 
+             * @brief Clears the SETUP packet received flag for the currently selected endpoint. 
              * 
-             * \note Ensure you read the contents of the Endpoint bank. Clearing this flag discards 
+             * @note Ensure you read the contents of the Endpoint bank. Clearing this flag discards 
              * the SETUP token packet currently stored in the selected endpoint's bank.
              * 
              */
@@ -796,12 +796,12 @@
 
 
             /**
-             * \brief Reads if a valid OUT data packet was sent to the device.
+             * @brief Reads if a valid OUT data packet was sent to the device.
              * 
-             * \return Boolean: true if there's a valid OUT data packet in the device's currently
+             * @return Boolean: true if there's a valid OUT data packet in the device's currently
              * selected endpoint buffer. False otherwise.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              *
              */
             static inline bool USBReg_Is_Out_DataPacket_Received(void)
@@ -811,9 +811,9 @@
 
 
             /**
-             * \brief Clears the OUT data packet received flag for the currently selected endpoint. 
+             * @brief Clears the OUT data packet received flag for the currently selected endpoint. 
              * 
-             * \note Ensure you read the contents of the Endpoint bank. Clearing this flag discards the OUT data packet
+             * @note Ensure you read the contents of the Endpoint bank. Clearing this flag discards the OUT data packet
              * currently stored in the selected endpoint's bank.
              * 
              */
@@ -825,12 +825,12 @@
 
 
             /**
-             * \brief Reads if the selected endpoint bank is ready to accept a new IN data packet.
+             * @brief Reads if the selected endpoint bank is ready to accept a new IN data packet.
              * 
-             * \return Boolean: true if the device is ready to receive an IN data packet from the host.
+             * @return Boolean: true if the device is ready to receive an IN data packet from the host.
              * False otherwise.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              *
              */
             static inline bool USBReg_Can_Receive_In_DataPacket(void)
@@ -840,7 +840,7 @@
 
             /* TODO: */
             // /**
-            //  * \brief 
+            //  * @brief 
             //  * 
             //  */
             // static inline void USBReg_Send_In_DataPacket(void)
@@ -850,16 +850,16 @@
 
 
             /**
-             * \brief Reads whether the selected endpoint's bank can be written to or read from.
+             * @brief Reads whether the selected endpoint's bank can be written to or read from.
              * 
-             * \return Boolean:
+             * @return Boolean:
              * For an IN endpoint (sending data to host): Returns true if the current bank 
              * is not full i.e. the firmware can push data into the FIFO. False otherwise.
              * 
              * For an OUT endpoint (receiving data from host): Returns true if the current
              * bank is not empty, i.e. the firmware can read data from the FIFO. False otherwise.
              * 
-             * \note Ensure the endpoint number of interest is selected prior to calling this.
+             * @note Ensure the endpoint number of interest is selected prior to calling this.
              * Do not call if you are using a Control Endpoint (Endpoint 0).
              *  
              */
@@ -870,9 +870,9 @@
 
 
             /**
-             * \brief Call to enable any of the USB General vector interrupts.
+             * @brief Call to enable any of the USB General vector interrupts.
              * 
-             * \param var Interrupt to enable.
+             * @param[in] var Interrupt to enable.
              *  
              */
             static inline void USBReg_Enable_USB_Interrupt(const USB_Interrupt_t var)
@@ -890,9 +890,9 @@
 
 
             /**
-             * \brief Call to enable any of the USB General vector interrupts.
+             * @brief Call to enable any of the USB General vector interrupts.
              * 
-             * \param var Interrupt to disable.
+             * @param[in] var Interrupt to disable.
              *  
              */
             static inline void USBReg_Disable_USB_Interrupt(const USB_Interrupt_t var)
@@ -910,13 +910,13 @@
 
 
             /**
-             * \brief Determines whether a specific USB General interrupt was previously
+             * @brief Determines whether a specific USB General interrupt was previously
              * enabled. Polled in USB General ISR along with Interrupt Flag register to
              * determine which portion of the ISR to execute. 
              * 
-             * \param var Interrupt to poll.
+             * @param[in] var Interrupt to poll.
              * 
-             * \return true if enabled. False otherwise.
+             * @return true if enabled. False otherwise.
              *
              */
             static inline bool USBReg_Is_USB_Interrupt_Enabled(const USB_Interrupt_t var)
@@ -933,14 +933,14 @@
 
 
             /**
-             * \brief Used to determine which interrupt condition was met when
+             * @brief Used to determine which interrupt condition was met when
              * USB General interrupt fires.
              * 
-             * \param var Interrupt flag to poll.
+             * @param[in] var Interrupt flag to poll.
              * 
-             * \return true if interrupt condition has been met. False otherwise.
+             * @return true if interrupt condition has been met. False otherwise.
              * 
-             * \note It is software's responsibility to clear this bit for repolling.
+             * @note It is software's responsibility to clear this bit for repolling.
              *
              */
             static inline bool USBReg_Is_USB_Interrupt_Flag_Set(const USB_Interrupt_t var)
@@ -957,9 +957,9 @@
             
             
             /**
-             * \brief Clears the interrupt flag.
+             * @brief Clears the interrupt flag.
              * 
-             * \param var Interrupt flag to clear.
+             * @param[in] var Interrupt flag to clear.
              * 
              */
             static inline void USBReg_Clear_USB_Interrupt_Flag(const USB_Interrupt_t var)
@@ -977,7 +977,7 @@
 
 
             /**
-             * \brief Disables all USB General vector interrupts. Also clears
+             * @brief Disables all USB General vector interrupts. Also clears
              * all USB Interrupt flags. Does not disable Endpoint interrupts
              * or clear Endpoint interrupt flags. 
              * 
@@ -990,10 +990,10 @@
 
 
             /**
-             * \brief General USB interrupt. Primarily used to update the
+             * @brief General USB interrupt. Primarily used to update the
              * USB_Device_State state machine.
              * 
-             * \note This is written with nested interrupts disabled. If
+             * @note This is written with nested interrupts disabled. If
              * for some reason a nested interrupt or a pre-emptive thread
              * also accesses USB_Device_State, it must be accessed
              * atomically.

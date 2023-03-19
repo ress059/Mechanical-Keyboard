@@ -1,7 +1,7 @@
 /**
  * @file KeyboardConfig.h
  * @author Ian Ress
- * \brief User configures keyboard settings here.
+ * @brief User configures keyboard settings here.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -15,15 +15,15 @@
 #include "KeyCodes.h"
 
 /**
- * \brief Keyboard configuration. User changes settings here.
+ * @brief Keyboard configuration. User changes settings here.
  * 
- * \param DEBOUNCE_TIME Keyswitch debounce time in ms.
- * \param NUM_LAYERS The number of layers on the keyboard.
- * \param NUM_ROWS The number of rows on the keyboard.
- * \param NUM_COLUMNS The number of columns on the keyboard.
- * \param ROW_PINS The GPIO pins connected to the rows.
- * \param COLUMN_PINS The GPIO pins connected to the columns.
- * \param KEY_LAYOUT The full key layout. KEY_NONE = no desired key in that position.  
+ * @param[in] DEBOUNCE_TIME Keyswitch debounce time in ms.
+ * @param[in] NUM_LAYERS The number of layers on the keyboard.
+ * @param[in] NUM_ROWS The number of rows on the keyboard.
+ * @param[in] NUM_COLUMNS The number of columns on the keyboard.
+ * @param[in] ROW_PINS The GPIO pins connected to the rows.
+ * @param[in] COLUMN_PINS The GPIO pins connected to the columns.
+ * @param[in] KEY_LAYOUT The full key layout. KEY_NONE = no desired key in that position.  
  * 
  */
 #define DEBOUNCE_TIME				5000 //ms

@@ -1,7 +1,7 @@
 /**
  * @file SysTick.h
  * @author Ian Ress
- * \brief System timer configured to tick every 1ms. In order to make the systick hardware
+ * @brief System timer configured to tick every 1ms. In order to make the systick hardware
  * agnostic, this driver uses a general purpose timer as the systick, regardless if the 
  * microcontroller has a designated systick. It is essentially a collection of wrapper functions
  * that call timer functions specific to the target hardware.  All the user must do is

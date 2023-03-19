@@ -1,7 +1,7 @@
 /**
  * @file USBDescriptors.c
  * @author Ian Ress
- * \brief Defines the USB descriptors for the keyboard.
+ * @brief Defines the USB descriptors for the keyboard.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023

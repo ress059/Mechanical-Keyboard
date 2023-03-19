@@ -1,7 +1,7 @@
 /**
  * @file CompileChecks.c
  * @author Ian Ress
- * \brief Solely used for compile-time checks. CompilerChecks.h/.c is meant to be compiled in 
+ * @brief Solely used for compile-time checks. CompilerChecks.h/.c is meant to be compiled in 
  * its own translation unit, never being included in any other source/header file.
  * @date 2023-02-16
  * 

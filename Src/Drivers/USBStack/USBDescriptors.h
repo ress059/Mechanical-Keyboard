@@ -1,7 +1,7 @@
 /**
  * @file USBDescriptors.h
  * @author Ian Ress
- * \brief USB descriptor headers and macros. The descriptor declarations are packed so a 
+ * @brief USB descriptor headers and macros. The descriptor declarations are packed so a 
  * uint8_t pointer can be used to send data across the bus. Struct padding won't matter 
  * for 8-bit machines however we need to use this attribute to make this portable across 
  * 16-bit and 32-bit AVRs.
@@ -44,10 +44,10 @@
                                                                 request. If set, the host will dynamically enable and disable remote wakeup 
                                                                 support. */
 
-/** \brief Macro to calculate the power value for the configuration descriptor, from a given number of milliamperes. Set bMaxPower
+/** @brief Macro to calculate the power value for the configuration descriptor, from a given number of milliamperes. Set bMaxPower
  *  member equal to this macro. For example to set a max of 200mA, bMaxPower = CONFIG_MAX_CURRENT_MA(200).
  *
- *  \param mA  Maximum number of milliamps the device consumes when the given configuration is selected.
+ *  @param[in] mA  Maximum number of milliamps the device consumes when the given configuration is selected.
  */
 #define CONFIG_MAX_CURRENT_MA(mA)                   ((mA) >> 1)
 

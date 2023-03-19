@@ -1,7 +1,7 @@
 /**
  * @file SysTick.c
  * @author Ian Ress
- * \brief System timer configured to tick every 1ms. In order to make the systick hardware
+ * @brief System timer configured to tick every 1ms. In order to make the systick hardware
  * agnostic, this driver uses a general purpose timer as the systick, regardless if the 
  * microcontroller has a designated systick. It is essentially a collection of wrapper functions
  * that call timer functions specific to the target hardware.  All the user must do is
@@ -23,7 +23,7 @@ static const timer1_t* const systick = &TIM1;
 volatile systick_wordsize_t g_ms = 0;
 
 /**
- * \brief ISR that executes each timer tick.
+ * @brief ISR that executes each timer tick.
  * 
  */
 static void Systick_ISR(void);
@@ -38,9 +38,9 @@ static void Systick_ISR(void)
 
 
 /**
- * \brief Initializes the systick to count every \p SYSTICK_PERIOD_MS 
+ * @brief Initializes the systick to count every @p SYSTICK_PERIOD_MS 
  * milliseconds without starting. To change the tick frequency
- * update the \p SYSTICK_PERIOD_MS definition in Systick.h
+ * update the @p SYSTICK_PERIOD_MS definition in Systick.h
  * 
  */
 void Systick_Init(void) 
@@ -50,7 +50,7 @@ void Systick_Init(void)
 
 
 /**
- * \brief Starts the systick.
+ * @brief Starts the systick.
  * 
  */
 void Systick_Start(void) 
@@ -60,7 +60,7 @@ void Systick_Start(void)
 
 
 /**
- * \brief Stops the systick.
+ * @brief Stops the systick.
  * 
  */
 void Systick_Stop(void)

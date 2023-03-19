@@ -1,7 +1,7 @@
 /**
  * @file Watchdog.c
  * @author Ian Ress
- * \brief See Watchdog.h description.
+ * @brief See Watchdog.h description.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -19,7 +19,7 @@ static void watchdog_reset(void) GCCATTRIBUTE_NAKED \
     GCCATTRIBUTE_USED;
 
 /** TODO: CLEANUP INLINE ASM CALL
- * \brief This disables the watchdog as soon as possible on startup in order to prevent 
+ * @brief This disables the watchdog as soon as possible on startup in order to prevent 
  * a never ending loop of system resets from occuring during initialization. For example
  * if this code were not here and the watchdog timer was set to 16ms, this timer may go off
  * before we reach main(). This would cause the MCU to perpetually reset without reaching the
@@ -49,7 +49,7 @@ static void watchdog_reset(void) {
 }
 
 /**
- * \brief ISR that executes on a watchdog timeout.
+ * @brief ISR that executes on a watchdog timeout.
  * 
  */
 ISR(WDT_vect) 
@@ -61,12 +61,12 @@ ISR(WDT_vect)
 }
 
 /**
- * \brief Sets up the watchdog and starts it. 
+ * @brief Sets up the watchdog and starts it. 
  * 
- * \param prescalar One of the wdt_timeout_t enum options for the watchdog timeout. For ATMega32U4, the 
+ * @param[in] prescalar One of the wdt_timeout_t enum options for the watchdog timeout. For ATMega32U4, the 
  * watchdog can be set to timeout after 16ms, 32ms, 64ms, 125ms, 250ms, 500ms, 1sec, 2sec, 4sec, or 8 sec.
  * 
- * \param mode One of the wdt_mode_t enum options that determines what the watchdog does after a timeout.
+ * @param[in] mode One of the wdt_mode_t enum options that determines what the watchdog does after a timeout.
  * After timeout the watchdog can be set to fire an interrupt, perform a system reset, or do both.
  * 
  */
@@ -81,7 +81,7 @@ void watchdog_enable(wdt_timeout_t prescalar, wdt_mode_t mode)
 }
 
 /**
- * \brief Disables the watchdog but keeps the old timeout value.
+ * @brief Disables the watchdog but keeps the old timeout value.
  * 
  */
 void watchdog_disable(void)
@@ -95,9 +95,9 @@ void watchdog_disable(void)
 }
 
 /**
- * \brief Sets an ISR function to execute during the watchdog timer interrupt.
+ * @brief Sets an ISR function to execute during the watchdog timer interrupt.
  * 
- * \param isr Pointer to an ISR function that executes during a watchdog interrupt.
+ * @param[in] isr Pointer to an ISR function that executes during a watchdog interrupt.
  * 
  */
 void watchdog_set_interrupt(void (*isr)(void))
@@ -106,9 +106,9 @@ void watchdog_set_interrupt(void (*isr)(void))
 }
 
 /**
- * \brief Placeholder
+ * @brief Placeholder
  * 
- * \param placeholder.
+ * @param[in] placeholder.
  * 
  */
 // void watchdog_set_timeout(wdt_timeout_t ms)
@@ -117,9 +117,9 @@ void watchdog_set_interrupt(void (*isr)(void))
 // }
 
 /**
- * \brief Placeholder
+ * @brief Placeholder
  * 
- * \param placeholder.
+ * @param[in] placeholder.
  * 
  */
 // void watchdog_set_mode(wdt_mode_t mode)

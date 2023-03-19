@@ -1,7 +1,7 @@
 /**
  * @file Matrix.h
  * @author Ian Ress
- * \brief Keyboard scanning logic to detect keypresses.
+ * @brief Keyboard scanning logic to detect keypresses.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
