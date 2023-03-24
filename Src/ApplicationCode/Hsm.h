@@ -15,6 +15,8 @@
 
 #include <stdint.h>
 
+#define NULL                ((void)*0)
+
 typedef struct Hsm Hsm;     /* Must forward declare for StateHandler typedef. */
 typedef uint16_t Signal;
 
@@ -53,7 +55,9 @@ typedef Status (*StateHandler)(Hsm * const me, const Event * const e);
 typedef struct 
 {
     State * superstate;     /*  This is a pointer to the State above the current state. For example
-                                if State A11 is nested inside State A1, superstate of A11 would point to A1. */
+                                if State A11 is nested inside State A1, the State struct of A11 would define
+                                a pointer to State A1 for the superstate. NULL if no superstate. */
+
     StateHandler hndlr;     /*  Current state's Event Handler function */
 } State;
 
