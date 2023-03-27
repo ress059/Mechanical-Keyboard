@@ -15,29 +15,28 @@
 
 #include <stdint.h>
 
-#define NULL                ((void)*0)
+#define NULL                ((void*) 0)
 
-typedef struct Hsm Hsm;     /* Must forward declare for StateHandler typedef. */
-typedef uint16_t Signal;
-
+/* Event Base Class */
 enum ReservedSignals
 {
-    ENTRY_EVENT,            /* Entry Event Signal when transitioning into a state. */
+    ENTRY_EVENT = 0,        /* Entry Event Signal when transitioning into a state. */
     EXIT_EVENT,             /* Exit Event Signal when transitioning out of a state. */
     /*********/
     USER_SIG                /* Beginning of user-definable Event Signals. */
 };
 
+typedef uint16_t Signal;
 
-/* Event Base Class */
 typedef struct
 {
     Signal sig;
     /* Private members can be added here in subclass that inherits Event Base Class. */
 } Event;
 
-
 /* Hsm Base Class */
+typedef struct Hsm Hsm;     /* Must forward declare for StateHandler typedef. */
+
 typedef enum
 {
     HSM_DISPATCH_STATUS,    /*  Used for Hsm_Dispatch() */
@@ -68,13 +67,11 @@ struct Hsm
 };
 
 /* Hsm Methods */
-#define TRAN(target_)   (((Hsm *)me)->state = (State)(target_), TRAN_STATUS)
-#define SUPER(super_)   (((Hsm *)me)->state = (State)(super_), SUPER_STATUS)
+#define TRAN(target_)   (((Hsm *)me)->state = (State *)(&target_), TRAN_STATUS)
+#define SUPER(super_)   (((Hsm *)me)->state = (State *)(&super_), SUPER_STATUS)
 void State_Ctor(State * const me, State * const superstate, StateHandler * const hndlr);
 void Hsm_Ctor(Hsm * const me, StateHandler initial);
-void Hsm_Init(Hsm * const me, const Event * const e);
+void Hsm_Begin(Hsm * const me, const Event * const e);
 void Hsm_Dispatch(Hsm * const me, const Event * const e);
-Status Hsm_Top(Hsm * const me, const Event * const e);
-
 
 #endif /* HSM_H */

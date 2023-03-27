@@ -6,7 +6,7 @@
  * 
  */
 
- /*TODO: STOPPED HERE FOR THE NIGHT - PICK UP 3/20*/
+#include <stdbool.h>
 #include "Hsm.h"
 
 static const Event entryEvent = {ENTRY_EVENT};
@@ -33,89 +33,48 @@ void State_Ctor(State * const me, State * const superstate, StateHandler * const
 }
 
 
-
-// /**
-//  * @brief Hsm Base Class constructor.
-//  * 
-//  * @param me Pointer to Hsm object.
-//  * @param initial Function that executes when the Hsm is first initialized (Initial Transition).
-//  * Ensure this function calls the TRAN(target) macro to transition to the next state.
-//  * 
-//  */
-// void Hsm_Ctor(Hsm * const me, StateHandler initial)
-// {
-//     me->state = initial;
-// }
-
-
-// /**
-//  * @brief Executes Initial Transition function assign in Hsm_Ctor(). Then
-//  * executes the entry event of the next state transitioned into.
-//  * 
-//  * @param me Pointer to Hsm object.
-//  * @param e Event Signal dispatched to the Hsm when it is first initialized.
-//  * 
-//  */
-// void Hsm_Init(Hsm * const me, const Event * const e)
-// {
-//     if (me->state != (StateHandler)0) /* TODO: Replace with run-time error handler */
-//     {
-//         (*me->state)(me, e); /* Execute Initial Transition function assigned in Hsm_Ctor. */
-//         (*me->state)(me, &entryEvent); /* Execute entry event of the the next state transitioned into. */
-//     }
-// }
-
+/**
+ * @brief Hsm Base Class constructor.
+ * 
+ * @param me Pointer to Hsm object.
+ * @param initial Function that executes when the Hsm is first initialized (Initial Transition).
+ * Ensure this function calls the TRAN(target) macro to transition to the next state.
+ * 
+ */
+void Hsm_Ctor(Hsm * const me, StateHandler initial)
+{
+    me->state = initial;
+}
 
 
 /**
- * @brief Called to locate the LCA when a state transition occurs in the Hsm. The Source
- * State Hierarchy is traversed until:
+ * @brief Executes Initial Transition function assigned in Hsm_Ctor(). Then
+ * executes the entry event of the next state transitioned into.
  * 
- *  -   The Top State is reached. If this occurs, we traverse up one level of the Target State hiearchy and
- *      repeat the process. If both the Source and Target hierarchy traversal reaches the Top State, then the LCA
- *      is the Top State.
+ * @warning Must be called after Hsm_Ctor()
  * 
- *  -   The Source State we traversed up to equals the current Target State. If this occurs, the LCA
- *      is whatever this state is.
- * 
- * @param source Source State we just transitioned out of.
- * @param target Target State we just transitioned into.
- * @return State* Pointer to LCA. LCA = Least Common Ancestor. This is the first state 
- * shared between the Source and Target State. This is needed to determine the entry 
- * and exit path of the Hsm when a state transition occured.
+ * @param me Pointer to Hsm object.
+ * @param e Event Signal dispatched to the Hsm when it is first initialized.
  * 
  */
-static inline State * LocateLCA(State * source, State * target);
-static inline State * LocateLCA(State * source, State * target)
+void Hsm_Begin(Hsm * const me, const Event * const e)
 {
-    State * LCA = NULL;
-
-    for (; target; target = target->superstate )
+    if (me->state->hndlr != (StateHandler)0) /* TODO: Replace with run-time error handler */
     {
-        for (; source; source = source->superstate )
-        {
-            if (source == target)
-            {
-                LCA = source;
-                break;
-            }
-        }
+        (void)(*me->state->hndlr)(me, e); /* Execute Initial Transition function assigned in Hsm_Ctor. */
+        (void)(*me->state->hndlr)(me, &entryEvent); /* Execute entry event of the the next state transitioned into. */
     }
-
-    if (!LCA)
-    {
-        // Throw error. LCA not able to be found
-    }
-
-    return LCA;
 }
-
 
 
 /**
  * @brief Runs the Hsm. If a state transition takes place, the dispatcher
- * automatically runs the Exit Event of the previous state and the Entry
- * Event of the state transitioned into.
+ * determines the entry and exit paths and executes the Entry and Exit
+ * Events of the appropriate states.
+ * 
+ * @warning Do not execute this in both the main application code and within an ISR.
+ * If you need to use ISRs to dispatch events to the Hsm, add the event to a queue
+ * and dispatch events in the main application.
  * 
  * @param me Pointer to Hsm object.
  * @param e Event Signal dispatched to the Hsm.
@@ -126,116 +85,114 @@ void Hsm_Dispatch(Hsm * const me, const Event * const e)
     #define MAX_STATE_EXIT_NESTS        3           /* TODO: Throw run-time error if max nested states is exceeded. Otherwise you'll have a stray pointer!! */
     #define MAX_STATE_ENTRY_NESTS       3           /* TODO: Throw run-time error if max nested states is exceeded. Otherwise you'll have a stray pointer!! */
 
-    State * TempState = me->state;
+    State * StartState = me->state;
+    State * HandledState;
     Status status = HSM_DISPATCH_STATUS;
 
-    /* Always record Exit Trace for convenience. Will only need if a State Transition takes place. */
-    for ( ; (status == SUPER_STATUS || status == HSM_DISPATCH_STATUS); ) /* Exit when event is handled. */
+    /* Execute dispatched event in current state's Event Handler. Exits when event is handled. */
+    while ( (status == SUPER_STATUS || status == HSM_DISPATCH_STATUS) )
     {
-        status = (*me->state->hndlr)(me, e); /* Execute dispatched event in current state's Event Handler. */
+        HandledState = me->state;  /* Will hold the State that handled the event once this exits */
+        status = (*me->state->hndlr)(me, e);
     }
 
-
-
-
-
-    // /* Always record Exit Trace for convenience. Will only need if a State Transition takes place. */
-    // for ( *exitTrace = me->state; (status == SUPER_STATUS || status == HSM_DISPATCH_STATUS); *(++exitTrace) = me->state ) /* Exit when event is handled. */
-    // {
-    //     status = (*me->state->hndlr)(me, e); /* Execute dispatched event in current state's Event Handler. */
-    // }
-
+    /* Did the dispatched event cause a State Transition? */
     if (status == TRAN_STATUS)
     {
-        /* Declared here to try to reduce Stack allocation since this is only needed if a State Transition occurs. */
-        /* TODO: Possibly declare at compile-time? */
-        State * entryPath[MAX_STATE_ENTRY_NESTS] = {NULL};
-        State ** entryTrace = entryPath;
-
-        State * exitPath[MAX_STATE_EXIT_NESTS] = {NULL};
-        State ** exitTrace = exitPath;
-
-
-        /**
-         * LCA = Least Common Ancestor
-         * Source State = state we just transitioned out of
-         * Target State = state we just transitioned into
-         * 
-         * We must find the LCA between the Source and Target State. This process is accomplished in a similar fashion
-         * to finding the LCA of a binary tree. However we don't have the path of each state defined at compile-time in order
-         * to preserve memory. Therefore this is calculated at run-time, only when a State Transition occurs. 
-         * 
-         * In this case, we start with the Source State and trace back up the State Hierarchy until we reach the Top State. 
-         * This path is recorded in exitTrace. The same process is repeated for the Target State, with the path being 
-         * recorded in entryTrace. 
-         * 
-         * We then start traversing through exitPath and entryPath. This is traversing from the Top State back to 
-         * the Target and Source State. After traversing down each level, we check if the current state in entryPath 
-         * and exitPath are the same. If they are different we know that the LCA is the state one level above.
-         * 
-         */
-
-        *exitTrace = TempState;
-        *entryTrace = me->state;
-
-        while ( (*exitTrace) != NULL && (*entryTrace != NULL) )
+        /* Was it a self-transition? */
+        if (StartState == HandledState) 
         {
-            if (*exitTrace)
-            {
-                *(++exitTrace) = (*exitTrace)->superstate;
-            }
-            if (*entryTrace)
-            {
-                *(++entryTrace) = (*entryTrace)->superstate;
-            }
+            (void)(*me->state->hndlr)(me, &exitEvent);
+            (void)(*me->state->hndlr)(me, &entryEvent);
         }
 
-        exitTrace--;
-        entryTrace--;
-
-
-        for ( (*exitTrace = TempState, *entryTrace = me->state); (); )
+        else
         {
-            if (*exitTrace)
+            /* Declared here to try to reduce Stack allocation since this is only needed if a State Transition occurs. */
+            State * entryPath[MAX_STATE_ENTRY_NESTS+1] = {NULL};
+            State ** entryTrace = &entryPath[0];
+
+            State * exitPath[MAX_STATE_EXIT_NESTS+1] = {NULL};
+            State ** exitTrace = &exitPath[0];
+
+            /**
+             * Source State = state we just transitioned out of. Similar to the node of a tree.
+             * Target State = state we just transitioned into. Similar to the node of a tree.
+             * Top State = similar to the root of a tree
+             * LCA = Least Common Ancestor. Lowest level state shared between two states.
+             * 
+             * We must find the LCA between the Source and Target State. This process is accomplished 
+             * in a similar fashion to finding the LCA of a tree. However the path from the root 
+             * to each node is not defined at compile-time to save memory. This path is determined
+             * at run-time for the necessary states only if a transition occurs.
+             * 
+             * We start with the Source State (node) and trace up the State Hierarchy until we reach 
+             * the Top State (root). This path is recorded in exitTrace. The same process is 
+             * repeated for the Target State, with the path being recorded in entryTrace. 
+             * 
+             * We then traverse back down exitPath and entryPath. (From root to node).
+             * After traversing down each level, we check if the current state in entryPath 
+             * and exitPath are the same. If they are different we know that the LCA is the 
+             * state one level above.
+             * 
+             * With this information, we now know the proper Exit and Entry paths to take
+             * for the State Transition.
+             * 
+             */
+            *exitTrace = TempState;
+            *entryTrace = me->state;
+
+            /* Trace up to the Top State */
+            while ( ((*exitTrace)->superstate != NULL) && ((*entryTrace)->superstate != NULL) )
             {
-                *(++exitTrace) = (*exitTrace)->superstate;
+                if ((*exitTrace)->superstate)
+                {
+                    *(exitTrace+1) = (*exitTrace)->superstate;
+                    exitTrace++;
+                }
+                if ((*entryTrace)->superstate)
+                {
+                    *(entryTrace+1) = (*entryTrace)->superstate;
+                    entryTrace++;
+                }
             }
-            if (*entryTrace)
+
+            /* Find LCA */
+            while ( ((*exitTrace) == (*entryTrace)) )
             {
-                *(++entryTrace) = (*entryTrace)->superstate;
+                bool exitTraversed = ((*exitTrace) != exitPath[0]) ? true : false;
+                bool entryTraversed = ((*entryTrace) != entryPath[0]) ? true : false;
+
+                if ( (exitTraversed == true) && (entryTraversed == true) )
+                {
+                    break;
+                }
+                else
+                {
+                    if (!exitTraversed)
+                    {
+                        exitTrace--;
+                    }
+                    if (!entryTraversed)
+                    {
+                        entryTrace--;
+                    }
+                }          
             }
-        }
 
-        /* For loop initialization traverses back by one leavl because traces will currently be pointed to Superstate of the Top State which is NULL. */
-        for ( (); (*exitTrace != *entryTrace); (exitTrace++, entryTrace++) )
-        {
-
-        }
-
-
-
-        exitTrace = &exitPath[0];
-
-        // *exitTrace = 0;     /*  At this point exitPath stores the correct Exit Path besides the last added element. The last added
-        //                         element contains the state we just transitioned into. We clear this because this is not apart of the
-        //                         Exit Path. This State will also already be stored in me->state if we ever need it. */
-
-        State * LCA = LocateLCA(exitPath[0], me->state); /* Find LCA between state we transitioned out of and state we transitioned into. */
-
-        /* Cannot set entryTrace equal to me->state in the iterator because me->state is no longer updating. */
-        for ( (*entryTrace = me->state); ( (*entryTrace) && (*entryTrace != LCA) ); (*entryTrace = *entryTrace->superstate) )
-        {
-
-        }
-
-        for ( ; (*exitTrace != me->state); exitTrace++ )
-        {
+            /* At this point we know our Entry and Exit paths. Traverse down each path then execute the Entry and Exit events for each state. */
+            for ( (TempState = *exitTrace, *exitTrace = &entryPath[0]); (*exitTrace != TempState); (exitTrace++) )
+            {
+                (void)(*exitTrace)->hndlr(me, &exitEvent);
+            }
             (void)(*exitTrace)->hndlr(me, &exitEvent);
-        }
 
-        for ( ; (*entryTrace != me->state); entryTrace-- )
-        {
+
+            for (; *entryTrace != me->state; entryTrace--)
+            {
+                (void)(*entryTrace)->hndlr(me, &entryEvent);
+            }
             (void)(*entryTrace)->hndlr(me, &entryEvent);
-        }
+        }        
     }
 }
