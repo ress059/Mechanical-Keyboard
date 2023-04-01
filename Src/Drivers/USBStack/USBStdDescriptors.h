@@ -14,6 +14,15 @@
 #include <stdint.h>
 #include "Attributes.h"
 
+enum /* bDescriptorType */
+{
+    DEVICE_DESCRIPTOR_TYPE = 0x01,
+    CONFIGURATION_DESCRIPTOR_TYPE = 0x02,
+    STRING_DESCRIPTOR_TYPE = 0x03,
+    INTERFACE_DESCRIPTOR_TYPE = 0x04,
+    ENDPOINT_DESCRIPTOR_TYPE = 0x05
+};
+
 typedef struct
 {
     uint8_t bLength;                            /*  Size of descriptor in bytes. Set to 18 since device descriptor is 18 bytes long. */
@@ -51,7 +60,7 @@ typedef struct
                                                     descriptors. If no string descriptor is present, a index of zero should be used. */
 
     uint8_t  bNumConfigurations;                /*  Number of possible configurations */
-} GCCATTRIBUTE_PACKED USB_Device_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Std_Device_Descriptor_t;
 
 
 typedef struct
@@ -74,7 +83,7 @@ typedef struct
                                                     Bits 4 to 0 = Reserved, set to 0. */
 
     uint8_t  bMaxPower;                         /*  Max power consumption in 2mA units. For example, bMaxPower = 100 means 200mA max consumption. */
-} GCCATTRIBUTE_PACKED USB_Configuration_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Std_Configuration_Descriptor_t;
 
 
 typedef struct
@@ -103,7 +112,7 @@ typedef struct
                                                     devices to use class drivers preventing the need to write specific drivers for your device.*/
 
     uint8_t iInterface;                         /*  Index of the string descriptor describing this interface. Allows for string descriptor of interface. */
-} USB_Interface_Descriptor_t;
+} USB_Std_Interface_Descriptor_t;
 
 
 typedef struct
@@ -148,7 +157,7 @@ typedef struct
                                                     So bInterval = 5 means every 5 frames. bInterval must be set to 1 for Isochronous and can
                                                     range from 1 to 255 for Interrupt transfers. Since the value equates to frame counts,
                                                     this equates to either 1ms for low/full speed devices or 125us for high speed devices */
-} GCCATTRIBUTE_PACKED USB_Endpoint_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Std_Endpoint_Descriptor_t;
 
 
 typedef struct
@@ -159,7 +168,7 @@ typedef struct
                                                 /*  The keyboard only supports English so this should be the only entry.
                                                     If more languages are supported in the future, successive wLANDID members should be
                                                     added with the corresponding Language ID unicode value. */
-} GCCATTRIBUTE_PACKED USB_String_Descriptor_Zero_t;
+} GCCATTRIBUTE_PACKED USB_Std_String_Descriptor_Zero_t;
 
 
 typedef struct
@@ -173,6 +182,6 @@ typedef struct
                                                     Under GCC, strings prefixed with the "L" character (before the opening string quotation mark) 
                                                     are considered to be Unicode strings, and may be used instead of an explicit array of ASCII 
                                                     characters. */
-} GCCATTRIBUTE_PACKED USB_String_Descriptor_t;
+} GCCATTRIBUTE_PACKED USB_Std_String_Descriptor_t;
 
 #endif

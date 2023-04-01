@@ -15,8 +15,6 @@
 
 #include <stdint.h>
 
-#define NULL                ((void*) 0)
-
 /* Event Base Class */
 enum ReservedSignals
 {
@@ -39,9 +37,12 @@ typedef struct Hsm Hsm;     /* Must forward declare for StateHandler typedef. */
 
 typedef enum
 {
-    HSM_DISPATCH_STATUS,    /*  Used for Hsm_Dispatch() */
-    TRAN_STATUS,            /*  Event dispatched to the HSM resulted in a State Transition */
-    HANDLED_STATUS,         /*  Event handler executed */
+    HSM_DISPATCH_STATUS,    /*  Used to start executing Event handlers in Hsm_Dispatch() function. */
+    TRAN_STATUS,            /*  Event dispatched to the HSM resulted in a State Transition. The Entry and Exit Event
+                                of the state that handled the event will also execute. */
+    INTERNAL_TRAN_STATUS,   /*  Event dispatched to the HSM resulted in a State Transition. However the Entry and
+                                Exit Events of the state that handled the event will not execute. */
+    HANDLED_STATUS,         /*  Event handler executed. */
     IGNORED_STATUS,         /*  Event dispatched to HSM was ignored. */
     INIT_STATUS,
     SUPER_STATUS            /*  Transitioned to a superstate. If an event dispatched to the HSM doesn't exist in the current state,
@@ -67,8 +68,33 @@ struct Hsm
 };
 
 /* Hsm Methods */
-#define TRAN(target_)   (((Hsm *)me)->state = (State *)(&target_), TRAN_STATUS)
-#define SUPER(super_)   (((Hsm *)me)->state = (State *)(&super_), SUPER_STATUS)
+
+/**
+ * @brief Used in State Handler functions. State to State Transition or used to reset a State. 
+ * Transition from the current state you were in to the State @p target_
+ * 
+ */
+#define TRAN(target_)                   (((Hsm *)me)->state = (State *)(&target_), TRAN_STATUS)
+
+
+/**
+ * @brief Used in State Handler functions. Internal State Transition to state @p target_
+ * The State that calls this macro is referred to as @p S
+ * If @p target_ takes you to a Substate of @p S, then the Entry and Exit Events of @p S will NOT execute.
+ * If @p target_ takes you to a Superstate of @p S, the the Exit Event of @p S will execute.
+ * 
+ */
+#define INTERNAL_TRAN(target_)          (((Hsm *)me)->state = (State *)(&target_), INTERNAL_TRAN_STATUS)
+
+
+/**
+ * @brief Used in State Handler functions. Transition to a Superstate @p super_ 
+ * Usually used when an event doesn't exist in the current state. 
+ * 
+ */
+#define SUPER(super_)                   (((Hsm *)me)->state = (State *)(&super_), SUPER_STATUS)
+
+
 void State_Ctor(State * const me, State * const superstate, StateHandler * const hndlr);
 void Hsm_Ctor(Hsm * const me, StateHandler initial);
 void Hsm_Begin(Hsm * const me, const Event * const e);
