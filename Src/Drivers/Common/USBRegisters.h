@@ -85,23 +85,23 @@
         static inline void USBReg_Freeze_Clock(void);
 
         /* USB Power */
-        static inline void USBReg_Enable_VBus(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
-        static inline void USBReg_Disable_VBus(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
-        static inline void USBReg_Enable_USBRegulator(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
-        static inline void USBReg_Disable_USBRegulator(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Enable_VBus(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Disable_VBus(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Enable_USBRegulator(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Disable_USBRegulator(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
 
         /* USB Controller PLL and Clock Setup */
         static inline void USBReg_Set_CPU_Clock_ExternalOsc(void);
-        static inline void USBReg_Set_CPU_Clock_InternalOsc(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
-        static inline void USBReg_Enable_InternalOsc(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
-        static inline void USBReg_Disable_InternalOsc(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
-        static inline bool USBReg_Is_InternalOsc_Ready(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Bool_Return);
+        static inline void USBReg_Set_CPU_Clock_InternalOsc(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Enable_InternalOsc(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Disable_InternalOsc(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline bool USBReg_Is_InternalOsc_Ready(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Bool_Return);
         static inline void USBReg_Enable_ExternalOsc(void);
         static inline void USBReg_Disable_ExternalOsc(void);
         static inline bool USBReg_Is_ExternalOsc_Ready(void);
         static inline void USBReg_PLL_Set_Prescalar(void);
         static inline void USBReg_PLL_Select_ExternalOsc(void);
-        static inline void USBReg_PLL_Select_InternalOsc(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_PLL_Select_InternalOsc(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
         static inline void USBReg_PLL_Set_Postscalar(void);
         static inline void USBReg_PLL_Enable(void);
         static inline void USBReg_PLL_Disable(void);
@@ -112,7 +112,7 @@
         static inline void USBReg_Set_Current_Endpoint(const AVR_reg_t var);
 
         /* USB Endpoint Configuration */
-        static inline void USBReg_Set_Low_Speed(void) GCCATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
+        static inline void USBReg_Set_Low_Speed(void) GCC_ATTRIBUTE_WEAK_ALIAS(USBReg_Void_Param_Void_Return);
         static inline void USBReg_Set_Full_Speed(void);
         static inline void USBReg_Enable_Endpoint(void);
         static inline void USBReg_Disable_Endpoint(void);

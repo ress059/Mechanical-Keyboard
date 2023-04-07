@@ -26,7 +26,7 @@
          * configured with a valid value. Never used.
          * 
          */
-        static inline void AVR_CPU_Wordsize_Check(void) GCCATTRIBUTE_UNUSED;
+        static inline void AVR_CPU_Wordsize_Check(void) GCC_ATTRIBUTE_UNUSED;
         static inline void AVR_CPU_Wordsize_Check(void)
         {
             (void)sizeof(char[(2*(sizeof(AVR_reg_t))) - 1]);
@@ -39,6 +39,9 @@
          */
         #if (!defined(AVR_BIG_ENDIAN)) && (!defined(AVR_LITTLE_ENDIAN))
             #error "Target MCU's endianness is not defined. Fix in DeviceSpecific.h"
+        #endif
+        #if (defined(AVR_BIG_ENDIAN) && defined(AVR_LITTLE_ENDIAN))
+            #error "Target MCU is defined as both Little Endian and Big Endian. Fix in DeviceSpecific.h"
         #endif
         #if (!defined(CAN_BE_USB_LOW_SPEED_DEVICE)) && (!defined(CAN_BE_USB_FULL_SPEED_DEVICE))
             #error "Target MCU's USB speed capabilities is not defined. Fix in DeviceSpecific.h"

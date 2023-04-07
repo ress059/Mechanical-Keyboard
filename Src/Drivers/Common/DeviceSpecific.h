@@ -17,13 +17,7 @@
 
 #include <stdint.h>
 
-#if defined(__DOXYGEN__)
-    /* TODO: Add member group for all required defines */
-
-    /* TODO: Add member group for all possible defines depending on MCU. */
-
-/* TODO: Add JTAGEnable() and JTAGDisable() functions? */
-#elif defined(__AVR_ATmega16U4__) || defined(__AVR_ATmega32U4__)
+#if (defined(__AVR_ATmega16U4__) || defined(__AVR_ATmega32U4__))
     /**
      * @brief CPU wordsize.
      * 
@@ -88,7 +82,7 @@
      */
     #define CAN_USE_USB_INTERNAL_CLOCK
 
-#elif defined(__AVR_ATmega8U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega32U2__)
+#elif (defined(__AVR_ATmega8U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega32U2__))
     /**
      * @brief CPU wordsize.
      * 
@@ -128,7 +122,7 @@
      */
     #define CAN_BE_USB_FULL_SPEED_DEVICE
 
-#elif defined(__AVR_ATxmega64B3__) || defined(__AVR_ATxmega128B3__)
+#elif (defined(__AVR_ATxmega64B3__) || defined(__AVR_ATxmega128B3__))
     /**
      * @brief CPU wordsize. These microcontrollers use 8/16bit architecture (not sure why..) however wordsize
      * is set to 8-bits since all Memory Mapped I/O peripherals are 8-bit registers.

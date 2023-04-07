@@ -21,7 +21,7 @@
      * is responsible for maintaining stack and register integrity.
      * 
      */
-    #define GCCATTRIBUTE_NAKED                  __attribute__ ((naked))
+    #define GCC_ATTRIBUTE_NAKED                  __attribute__ ((naked))
 
     /**
      * @brief Places the function in one of the initialization sections, which execute before the main function
@@ -30,14 +30,14 @@
      * @param[in] SectionIndex  Initialization section number where the function should be placed.
      * 
      */
-    #define GCCATTRIBUTE_SECTION(SectionIndex)  __attribute__ ((section (".init" #SectionIndex)))
+    #define GCC_ATTRIBUTE_SECTION(SectionIndex)  __attribute__ ((section (".init" #SectionIndex)))
 
     /**
      * @brief This attribute, attached to a function, means that code must be emitted for the function even 
      * if it appears that the function is not referenced.
      * 
      */
-    #define GCCATTRIBUTE_USED                   __attribute__ ((used))
+    #define GCC_ATTRIBUTE_USED                   __attribute__ ((used))
 
     /**
      * @brief Marks a variable or struct element for packing into the smallest space available, omitting any
@@ -49,7 +49,7 @@
      * and CPU.
      * 
      */
-    #define GCCATTRIBUTE_PACKED                 __attribute__ ((packed))
+    #define GCC_ATTRIBUTE_PACKED                 __attribute__ ((packed))
 
     /**
      * @brief Marks a function as a weak symbol during linkage. This allows the function to be overwritten
@@ -58,7 +58,7 @@
      * @note Only works for .ELF or .out builds.
      * 
      */
-    #define GCCATTRIBUTE_WEAK                   __attribute__((weak))
+    #define GCC_ATTRIBUTE_WEAK                   __attribute__((weak))
 
     /**
      * @brief Aliases the function to another, previously declared function. If this isn't
@@ -70,14 +70,14 @@
      * and return type as the function being declared with this attribute.
      * 
      */
-    #define GCCATTRIBUTE_WEAK_ALIAS(func)      __attribute__((weak, alias(#func)))
+    #define GCC_ATTRIBUTE_WEAK_ALIAS(func)      __attribute__((weak, alias(#func)))
 
     /**
      * @brief The function is meant to be possibly unused. GCC does not produce 
      * a warning for an unused function that has this attribute.
      * 
      */
-    #define GCCATTRIBUTE_UNUSED                __attribute__((unused))
+    #define GCC_ATTRIBUTE_UNUSED                __attribute__((unused))
 
 #else
     #error "This must be compmiled with AVR GCC v3.1 and greater."

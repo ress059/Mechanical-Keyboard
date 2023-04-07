@@ -74,7 +74,7 @@ void USB_Default_Error_Handler(void)
  * disables all interrupts and enters an infinite while loop.
  * 
  */
-static void USB_EVENT_ERROR_Clock_Enable_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+static void USB_EVENT_ERROR_Clock_Enable_Failure(void) GCC_ATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
 /**
@@ -90,7 +90,7 @@ static void USB_EVENT_ERROR_Clock_Enable_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(U
  * disables all interrupts and enters an infinite while loop.
  * 
  */
-static void USB_EVENT_ERROR_PLL_Lock_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+static void USB_EVENT_ERROR_PLL_Lock_Failure(void) GCC_ATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
 /**
@@ -99,7 +99,7 @@ static void USB_EVENT_ERROR_PLL_Lock_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_D
  * @p USBReg_Is_Endpoint_Configured() in USBRegisters.h
  * 
  */
-static void USB_EVENT_ERROR_Endpoint_Setup_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+static void USB_EVENT_ERROR_Endpoint_Setup_Failure(void) GCC_ATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
 /**
@@ -111,7 +111,7 @@ static void USB_EVENT_ERROR_Endpoint_Setup_Failure(void) GCCATTRIBUTE_WEAK_ALIAS
  * in @p USB.c
  * 
  */
-static void USB_EVENT_ERROR_Host_Reset_Not_Received(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+static void USB_EVENT_ERROR_Host_Reset_Not_Received(void) GCC_ATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
 /**
@@ -120,14 +120,14 @@ static void USB_EVENT_ERROR_Host_Reset_Not_Received(void) GCCATTRIBUTE_WEAK_ALIA
  * @p USB_Device_State is accessed in multiple threads. 
  * 
  */
-static void USB_EVENT_ERROR_USB_State_Machine_Corrupted(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+static void USB_EVENT_ERROR_USB_State_Machine_Corrupted(void) GCC_ATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
 /**
  * @brief TODO: 
  * 
  */
-static void USB_EVENT_ERROR_Enumeration_Failure(void) GCCATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
+static void USB_EVENT_ERROR_Enumeration_Failure(void) GCC_ATTRIBUTE_WEAK_ALIAS(USB_Default_Error_Handler);
 
 
 

@@ -14,9 +14,9 @@
 
 static void (*wdt_isr)(void);
 
-static void watchdog_reset(void) GCCATTRIBUTE_NAKED \
+static void watchdog_reset(void) GCC_ATTRIBUTE_NAKED \
     GCCATTRIBUTE_SECTION(3) \
-    GCCATTRIBUTE_USED;
+    GCC_ATTRIBUTE_USED;
 
 /** TODO: CLEANUP INLINE ASM CALL
  * @brief This disables the watchdog as soon as possible on startup in order to prevent 

@@ -13,54 +13,20 @@
 #define USBHIDDEVICEHSM_H
 
 #include "Hsm.h"
-#include "USBStdDescriptors.h"
+#include "USBHIDDescriptors.h"
 
 
-/* USB HID Device Hsm Base Class */
-// typedef struct
-// {
-//     struct USBHID_Device_Hsm_Device_Descriptor
-//     {
-//         const USB_Std_Device_Descriptor_t * const Device_Descriptor;
-//     };
-
-//     struct USBHID_Device_Hsm_Configuration_Descriptor
-//     {
-//         struct USBHID_Device_Hsm_Device_Descriptor * const Device;
-//         const USB_Std_Configuration_Descriptor_t * const Configuration_Descriptor;
-//     } arr[];
-
-// } USBHID_Device_Hsm_Descriptors;
-
-
-
+/**
+ * @brief USB HID Device Hsm Base Class. Each HID Device object is meant to have its
+ * own descriptors.
+ * 
+ */
 typedef struct
 {
     Hsm hsm; /* Inherit Hsm Base Class */
 
-    /* Private Members */
-    struct
-    {
-        const USB_Std_Device_Descriptor_t * const Device_Descriptor;
-        
-        const struct Configuration_Descriptor_t
-        {
-            /* Each Configuration Descriptor belongs to this Device (an instance of USBHID_Device_Hsm). */
-            const USB_Std_Configuration_Descriptor_t * const Configuration_Descriptor;
-        } Configuration_Descriptors[];
-
-        const struct Interface_Descriptor_t
-        {
-            const struct Configuration_Descriptor_t * const Configuration;  /* Configuration each Interface Descriptor belongs to. */
-            const USB_Std_Interface_Descriptor_t * const Interface_Descriptor;
-        } Interface_Descriptors[];
-        
-   
-        
-    } Descriptors;
-
-
-   
+    /* Additional Members */
+    const USB_HID_Descriptors_Collection  * const Descriptors;
 
     enum
     {
@@ -73,11 +39,8 @@ typedef struct
         USBHID_DEVICE_DISABLED_STATE    /* Not defined in USB Spec. Signifies the USB HID Device Hsm instance is disabled - either because it is starting up or a major error has occured. */
     } Device_State; /* Visible USB Device States. Chapter 9 of USB 2.0 Spec. */
 
-    /* TODO: Add HID Descriptor */
-
     uint8_t Address;                /* The address the Host sets the USB Device to. This is updated when a SET_ADDRESS request is received. Otherwise the default Address of 0 is used. */
     uint8_t Configuration_Index;    /* The Configuration Descriptor the Device uses. This is updated when a SET_CONFIGURATION request is received. Otherwise it is 0. */
-
 } USBHID_Device_Hsm;
 
 
@@ -86,7 +49,7 @@ typedef struct
 {
     Event event; /* Inherit Event Base Class */
 
-    /* Private Members */
+    /* Additional Members */
     uint8_t HIDReport[8];
 } USBHID_Device_Hsm_Event;
 
@@ -110,11 +73,9 @@ enum USBHID_Device_Hsm_Event_Sigs
 };
 
 
-void USBHID_Device_Hsm_Ctor(    USBHID_Device_Hsm * const me, 
-                                const USB_Std_Device_Descriptor_t * const Device_Descriptor, 
-                                const USB_Std_Configuration_Descriptor_t * (*const Configuration_Descriptor)[],
-                                const USB_Std_Interface_Descriptor_t * (*const Interface_Descriptor)[],
-                                const USB_Std_Endpoint_Descriptor_t * (*const Endpoint_Descriptor)[]    );
+void USBHID_Device_Hsm_Ctor(    USBHID_Device_Hsm * const me,
+                                const USB_Std_Descriptors_Collection * const Std_Descriptors,
+                                const USB_HID_Descriptor_Collection * const HID_Descriptors   );
 void USBHID_Device_Hsm_Begin(void);
 void USBHID_Device_Hsm_Dispatch(const USBHID_Device_Hsm_Event * const e);
 
