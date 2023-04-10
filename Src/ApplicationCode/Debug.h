@@ -15,7 +15,7 @@
 #include "Gpio.h"
 #include "Systick.h"
 
-extern const pinmap_t led;
+extern const Pinmap_t led;
 
 void blink(void);
 void timer_blink(uint16_t freq);

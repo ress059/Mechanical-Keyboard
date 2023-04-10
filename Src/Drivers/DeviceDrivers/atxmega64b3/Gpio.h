@@ -2,7 +2,7 @@
  * @file Gpio.h
  * @author Ian Ress
  * @brief Basic GPIO driver for ATxMega64B3. Pins specific to the microcontroller are also declared here
- * and are defined as a pinmap_t type in userconfig.h. The pinmap_t struct contains two members:
+ * and are defined as a Pinmap_t type in userconfig.h. The Pinmap_t struct contains two members:
  * 
  * 1) index = index in the gpio array defined in gpio.c. This array contains the base address
  * of each GPIO port. So this maps the pin to the correct port address (port B, port C, etc.)
@@ -30,7 +30,7 @@
 typedef struct {
 	uint8_t index;
     uint8_t mask;
-} pinmap_t;
+} Pinmap_t;
 
 /* ATXMEGA64B3 has SET and CLR registers (e.g. OUTSET, OUTCLR). These perform register
 writes via hardware with a single atomic instruction instead of a read-modify-write. The original
@@ -126,11 +126,11 @@ typedef struct {
 #define PIN_PM6     					{PORTM_INDEX, (PIN6_MASK)}
 #define PIN_PM7     					{PORTM_INDEX, (PIN7_MASK)}
 
-void gpio_set_input(pinmap_t pin);
-void gpio_set_output(pinmap_t pin);
-void gpio_output_low(pinmap_t pin);
-void gpio_output_high(pinmap_t pin);
-void gpio_toggle(pinmap_t pin);
-uint8_t gpio_read(pinmap_t pin);
+void GPIO_Set_Input(Pinmap_t pin);
+void GPIO_Set_Output(Pinmap_t pin);
+void GPIO_Output_Low(Pinmap_t pin);
+void GPIO_Output_High(Pinmap_t pin);
+void GPIO_Toggle(Pinmap_t pin);
+uint8_t GPIO_Read(Pinmap_t pin);
 
 #endif /* GPIO_H */

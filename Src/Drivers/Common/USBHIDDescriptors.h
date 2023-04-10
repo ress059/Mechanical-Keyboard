@@ -41,134 +41,189 @@ enum
 
 
 /**
- * Standard Descriptors defined by the USB HID Spec. 
+ * Standard HID Descriptors defined by USB HID spec.
  */
 
 /**
- * @brief Standard USB HID Descriptor Header.
+ * @brief All HID Descriptors must include at least one Report Descriptor.
+ * This structure is the base-level descriptor required by all HID Devices.
+ * Use @p USB_HID_Dynamic_HID_Descriptor_t if your Device uses additional
+ * Report/Physical Descriptors.
  * 
- * @warning This definition does NOT include bDescriptorType and wDescriptorLength
- * which are needed for each Report and Physical Descriptor assigned to this HID 
- * Descriptor. A minimum of one Report Descriptor is required for every HID Device.
- * Therefore this definition on it's own will not work. Meant for use
- * within @p USB_Dynamic_HID_Descriptor_t.
+ * @warning Meant for GCC. Do NOT declare/use multi-byte pointers to 
+ * any members of this struct to prevent unaligned memory access. Only 
+ * access multi-byte members directly as GCC guarantees that misalignment
+ * via direct member access will automatically be handled by the compiler.
  * 
  */
-struct GCC_ATTRIBUTE_PACKED USB_HID_Std_HID_Descriptor_Header
+typedef struct
 {
     const uint8_t  bLength;
     const uint8_t  bDescriptorType;
     const uint16_t bcdHID;
     const uint8_t  bCountryCode;
-    const uint8_t  bNumDescriptors;
-};
+    const uint8_t  bNumDescriptors;     /* Should be 1 since only using 1 Report Descriptor */
+    const uint8_t  bDescriptorType2;    /* Report Descriptor */
+    const uint16_t wDescriptorLength;   /* Size of Report Descriptor in bytes */
+} GCC_ATTRIBUTE_PACKED USB_HID_Std_HID_Descriptor_t;
 
 
-/**
- * @brief 
- * 
- */
-typedef struct
-{
-    #error "TODO:"
-} GCC_ATTRIBUTE_PACKED USB_HID_Std_Physical_Descriptor_t;
+// /* TODO: Trying to architect way to configure any possible Descriptor Configuration
+// at compile-time */
+
+// /**
+//  * Non-standard Descriptors to offer flexibility. Allows user to assign
+//  * any Descriptor Configuration to their HID Device.
+//  */
+
+// /**
+//  * @brief The HID Descriptor Header. Not meant to be used within the
+//  * application as this does not include the info for the Report/Physical
+//  * Descriptors attached to this HID Descriptor. Meant for use in 
+//  * @p USB_HID_Dynamic_HID_Descriptor_t
+//  * 
+//  * @warning Meant for GCC. Do NOT declare/use multi-byte pointers to 
+//  * any members of this struct to prevent unaligned memory access. Only 
+//  * access multi-byte members directly as GCC guarantees that misalignment
+//  * via direct member access will automatically be handled by the compiler.
+//  * 
+//  */
+// typedef struct
+// {
+//     const uint8_t  bLength;
+//     const uint8_t  bDescriptorType;
+//     const uint16_t bcdHID;
+//     const uint8_t  bCountryCode;
+//     const uint8_t  bNumDescriptors;
+// } GCC_ATTRIBUTE_PACKED USB_HID_Descriptor_Header;
 
 
+// /**
+//  * @brief Headers for any Report and Physical Descriptors the user adds
+//  * to their HID Descriptor. Not meant to be used within the application. 
+//  * Meant for use in @p USB_HID_Dynamic_HID_Descriptor_t
+//  * 
+//  * @warning Meant for GCC. Do NOT declare/use multi-byte pointers to 
+//  * any members of this struct to prevent unaligned memory access. Only 
+//  * access multi-byte members directly as GCC guarantees that misalignment
+//  * via direct member access will automatically be handled by the compiler.
+//  * 
+//  */
+// typedef struct
+// {
+//     const uint8_t  bDescriptorType;
+//     const uint16_t wDescriptorLength;
+// } GCC_ATTRIBUTE_PACKED USB_HID_Report_And_Physical_Descriptor_Header;
 
 
-/**
- * Non-standard Descriptors to offer flexibility. Allows user to assign
- * any Descriptor Configuration to their HID Device.
- */
+// /**
+//  * @brief Allows the user to assign any number of Report and Physical
+//  * Descriptors Headers to an HID Descriptor. Not meant to be used 
+//  * within the application. Meant for use in @p USB_HID_Dynamic_HID_Descriptor_t
+//  * 
+//  * @warning Meant for GCC. @p USB_HID_Descriptor_Header 
+//  * and @p USB_HID_Report_And_Physical_Descriptor_Header are packed. 
+//  * Do NOT declare/use multi-byte pointers to any members of these packed 
+//  * structs to prevent unaligned memory access. Only access multi-byte members 
+//  * directly as GCC guarantees that misalignment via direct member access 
+//  * will automatically be handled by the compiler.
+//  * 
+//  */
+// typedef struct
+// {
+//     const USB_HID_Descriptor_Header HID_Header;                                                     /* USB_HID_Descriptor_Header is Packed */
+//     const USB_HID_Report_And_Physical_Descriptor_Header Report_And_Physical_Descriptor_Headers[];   /* USB_HID_Report_And_Physical_Descriptor_Header is Packed */
+// } GCC_ATTRIBUTE_PACKED USB_HID_Dynamic_HID_Descriptor_Headers_t;
 
 
-/**
- * @brief Allows user to define any number of Report and Physical Descriptors
- * within an HID Descriptor. Meant for use within @p USB_HID_Dynamic_HID_Descriptor_t.
- * 
- */
-typedef struct
-{
-    const uint8_t  bDescriptorType;
-    const uint16_t wDescriptorLength;
-    const uint8_t * Report_Descriptor;
-    // TODO: Add support for Physical Descriptor
-    // void * Report_Or_Physical_Descriptor;  /* Pointer to Report or Physical Descriptor assigned to this header. Typecast to (uint8_t *) or (USB_Std_Physical_Descriptor_t *) depending on which descriptor is used*/
-} GCC_ATTRIBUTE_PACKED USB_HID_Report_And_Physical_Descriptors;
+// /**
+//  * @brief Meant to be used within the application. Allows the user 
+//  * to assign any number of Report and Physical Descriptors to an 
+//  * HID Descriptor. Also includes the Report and Physical Descriptors 
+//  * meant to be assigned to this HID Descriptor.
+//  * 
+//  * @warning Meant for GCC. @p USB_HID_Dynamic_HID_Descriptor_Headers_t 
+//  * is packed. Do NOT declare/use multi-byte pointers to any members of this 
+//  * packed struct to prevent unaligned memory access. Only access multi-byte 
+//  * members directly as GCC guarantees that misalignment via direct member 
+//  * access will automatically be handled by the compiler.
+//  * 
+//  */
+// typedef struct
+// {
+//     const USB_HID_Dynamic_HID_Descriptor_Headers_t HID_Descriptor;  /* USB_HID_Dynamic_HID_Descriptor_Headers_t is Packed */
+//     const uint8_t * const Report_Descriptors[];
+//     /* TODO: Physical Descriptors */
+// } USB_HID_Dynamic_HID_Descriptor_t;
 
 
-/**
- * @brief Non-standard USB HID Descriptor definition. This definition
- * allows the user to assign any number of Report and Physical Descriptors to
- * the HID Descriptor.
- * 
- */
-typedef struct
-{
-    const struct USB_HID_Std_HID_Descriptor_Header HID_Descriptor_Header;
-    const USB_HID_Report_And_Physical_Descriptors * (* const Report_And_Physical_Descriptors)[];
-} GCC_ATTRIBUTE_PACKED USB_HID_Dynamic_HID_Descriptor_t;
+// /**
+//  * @brief Meant to be used within the application. Allows the user to 
+//  * explicitly assign both Endpoint and HID Descriptors to each Interface
+//  * Descriptor. Meant for use in @p USB_HID_Descriptors_Collection 
+//  * 
+//  * @warning Meant for GCC. @p USB_Std_Interface_Descriptor_t 
+//  * @p USB_Std_Endpoint_Descriptor_t and @p USB_HID_Dynamic_HID_Descriptor_Headers_t 
+//  * in @p USB_HID_Dynamic_HID_Descriptor_t are packed. Do NOT declare/use multi-byte 
+//  * pointers to any members of these packed structs to prevent unaligned memory access. 
+//  * Only access multi-byte members directly as GCC guarantees that misalignment 
+//  * via direct member access will automatically be handled by the compiler.
+//  * 
+//  */
+// typedef struct
+// {
+//     const USB_Std_Interface_Descriptor_t Interface_Header;                      /* USB_Std_Interface_Descriptor_t is Packed */
+//     const USB_Std_Endpoint_Descriptor_t * (* const Endpoint_Descriptors)[];     /* USB_Std_Endpoint_Descriptor_t is Packed */
+//     const USB_HID_Dynamic_HID_Descriptor_t * (* const HID_Descriptors)[];       /* USB_HID_Dynamic_HID_Descriptor_Headers_t in USB_HID_Dynamic_HID_Descriptor_t is Packed */
+// } USB_HID_Dynamic_Interface_Descriptor_t;
 
 
-/**
- * @brief Allows the user to explicitly assign both Endpoint and HID Descriptors
- * to each Interface Descriptor. Meant for use in @p USB_HID_Descriptors_Collection
- * structure.
- * 
- */
-typedef struct
-{
-    const uint8_t bLength;              /* Size of the Standard Interface Descriptor. E.g. sizeof(USB_Std_Interface_Descriptor_t). NOT the size of this descriptor. */
-    const uint8_t bDescriptorType;
-    const uint8_t bInterfaceNumber;
-    const uint8_t bAlternateSetting;
-    const uint8_t bNumEndpoints;
-    const uint8_t bInterfaceClass;
-    const uint8_t bInterfaceSubClass;
-    const uint8_t bInterfaceProtocol;
-    const uint8_t iInterface;
-    const USB_Std_Endpoint_Descriptor_t * (* const Endpoint_Descriptors)[];
-    const USB_HID_Dynamic_HID_Descriptor_t * (* const HID_Descriptors)[];
-} USB_HID_Dynamic_Interface_Descriptor_t;
+// /**
+//  * @brief Meant to be used within the application. Allows the user to 
+//  * explicitly assign various Interface Descriptors to each Configuration 
+//  * Descriptor. Meant for use within @p USB_HID_Descriptors_Collection
+//  * 
+//  * @warning Meant for GCC. @p USB_Std_Configuration_Descriptor_t is packed.
+//  * The struct members of @p USB_HID_Dynamic_Interface_Descriptor_t are packed
+//  * but the @p USB_HID_Dynamic_Interface_Descriptor_t struct itself is not packed.
+//  * Do NOT declare/use multi-byte pointers to any members of these packed structs to 
+//  * prevent unaligned memory access. Only access multi-byte members directly as 
+//  * GCC guarantees that misalignment via direct member access will automatically 
+//  * be handled by the compiler.
+//  * 
+//  */
+// typedef struct
+// {
+//     const USB_Std_Configuration_Descriptor_t Configuration_Header;                      /* USB_Std_Configuration_Descriptor_t is Packed */
+//     const USB_HID_Dynamic_Interface_Descriptor_t * (* const Interface_Descriptors)[];   /* Members of USB_HID_Dynamic_Interface_Descriptor_t are individually Packed but the struct itself is not */
+// } USB_HID_Dynamic_Configuration_Descriptor_t;
 
 
-/**
- * @brief Allows user to explicitly assign various Interfaces to each
- * Configuration Descriptor. Meant for use in @p USB_HID_Descriptors_Collection
- * structure.
- * 
- */
-typedef struct
-{
-    const uint8_t  bLength;             /* Size of the Standard Configuration Descriptor. E.g. sizeof(USB_Std_Configuration_Descriptor_t). NOT the size of this descriptor. */
-    const uint8_t  bDescriptionType;
-    const uint16_t wTotalLength;        /* Calculated using lengths of Standard Descriptors. */
-    const uint8_t  bNumInterfaces;
-    const uint8_t  bConfigurationValue;
-    const uint8_t  iConfiguration;
-    const uint8_t  bmAttributes;
-    const uint8_t  bMaxPower;
-    const USB_HID_Dynamic_Interface_Descriptor_t * (* const Interface_Descriptors)[];
-} GCC_ATTRIBUTE_PACKED USB_HID_Dynamic_Configuration_Descriptor_t;
-
-
-/**
- * @brief Use for maximum flexibility. Allows a device to be configured with any 
- * number of Configuration, Interface, Endpoint, HID, Report, and Physical Descriptor 
- * combinations. Only one Device Descriptor is defined for each Device. Each Configuration Descriptor
- * stores an array of Interface Descriptors assigned to each Configuration.
- * Each Interface Descriptor stores an array of Endpoint and HID Descriptors assigned to
- * each Interface.
- * 
- * @note This configuration has to be defined at compile-time and is not able to change
- * during run-time.
- * 
- */
-typedef struct
-{
-    const USB_Std_Device_Descriptor_t * const Device_Descriptor;
-    const USB_HID_Dynamic_Configuration_Descriptor_t * (* const Configuration_Descriptors)[];
-} USB_HID_Descriptors_Collection;
+// /**
+//  * @brief Use for maximum flexibility. Allows a Device to be configured with any 
+//  * number of Configuration, Interface, HID, and Endpoint Descriptor combinations. Each
+//  * Device can only have one Device Descriptor. But it can have multiple Configuration
+//  * Descriptors. Each Configuration Descriptor can have its own set of Interface 
+//  * Descriptors. Each Interface Descriptor can have its own set of HID and 
+//  * Endpoint Descriptors.
+//  * 
+//  * @warning Meant for GCC. @p USB_Std_Device_Descriptor_t is packed. See 
+//  * @p USB_HID_Dynamic_Configuration_Descriptor_t to see which members
+//  * of this struct are packed. Do NOT declare/use multi-byte pointers to any members 
+//  * of these packed structs to prevent unaligned memory access. Only access multi-byte 
+//  * members directly as GCC guarantees that misalignment via direct member access 
+//  * will automatically be handled by the compiler.
+//  * 
+//  * @note This configuration has to be defined at compile-time and is not able to be
+//  * changed during run-time. This includes the Report and Physical Descriptors also
+//  * assigned to this Device.
+//  * 
+//  */
+// typedef struct
+// {
+//     const USB_Std_Device_Descriptor_t * const Device_Descriptor;                                /* USB_Std_Device_Descriptor_t is Packed */
+//     const USB_HID_Dynamic_Configuration_Descriptor_t * (* const Configuration_Descriptors)[];   /* See description to see which members are Packed */
+// } USB_HID_Descriptors_Collection;
 
 
 #endif /* USBHIDDESCRIPTORS_H */

@@ -15,13 +15,13 @@
 #include "Timer.h"
 #include "USBHandler.h"
 
-const pinmap_t led = PIN_PD7;
+const Pinmap_t led = PIN_PD7;
 const timer1_t* const blinktimer = &TIM1;
 
 static void timer_isr(void);
 static void timer_isr(void)
 {
-    gpio_toggle(led);
+    GPIO_Toggle(led);
 }
 
 /**
@@ -31,10 +31,10 @@ static void timer_isr(void)
  */
 void blink(void) 
 {
-    gpio_set_output(led);
+    GPIO_Set_Output(led);
     while(1)
     {
-        gpio_toggle(led);
+        GPIO_Toggle(led);
         _delay_ms(2000);
     }
 }
@@ -47,8 +47,8 @@ void blink(void)
  */
 void timer_blink(uint16_t freq)
 {
-    gpio_set_output(led);
-    gpio_output_high(led);
+    GPIO_Set_Output(led);
+    GPIO_Output_High(led);
     blinktimer->init(freq);
     blinktimer->start(timer_isr);
     while(1){}
@@ -65,7 +65,7 @@ void systick_blink(systick_wordsize_t freq)
     static systick_wordsize_t wait = 0;
     static systick_wordsize_t g_ms_copy = 0;
 
-    gpio_set_output(led);
+    GPIO_Set_Output(led);
     Systick_Init();
     Systick_Start();
 
@@ -79,7 +79,7 @@ void systick_blink(systick_wordsize_t freq)
 
         if ( ((systick_wordsize_t)(g_ms_copy - wait)) >= freq )
         {
-            gpio_toggle(led);
+            GPIO_Toggle(led);
             wait = g_ms_copy;
         }
     }

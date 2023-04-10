@@ -2,9 +2,9 @@
  * @file Gpio.h
  * @author Ian Ress
  * @brief Basic GPIO driver for ATMega32U4. Pins specific to the microcontroller are declared here
- * as a pinmap_t type. The pinmap_t struct contains two members:
+ * as a Pinmap_t type. The Pinmap_t struct contains two members:
  * 
- * 1) index = index in the gpio array defined in gpio.c. This array contains the base address
+ * 1) index = index in the gpio array defined in Gpio.c. This array contains the base address
  * of each GPIO port. So this maps each pin to the correct memory mapped I/O port address 
  * (port B, port C, etc.)
  * 
@@ -12,15 +12,15 @@
  * saves clock cycles whenever the gpio driver is used.
  * 
  * Declaring the pins this way makes it easy for the end user to define the column/row pins of
- * their keyboard in userconfig.h, while abstracting away the lower-level info needed for the gpio
+ * their keyboard in KeyboardConfig.h, while abstracting away the lower-level info needed for the gpio
  * driver. E.g. 
  * #define ROW_PINS 			{PIN_PD0, PIN_PD1, PIN_PD2, PIN_PD3}.
  * 
  * The application code can then use these keyboard pins whenever the gpio driver is called. 
- * Therefore the keyboard settings in userconfig.h and application code are microcontroller-agnostic. 
- * Only the gpio driver needs to be changed for each AVR microcontroller. It should also be noted that 
- * the user will get a compiler error if an invalid pin is used (pin that doesn't exist/can't be used 
- * for their microcontroller won't be declared in gpio.h).
+ * Therefore the keyboard settings in KeyboardConfig.h and the application code are 
+ * microcontroller-agnostic. Only the gpio driver needs to be changed for each AVR microcontroller. 
+ * It should also be noted that the user will get a compiler error if an invalid pin is used 
+ * (pin that doesn't exist/can't be used for their microcontroller won't be declared in Gpio.h).
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
@@ -30,25 +30,14 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
-typedef struct {
-	uint8_t index;
-	uint8_t mask;
-} pinmap_t;
-
-typedef struct {
-	volatile uint8_t PINx;
-	volatile uint8_t DDRx;
-	volatile uint8_t PORTx;
-} gpioreg_t;
-
-/* ATMega32U4 gpio registers. See ATMega32U4 datasheet chapter 31. */
-#define GPIOB							((gpioreg_t *) ((uint8_t)0x23))
-#define GPIOC							((gpioreg_t *) ((uint8_t)0x26))
-#define GPIOD							((gpioreg_t *) ((uint8_t)0x29))
-#define GPIOE							((gpioreg_t *) ((uint8_t)0x2C))
-#define GPIOF							((gpioreg_t *) ((uint8_t)0x2F))
+typedef struct
+{
+	uint8_t PortIndex;
+	uint8_t Mask;
+} Pinmap_t;
 
 /* MCU specific pinouts */
 #define PORTB_INDEX                     0
@@ -98,11 +87,17 @@ typedef struct {
 #define PIN_PF6     					{PORTF_INDEX, (PIN6_MASK)}
 #define PIN_PF7     					{PORTF_INDEX, (PIN7_MASK)}
 
-void gpio_set_input(pinmap_t pin);
-void gpio_set_output(pinmap_t pin);
-void gpio_output_low(pinmap_t pin);
-void gpio_output_high(pinmap_t pin);
-void gpio_toggle(pinmap_t pin);
-uint8_t gpio_read(pinmap_t pin);
+
+void GPIO_Set_Input(const Pinmap_t pin);
+void GPIO_Set_Output(const Pinmap_t pin);
+void GPIO_Output_Low(const Pinmap_t pin);
+void GPIO_Output_High(const Pinmap_t pin);
+void GPIO_Toggle(const Pinmap_t pin);
+bool GPIO_Read(const Pinmap_t pin); 	/* 	Only reads if individual pin is HIGH or LOW. Not returning bitmap of
+											the entire port since separate MCUs will have different register sizes. 
+											This will be called in the application so it needs to be microcontroller
+											agnostic. We cannot have the return type of GPIO_Read() functions 
+											return different sizes. E.g. Can't have GPIO_Read() of ATMega32U4 return
+											uint8_t and GPIO_Read() for ATxMegaB return uint16_t */
 
 #endif /* GPIO_H */

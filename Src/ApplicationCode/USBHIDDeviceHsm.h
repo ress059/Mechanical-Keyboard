@@ -2,7 +2,6 @@
  * @file USBHIDDeviceHsm.h
  * @author Ian Ress
  * @brief Hierarchical State Machine for the USB Handler. Inherits the Hsm Base Class.
- * Only one USBHsm can be created.
  * @date 2023-03-18
  * 
  * @copyright Copyright (c) 2023
@@ -26,7 +25,16 @@ typedef struct
     Hsm hsm; /* Inherit Hsm Base Class */
 
     /* Additional Members */
-    const USB_HID_Descriptors_Collection  * const Descriptors;
+    const struct
+    {
+        USB_Std_Device_Descriptor_t Device_Descriptor;
+        USB_Std_Configuration_Descriptor_t Configuration_Descriptor;
+        USB_Std_Interface_Descriptor_t Interface_Descriptor;
+        USB_HID_Std_HID_Descriptor_t HID_Descriptor;
+        USB_Std_Endpoint_Descriptor_t Endpoint_Descriptor;
+        uint8_t * Report_Descriptor;
+        uint8_t Report_Descriptor_Size;
+    } Descriptors;
 
     enum
     {

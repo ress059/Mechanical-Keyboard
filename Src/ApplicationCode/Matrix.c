@@ -68,12 +68,12 @@ void Matrix_Init(void)
 	#endif
 
 	for (int r = 0; r < NUM_ROWS; r++) {
-		gpio_set_input(g_keyboard_rowpins[r]); /* Input pullup */
+		GPIO_Set_Input(g_keyboard_rowpins[r]); /* Input pullup */
 	}
 
 	for (int c = 0; c < NUM_COLUMNS; c++) {
-		gpio_set_output(g_keyboard_colpins[c]);
-		gpio_output_high(g_keyboard_colpins[c]);
+		GPIO_Set_Output(g_keyboard_colpins[c]);
+		GPIO_Output_High(g_keyboard_colpins[c]);
 	}
 }
 
@@ -86,28 +86,28 @@ void Matrix_Scan(void)
 	uint8_t keypress = 0;
 
 	for (int c = 0; c < NUM_COLUMNS; c++) {
-		gpio_output_low(g_keyboard_colpins[c]);
+		GPIO_Output_Low(g_keyboard_colpins[c]);
 
 		for (int r = 0; r < NUM_ROWS; r++) {
 
 			//if (matrix_state[r][c]) { /* Has debounce timer already started for this key? */
 
 				//if (debounce_logic(r,c)) { /* Has the key been fully debounced? */
-					keypress = gpio_read(g_keyboard_rowpins[r]);
+					keypress = GPIO_Read(g_keyboard_rowpins[r]);
 					
 					if (keypress) {
 						//TODO: Store press loc, translate to keycode, store keymap in USB buffer
 
-						gpio_toggle(led); /* DEBUG */
+						GPIO_Toggle(led); /* DEBUG */
 						debugpress = 1; /* DEBUG */
 					}
 					//matrix_state[r][c] = 0;
 				}
-				gpio_output_high(g_keyboard_colpins[c]);
+				GPIO_Output_High(g_keyboard_colpins[c]);
 			}
 
 			// else { /* Otherwise start debounce timer if initial keypress detected */
-			// 	keypress = gpio_read(g_keyboard_rowpins[r]);	
+			// 	keypress = GPIO_Read(g_keyboard_rowpins[r]);	
 			// 	if (keypress) 
 			// 	{
 			// 		matrix_state[r][c] = g_ms; /* TODO: Handle unlucky case where g_ms = 0 */

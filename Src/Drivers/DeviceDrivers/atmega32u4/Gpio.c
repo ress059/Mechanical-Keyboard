@@ -1,98 +1,107 @@
 /**
  * @file Gpio.c
  * @author Ian Ress
- * @brief Basic GPIO driver for ATMega32U4. See gpio.h for full description.
+ * @brief Basic GPIO driver for ATMega32U4. See Gpio.h for full description.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
  * 
  */
 
+#include <avr/io.h> /* GPIO Register Memory Map */
 #include "Gpio.h"
 
-static gpioreg_t * const gpio[5] = 
+/* ATMega32U4 gpio registers. See ATMega32U4 datasheet chapter 31. */
+typedef struct
 {
-    GPIOB,
-    GPIOC,
-    GPIOD,
-    GPIOE,
-    GPIOF
+	volatile uint8_t * const PINx;
+	volatile uint8_t * const DDRx;
+	volatile uint8_t * const PORTx;
+} GPIOReg_t;
+
+static const GPIOReg_t GPIO[] = 
+{
+    {&PINB, &DDRB, &PORTB},
+    {&PINC, &DDRC, &PORTC},
+    {&PIND, &DDRD, &PORTD},
+    {&PINE, &DDRE, &PORTE},
+    {&PINF, &DDRF, &PORTF}
 };
 
 /**
- * @brief Sets gpio pin as an input pullup. Example call: gpio_set_input(PIN_PD2);
+ * @brief Sets GPIO pin as an input pullup. Example call: GPIO_Set_Input(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin Pinmap_t struct containing the pin's index in GPIO array 
  * and it's pin mask.
  * 
  */
-void gpio_set_input(pinmap_t pin) 
+void GPIO_Set_Input(const Pinmap_t pin) 
 {
-    gpio[pin.index]->DDRx &= ~pin.mask;
-    gpio[pin.index]->PORTx |= pin.mask;
+    *(GPIO[pin.PortIndex].DDRx) &= ~pin.Mask;
+    *(GPIO[pin.PortIndex].PORTx) |= pin.Mask;
 }
 
 /**
- * @brief Sets gpio pin as an output. Example call: gpio_set_output(PIN_PD2);
+ * @brief Sets GPIO pin as an output. Example call: GPIO_Set_Output(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin Pinmap_t struct containing the pin's index in GPIO array 
  * and it's pin mask.
  * 
  */
-void gpio_set_output(pinmap_t pin) 
+void GPIO_Set_Output(Pinmap_t pin) 
 {
-    gpio[pin.index]->DDRx |= pin.mask;
+    *(GPIO[pin.PortIndex].DDRx) |= pin.Mask;
 }
 
 /**
- * @brief Outputs a LOW signal on the gpio pin. gpio_set_output() must be called once beforehand.
- * Example call: gpio_output_low(PIN_PD2);
+ * @brief Outputs a LOW signal on the GPIO pin. GPIO_Set_Output() must be called once beforehand.
+ * Example call: GPIO_Output_Low(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin Pinmap_t struct containing the pin's index in GPIO array 
  * and it's pin mask.
  * 
  */
-void gpio_output_low(pinmap_t pin) 
+void GPIO_Output_Low(Pinmap_t pin) 
 {
-    gpio[pin.index]->PORTx &= ~pin.mask;
+    *(GPIO[pin.PortIndex].PORTx) &= ~pin.Mask;
 }
 
 /**
- * @brief Outputs a HIGH signal on the gpio pin. gpio_set_output() must be called once beforehand.
- * Example call: gpio_output_high(PIN_PD2);
+ * @brief Outputs a HIGH signal on the GPIO pin. GPIO_Set_Output() must be called once beforehand.
+ * Example call: GPIO_Output_High(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin Pinmap_t struct containing the pin's index in GPIO array 
  * and it's pin mask.
  * 
  */
-void gpio_output_high(pinmap_t pin) 
+void GPIO_Output_High(Pinmap_t pin) 
 {
-    gpio[pin.index]->PORTx |= pin.mask;
+    *(GPIO[pin.PortIndex].PORTx) |= pin.Mask;
 }
 
 /**
- * @brief Outputs LOW signal if the gpio is previously outputting HIGH and vise versa.
- * gpio_set_output() must be called once beforehand. Example call: gpio_toggle(PIN_PD2);
+ * @brief Outputs LOW signal if the GPIO is previously outputting HIGH and vise versa.
+ * GPIO_Set_Output() must be called once beforehand. Example call: GPIO_Toggle(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin Pinmap_t struct containing the pin's index in GPIO array 
  * and it's pin mask.
  * 
  */
-void gpio_toggle(pinmap_t pin) 
+void GPIO_Toggle(Pinmap_t pin) 
 {
-    gpio[pin.index]->PORTx ^= pin.mask;
+    GPIO[pin.index]->PORTx ^= pin.mask;
 }
 
 /**
- * @brief Reads the status of the gpio pin. Example call: uint8_t val = gpio_read(PIN_PD2);
+ * @brief Reads the status of the GPIO pin. Example call: bool val = GPIO_Read(PIN_PD2);
  * 
- * @param[in] pin pinmap_t struct containing the pin's index in gpio array 
+ * @param pin Pinmap_t struct containing the pin's index in GPIO array 
  * and it's pin mask.
  * 
- * @return 1 if LOW (pressed), 0 if HIGH.
+ * @return true if LOW (pressed), false if HIGH.
  * 
  */
-uint8_t gpio_read(pinmap_t pin) 
+bool GPIO_Read(Pinmap_t pin) 
 {
-    return (!(gpio[pin.index]->PINx & pin.mask));
+    return (!(GPIO[pin.index]->PINx & pin.mask));
 }

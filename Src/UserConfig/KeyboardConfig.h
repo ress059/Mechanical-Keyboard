@@ -48,7 +48,7 @@
 									 {KEY_CTRL,			KEY_GUI,	KEY_ALT,	KEY_NONE,	KEY_NONE,	KEY_NONE,	KEY_SPACE,	KEY_NONE,	KEY_NONE,	KEY_TILDE,	KEY_NONE,		KEY_DOWN,			KEY_NONE,		KEY_RIGHT}} //TODO - add back column 12 after done with debugging LED. Add layer 2
 
 /* Programmer declarations. Do not edit. */
-extern const pinmap_t g_keyboard_rowpins[NUM_ROWS];
-extern const pinmap_t g_keyboard_colpins[NUM_COLUMNS];
+extern const Pinmap_t g_keyboard_rowpins[NUM_ROWS];
+extern const Pinmap_t g_keyboard_colpins[NUM_COLUMNS];
 
 #endif /* KEYBOARDCONFIG_H */

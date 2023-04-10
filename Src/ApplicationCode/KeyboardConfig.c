@@ -11,5 +11,5 @@
 
 #include "KeyboardConfig.h"
 
-const pinmap_t g_keyboard_rowpins[NUM_ROWS] = ROW_PINS;
-const pinmap_t g_keyboard_colpins[NUM_COLUMNS] = COLUMN_PINS;
+const Pinmap_t g_keyboard_rowpins[NUM_ROWS] = ROW_PINS;
+const Pinmap_t g_keyboard_colpins[NUM_COLUMNS] = COLUMN_PINS;

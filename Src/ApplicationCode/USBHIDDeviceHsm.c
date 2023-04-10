@@ -89,61 +89,23 @@ static const USB_Std_Device_Descriptor_t Default_Device_Descriptor =
     .bNumConfigurations         = 1
 };
 
-/**
- * Start from bottom up (Endpoint -> Interface -> Configuration -> Device)
- */
-
-/**
- * Endpoint Descriptor(s)
- */
-static const USB_Std_Endpoint_Descriptor_t Default_Endpoint_Descriptor =
+static const USB_Std_Configuration_Descriptor_t Default_Configuration_Descriptor =
 {
-    .bLength                    = sizeof(USB_Std_Endpoint_Descriptor_t),
-    .bDescriptorType            = ENDPOINT_DESCRIPTOR_TYPE,
-    .bEndpointAddress           = 0b10000001,                       /* Endpoint 1 IN */
-    .bmAttributes               = 0b00000011,                       /* Interrupt Endpoint */
-    .wMaxPacketSize             = LE16_COMPILETIME(HID_ENDPOINT_SIZE),
-    .bInterval                  = 5                                 /* 5ms Polling */
-};
-static const USB_Std_Endpoint_Descriptor_t * Default_Endpoint_Descriptors[] = {&Default_Endpoint_Descriptor};
-
-
-/**
- * Report (and Physical) Descriptor(s)
- */
-static const USB_HID_Report_And_Physical_Descriptors Default_Report_Descriptors[] =
-{
-    {
-        .bDescriptorType            = HID_REPORT_DESCRIPTOR_TYPE,
-        .wDescriptorLength          = LE16_COMPILETIME(sizeof(Default_Report_Descriptors)),
-        .Report_Descriptor          = &Default_Report_Descriptor
-    };
+    .bLength                    = sizeof(USB_Std_Configuration_Descriptor_t),
+    .bDescriptionType           = CONFIGURATION_DESCRIPTOR_TYPE,
+    .wTotalLength               = LE16_COMPILETIME(   sizeof(USB_Std_Configuration_Descriptor_t) \  /* This Configuration Descriptor */
+                                                    + sizeof(USB_Std_Interface_Descriptor_t) \      /* We are only assigning One Interface Descriptor to this Configuration. */
+                                                    + sizeof(USB_Std_Endpoint_Descriptor_t) \       /* Endpoint 1 IN Descriptor */
+                                                    + sizeof(USB_HID_Std_HID_Descriptor_t) \        /* HID Descriptor. We are only assigning One Report Descriptor to this HID Descriptor. */
+                                                    + sizeof(Default_Report_Descriptor)   ),        /* Report Descriptor */
+    .bNumInterfaces             = 1,
+    .bConfigurationValue        = 1,
+    .iConfiguration             = 0,
+    .bmAttributes               = 0b0010000,                        /* Remote Wakeup */
+    .bMaxPower                  = 50,                               /* 100mA max */
 };
 
-
-/**
- * HID Descriptor(s)
- */
-static const USB_HID_Dynamic_HID_Descriptor_t Default_HID_Descriptor = 
-{
-    .HID_Descriptor_Header = 
-    {
-        .bLength                                    = (sizeof(struct USB_HID_Std_HID_Descriptor_Header) + 3),
-        .bDescriptorType                            = HID_DESCRIPTOR_TYPE,
-        .bcdHID                                     = LE16_COMPILETIME(HID_CLASS_VERSION),
-        .bCountryCode                               = 33,                               /* U.S. Country Code. See USB HID Spec Section 6.1.2 - HID Descriptor */
-        .bNumDescriptors                            = 1                                 /* Report Descriptor */
-    },
-
-    .Report_And_Physical_Descriptors                = &Default_Report_Descriptors       /* Assigning Report and Physical Descriptors to this specific HID Descriptor */
-};
-static const USB_HID_Dynamic_HID_Descriptor_t * Default_HID_Descriptors[] = {&Default_HID_Descriptor};
-
-
-/**
- * Interface Descriptor(s)
- */
-static const USB_HID_Dynamic_Interface_Descriptor_t Default_Interface_Descriptor = 
+static const USB_Std_Interface_Descriptor_t Default_Interface_Descriptor =
 {
     .bLength                    = sizeof(USB_Std_Interface_Descriptor_t),
     .bDescriptorType            = INTERFACE_DESCRIPTOR_TYPE,
@@ -154,58 +116,31 @@ static const USB_HID_Dynamic_Interface_Descriptor_t Default_Interface_Descriptor
     .bInterfaceSubClass         = 0x00,                             /* TODO: Set to 0x01 when development work to support UEFI/BIOS operation is started */
     .bInterfaceProtocol         = 0x00,                             /* TODO: Set to HID_KEYBOARD_INTERFACE_CODE when development work to support UEFI/BIOS operation is started */
     .iInterface                 = 0,
-    .Endpoint_Descriptors       = &Default_Endpoint_Descriptors,    /* Assigning Endpoint Descriptors to this specific Interface Descriptor */
-    .HID_Descriptors            = &Default_HID_Descriptors          /* Assigning HID Descriptors to this specific Interface Descriptor */
 };
-static const USB_HID_Dynamic_Interface_Descriptor_t Default_Interface_Descriptors[] = {&Default_Interface_Descriptor};
 
-
-/**
- * Configuration Descriptor(s)
- */
-static const USB_HID_Dynamic_Configuration_Descriptor_t Default_Configuration_Descriptor =
+static const USB_HID_Std_HID_Descriptor_t Default_HID_Descriptor =
 {
-    .bLength                    = sizeof(USB_Std_Configuration_Descriptor_t),
-    .bDescriptionType           = CONFIGURATION_DESCRIPTOR_TYPE,
-    .wTotalLength               = LE16_COMPILETIME(   sizeof(USB_Std_Configuration_Descriptor_t) \              /* This Configuration Descriptor */
-                                                    + sizeof(USB_Std_Interface_Descriptor_t) \                  /* We are only assigning One Interface Descriptor to this Configuration. */
-                                                    + sizeof(USB_Std_Endpoint_Descriptor_t) \                   /* Endpoint 1 IN Descriptor */
-                                                    + (sizeof(struct USB_HID_Std_HID_Descriptor_Header) + 3) \  /* HID Descriptor. We are only assigning One Report Descriptor to this HID Descriptor. */
-                                                    + sizeof(Default_Report_Descriptor) ),                      /* Report Descriptor */
-    .bNumInterfaces             = 1,
-    .bConfigurationValue        = 1,
-    .iConfiguration             = 0,
-    .bmAttributes               = 0b0010000,                        /* Remote Wakeup */
-    .bMaxPower                  = 50,                               /* 100mA max */
-    .Interface_Descriptors      = &Default_Interface_Descriptors    /* Assigning Interface Descriptors to this specific Configuration Descriptor */
+    .bLength                    = sizeof(USB_HID_Std_HID_Descriptor_t),
+    .bDescriptorType            = HID_DESCRIPTOR_TYPE,
+    .bcdHID                     = LE16_COMPILETIME(HID_CLASS_VERSION),
+    .bCountryCode               = 33,                               /* U.S. Country Code. See USB HID Spec Section 6.1.2 - HID Descriptor */
+    .bNumDescriptors            = 1,                                /* Report Descriptor */
+    .bDescriptorType2           = HID_REPORT_DESCRIPTOR_TYPE,
+    .wDescriptorLength          = sizeof(Default_Report_Descriptor)
 };
-static const USB_HID_Dynamic_Configuration_Descriptor_t Default_Configuration_Descriptors[] = {&Default_Configuration_Descriptor};
 
-
-/**
- * The Default Descriptor Configuration for the HID Device in the USB_HID Hsm Class.
- */
-static const USB_HID_Descriptors_Collection Default_HID_Device = 
+static const USB_Std_Endpoint_Descriptor_t Default_Endpoint_Descriptor =
 {
-    .Device_Descriptor          = &Default_Device_Descriptor,
-    .Configuration_Descriptors  = &Default_Configuration_Descriptors
+    .bLength                    = sizeof(USB_Std_Endpoint_Descriptor_t),
+    .bDescriptorType            = ENDPOINT_DESCRIPTOR_TYPE,
+    .bEndpointAddress           = 0b10000001,                       /* Endpoint 1 IN */
+    .bmAttributes               = 0b00000011,                       /* Interrupt Endpoint */
+    .wMaxPacketSize             = LE16_COMPILETIME(HID_ENDPOINT_SIZE),
+    .bInterval                  = 5                                 /* 5ms Polling */
 };
-
-
-// typedef struct
-// {
-//     const USB_Std_Device_Descriptor_t * const Device_Descriptor;
-//     const USB_HID_Dynamic_Configuration_Descriptor_t * (* const Configuration_Descriptors)[];
-// } USB_HID_Descriptors_Collection;
-
-
-/* Can add Default Physical Descriptor Header here if needed */
-
-
 
 /**
  * State Objects and State Handler function prototypes.
- * 
  */
 
 /* Top-most State. Contains USB_Superstate and Error_State */
@@ -552,8 +487,11 @@ static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me
  * Public Functions
  */
 
-/** TODO: Description
- * @brief Initialize a USBHID_Device Hsm Object with your custom Descriptor configuration.
+/** 
+ * TODO: Want to architect this so user is able to assign any Descriptor Configuration to the
+ * HID Device. Right now it just sets the Device to the Default Configuration.
+ * 
+ * @brief Initialize a USBHID_Device Hsm Object with the custom Descriptor Configuration.
  * 
  * @warning There are no checks to make sure bNumConfigurations, bNumInterfaces, bNumEndpoints, etc
  * are correct. Can result in stray pointer!
