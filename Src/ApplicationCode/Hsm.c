@@ -34,8 +34,69 @@
 #define MAX_LEVELS                      3
 
 
-static const Event entryEvent = {ENTRY_EVENT};
-static const Event exitEvent = {EXIT_EVENT};
+static const Event entryEvent   = {ENTRY_EVENT};
+static const Event exitEvent    = {EXIT_EVENT};
+
+
+/**
+ * @brief Runs the Initial Transition when Hsm_Begin() is called. This executes
+ * the Initial State Handler function that is defined by the user. The Dispatcher
+ * will determine the proper State Traversal and Entry Event sequence to execute.
+ * 
+ * @warning The user MUST transition into a State within the Hsm by calling
+ * @p HSM_TRAN(target_) macro. Calling @p HSM_INTERNAL_TRAN(target_) will be
+ * treated as if @p HSM_TRAN(target_) was called.
+ * 
+ * @param me Pointer to Hsm object.
+ * @param inithndlr User-defined Initial State Handler function. See warning above.
+ * 
+ * @return true if the user properly defined the Initial State Handler Function,
+ * false otherwise.
+ * 
+ */
+static void Hsm_Init_Dispatch(Hsm * const me, const InitStateHandler inithndlr);
+static void Hsm_Init_Dispatch(Hsm * const me, const InitStateHandler inithndlr)
+{
+    bool success = false;
+    Status status = (*inithndlr)(me); /* Execute Initial State Handler function */
+
+    /* The Initial State Handler function must cause a State Transition. Return false if this does not enter. */
+    if ( (status == TRAN_STATUS || status == INTERNAL_TRAN_STATUS) )
+    {
+        int levels = 0;
+        State * entryPath[MAX_LEVELS+1] = {NULL_STATE};
+        State ** entryTrace = &entryPath[0];
+
+        /**
+         * Find Entry Path. This is the State you transitioned into up to the Top State.
+         */
+        for (State * s = me->state; s != &me->top; s = s->superstate)
+        {
+            if (levels++ > MAX_LEVELS)
+            {
+                // TODO: throw run-time error
+                return;
+            }
+            else
+            {
+                *(entryTrace++) = s; /* {0, Substate, Substate,...Substate of Top State}. This excludes Top State */
+            }
+
+        }
+
+        /**
+         * Execute Entry Events
+         */
+        (void)(*me->top.hndlr)(me, &entryEvent);
+        for (; *entryTrace; entryTrace--)
+        {
+            (void)(*(*entryTrace)->hndlr)(me, &entryEvent);
+        }
+        success = true;
+    }
+    return success;
+}
+
 
 
 /**
@@ -51,7 +112,7 @@ static const Event exitEvent = {EXIT_EVENT};
  * will be unique depending on whcih state you are currently in.
  * 
  */
-void State_Ctor(State * const me, State * const superstate, StateHandler * const hndlr)
+void State_Ctor(State * const me, State * const superstate, const StateHandler hndlr)
 {
     me->superstate = superstate;
     me->hndlr = hndlr;
@@ -59,36 +120,54 @@ void State_Ctor(State * const me, State * const superstate, StateHandler * const
 
 
 /**
- * @brief Hsm Base Class constructor.
+ * @brief Hsm Base Class Constructor. Initializes the Top-most State of the Hsm. The
+ * Superstate of this is NULL.
+ * 
+ * @warning Unless explicitly defined beforehand by the user, note that me->state is
+ * still a NULL pointer.
  * 
  * @param me Pointer to Hsm object.
- * @param initial Function that executes when the Hsm is first initialized (Initial Transition).
- * Ensure this function calls the TRAN(target) macro to transition to the next state.
+ * @param tophndlr Function that executes when the Hsm is in the Top-most State.
  * 
  */
-void Hsm_Ctor(Hsm * const me, StateHandler initial)
+void Hsm_Ctor(Hsm * const me, const StateHandler tophndlr)
 {
-    me->state = initial;
+    State_Ctor(&me->top, (State *)0, tophndlr);
 }
 
 
 /**
- * @brief Executes Initial Transition function assigned in Hsm_Ctor(). Then
- * executes the entry event of the next state transitioned into.
+ * @brief Sets the Hsm's State to the user-defined Initial State. If
+ * the Initial State object is defined correctly, the Initial State Handler
+ * function will execute. The Hsm Dispatcher will determine the proper
+ * State Traversal and Entry Event sequence to execute.
  * 
- * @warning Must be called after Hsm_Ctor()
+ * @warning @p HSM_Ctor() must be called beforehand.
+ * 
+ * @warning In the Initial State Handler function, the user MUST define a 
+ * @p HSM_ENTRY_EVENT case. Within this, the user must transition to
+ * a State within the Hsm by calling the @p HSM_INIT(target_) macro. Do 
+ * not use the @p HSM_TRAN(target_) or @p HSM_INTERNAL_TRAN(target_) macros 
+ * within the Initial State Handler. If this is not followed, the Hsm
+ * will have undefined behavior. 
  * 
  * @param me Pointer to Hsm object.
- * @param e Event Signal dispatched to the Hsm when it is first initialized.
+ * @param initstate The Initial State the user wants assigned to the Hsm.
+ * 
+ * @return true if the Hsm successfully started, false otherwise.
  * 
  */
-void Hsm_Begin(Hsm * const me, const Event * const e)
+bool Hsm_Begin(Hsm * const me, const State * const initstate)
 {
-    if (me->state->hndlr != (StateHandler)0) /* TODO: Replace with run-time error handler */
+    bool success = false;
+
+    if ( ((me->top).hndlr != (StateHandler)0) && (initstate != (State *)0) && (initstate->hndlr != (StateHandler)0) ) /* Hsm_Ctor called beforehand and Initial State defined correctly by user. */
     {
-        (void)(*me->state->hndlr)(me, e); /* Execute Initial Transition function assigned in Hsm_Ctor. */
-        (void)(*me->state->hndlr)(me, &entryEvent); /* Execute entry event of the the next state transitioned into. */
+        me->state = initstate;
+        Hsm_Dispatch(me, &entryEvent);   /* Execute Initial Transition function assigned in Hsm_Ctor and relevant State Entry Events. */
+        success = true;
     }
+    return success;
 }
 
 

@@ -25,7 +25,7 @@ typedef struct
     Hsm hsm; /* Inherit Hsm Base Class */
 
     /* Additional Members */
-    const struct
+    struct /* Should be pointers to descriptors with internal linkage in .c file */
     {
         USB_Std_Device_Descriptor_t Device_Descriptor;
         USB_Std_Configuration_Descriptor_t Configuration_Descriptor;
@@ -81,10 +81,8 @@ enum USBHID_Device_Hsm_Event_Sigs
 };
 
 
-void USBHID_Device_Hsm_Ctor(    USBHID_Device_Hsm * const me,
-                                const USB_Std_Descriptors_Collection * const Std_Descriptors,
-                                const USB_HID_Descriptor_Collection * const HID_Descriptors   );
-void USBHID_Device_Hsm_Begin(void);
+void USBHID_Device_Hsm_Ctor(USBHID_Device_Hsm * const me);
+void USBHID_Device_Hsm_Begin(USBHID_Device_Hsm * const me);
 void USBHID_Device_Hsm_Dispatch(const USBHID_Device_Hsm_Event * const e);
 
 #endif /* USBHIDDEVICEHSM_H */

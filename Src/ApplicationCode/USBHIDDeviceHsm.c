@@ -11,6 +11,7 @@
 
 #include <avr/interrupt.h>
 #include <string.h> /* memset */
+#include "Compatibility.h"
 #include "Endian.h"
 #include "USBConfig.h"
 #include "USBHIDDeviceHsm.h"
@@ -139,16 +140,26 @@ static const USB_Std_Endpoint_Descriptor_t Default_Endpoint_Descriptor =
     .bInterval                  = 5                                 /* 5ms Polling */
 };
 
+
 /**
  * State Objects and State Handler function prototypes.
  */
+
+/* Init State. This state is entered when the USBHID_Device_Hsm Constructor is first called. */
+static Status USBHID_Device_Hsm_Init_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
+static const State USBHID_Device_Hsm_Init_State =
+{
+    .superstate = (State *)0,                       /* Hsm Dispatcher uses NULL pointer to identify Top State has been reached. Do not change. */
+    .hndlr = &USBHID_Device_Hsm_Init_State_Hndlr
+};
+
 
 /* Top-most State. Contains USB_Superstate and Error_State */
 static Status USBHID_Device_Hsm_Top_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
 static const State USBHID_Device_Hsm_Top_State = 
 {
-    (State *)0, /* Hsm Dispatcher uses NULL pointer to identify Top State has been reached. Do not change. */
-    &USBHID_Device_Hsm_Top_State_Hndlr
+    .superstate = (State *)0,                       /* Hsm Dispatcher uses NULL pointer to identify Top State has been reached. Do not change. */
+    .hndlr = &USBHID_Device_Hsm_Top_State_Hndlr
 };
 
 
@@ -206,6 +217,22 @@ static Status USBHID_Device_Hsm_Configured_State_Process_Control_Transfer(USBHID
  * State Handler function definitions
  * 
  */
+
+
+/**
+ * @brief The Init State is entered when the USBHID_Device_Hsm Constructor is first called. 
+ * This will not be called until USBHID_Device_Hsm_Begin() is called.
+ * 
+ */
+static Status USBHID_Device_Hsm_Init_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e)
+{
+    Status status = IGNORED_STATUS;
+    (void)me;
+    (void)e;
+    status = INIT(USBHID_Device_Hsm_Default_State);
+    return status;
+}
+
 
 /**
  * @brief The Top-most State is just a container for all of the other substates in the USBHID Device
@@ -491,138 +518,41 @@ static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me
  * TODO: Want to architect this so user is able to assign any Descriptor Configuration to the
  * HID Device. Right now it just sets the Device to the Default Configuration.
  * 
- * @brief Initialize a USBHID_Device Hsm Object with the custom Descriptor Configuration.
- * 
- * @warning There are no checks to make sure bNumConfigurations, bNumInterfaces, bNumEndpoints, etc
- * are correct. Can result in stray pointer!
- * 
- * @note If no descriptors or an invalid descriptor configuration is provided, the default
- * descriptor configuration will be assigned to the object. These Descriptors and the Descriptor
- * Configuration is defined at the beginning of USBHIDDeviceHsm.c
+ * @brief Initialize a USBHID_Device Hsm Object with the Default Descriptor Configuration defined
+ * at the beginning of this file. Starts the Hsm at the Init State.
  * 
  * @param me Pointer to USBHID_Device_Hsm type.
- * @param Std_Descriptors Device, Configuration, Interface, and Endpoint Descriptors to assign to this device.
- * A device can only have one Device Descriptor, but any number of Configuration, Interface, and Endpoint
- * Descriptors. The Constructor will parse through the supplied Descriptors.
- * @param HID_Descriptors HID, Report, and Physical Descriptors to assign to this device. A device can have any
- * number of HID, Report, and Physical Descriptors.
  * 
  */
-void USBHID_Device_Hsm_Ctor(    USBHID_Device_Hsm * const me,
-                                USB_Std_Descriptors_Collection * const Std_Descriptors,
-                                USB_HID_Descriptor_Collection * const HID_Descriptors   )
+void USBHID_Device_Hsm_Ctor(USBHID_Device_Hsm * const me)
 {
-    /* Device Descriptor Checks */
-    // if (    (Device_Descriptor->bLength != sizeof(USB_Std_Device_Descriptor_t)) || \
-    //         (Device_Descriptor->bcdUSB > USB version we support) || \
-    //         (Device_Descriptor->bDeviceClass !=0) || \
-    //         (Device_Descriptor->bSubClass != 0) || \
-    //         (Device_Descriptor->bDeviceProtocol != 0) || \
-    //         ((Device_Descriptor->bMaxPacketSize0 != 8) || (Device_Descriptor->bMaxPacketSize0 != 16) || (Device_Descriptor->bMaxPacketSize0 != 32) || (Device_Descriptor->bMaxPacketSize0 != 64)) || \
-    //         (Device_Descriptor->bNumConfigurations != sizeof(*Configuration_Descriptor)) || \   /* sizeof on variable-length array so it is properly calculated at run-time */
-    //          )
-    // {
-    //     #error "TODO: Make run-time error."
-    //     return;
-    // }
-
-    /**
-     * 
-     * 0) CHECK IF Std_Descriptors and HID_Descriptors are NULL.
-     * 
-     * DEVICE DESCRIPTOR:
-     *  1) Verify bLength = sizeof(USB_Std_Device_Descriptor_t)
-     *  2) Verify bDescriptionType = DEVICE_DESCRIPTOR_TYPE
-     *  3) Verify bcdUSB is the version we support
-     *  4) Verify bDeviceClass = 0
-     *  5) Verify bDeviceSubClass = 0
-     *  6) Verify bDeviceProtocol = 0
-     *  7) Verify bMaxPacketSize0 = CONTROL_ENDPOINT_SIZE (the endpoint 0 size the MCU supports)
-     *  8) Verify bNumConfigurations = size of configuration descriptor array Std_Descriptors->(sizeof(Configuration_Descriptors) / sizeof(USB_Std_Configuration_Descriptor_t)
-     * 
-     * 
-     * 
-     */
-
-    bool error = false;
-    uint8_t bNumConfigurations = Std_Descriptors->Device_Descriptor->bNumConfigurations;
-
-    if ( (Std_Descriptors == (USB_Std_Descriptors_Collection *)0) || (HID_Descriptors == (USB_HID_Descriptor_Collection *)0) )
-    {
-        error = true;
-    }
-
-    /**
-     * Device Descriptor Check 
-     */
-    if (    (Std_Descriptors->Device_Descriptor->bLength != sizeof(USB_Std_Device_Descriptor_t)) || \
-            (Std_Descriptors->Device_Descriptor->bDescriptionType != DEVICE_DESCRIPTOR_TYPE) || \
-            (Std_Descriptors->Device_Descriptor->bcdUSB != (LE16_RUNTIME(USB_VERSION))) || \
-            (Std_Descriptors->Device_Descriptor->bDeviceClass != 0x00) || \
-            (Std_Descriptors->Device_Descriptor->bDeviceSubClass != 0x00) || \
-            (Std_Descriptors->Device_Descriptor->bDeviceProtocol != 0x00) || \
-            (Std_Descriptors->Device_Descriptor->bMaxPacketSize0 != CONTROL_ENDPOINT_SIZE) || \
-            (Std_Descriptors->Device_Descriptor->bNumConfigurations == 0)
-        )
-    {
-        error = true;
-    }
-
-    /**
-     * Configuration Descriptor Checks
-     */
-    for (uint8_t i = 0, ; i < )
-
-    /* Invalid configuration, assign default descriptors. */
-    me->USBHID_Device_Hsm_Std_Descriptors = Std_Descriptors;
-    me->USBHID_Device_Hsm_HID_Descriptors = HID_Descriptors;
-
+    me->Descriptors.Device_Descriptor               = Default_Device_Descriptor;
+    me->Descriptors.Configuration_Descriptor        = Default_Configuration_Descriptor;
+    me->Descriptors.Interface_Descriptor            = Default_Interface_Descriptor;
+    me->Descriptors.HID_Descriptor                  = Default_HID_Descriptor;
+    me->Descriptors.Endpoint_Descriptor             = Default_Endpoint_Descriptor;
+    me->Descriptors.Report_Descriptor               = Default_Report_Descriptor;
+    me->Descriptors.Report_Descriptor_Size          = sizeof(Default_Report_Descriptor);
+    me->Device_State                                = USBHID_DEVICE_POWERED_STATE;
+    me->Address                                     = 0;
+    me->Configuration_Index                         = 0;
+    Hsm_Ctor((Hsm *)me, (StateHandler)USBHID_Device_Hsm_Init_State); // TODO: me->state is currently NULL
 }
 
 
-
-
-
-// /**
-//  * @brief Initial transition into the USB Hsm. This transitions the state 
-//  * into the Pre-Operational State. Only called once when the State Machine
-//  * first starts up.
-//  * 
-//  */
-// static Status USBHID_Device_Hsm_Initial_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-// static Status USBHID_Device_Hsm_Initial_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e)
-// {
-//     (void)me;
-//     (void)e;
-//     return TRAN(USBHID_Device_Hsm_PreOperational_State);
-// }
-
-
-
-
-
-
 /**
- * @brief Calls the USBHID_Device_Hsm Constructor and runs the Initial State Handler 
- * function of the USB Hsm. This function transitions the USB Hsm state 
- * to the Pre-Operational State then runs the Entry Event of the 
- * Pre-Operational State Handler. This resets and initializes the USB hardware.
+ * @brief Runs the Initial State Handler function. This runs the Entry Events from
+ * the Top State to the Default State (USBHID_Device_Hsm_Default_State).
  * 
- * @note Meant to only be called once at startup since only one USBHID_Device_Hsm
- * object can be defined. If this is called again the function will 
- * simply return and no changes will be applied to the USB Hsm.
+ * @note Meant to only be called once at startup after the USBHID_Device_Hsm 
+ * Constructor is called. Will do nothing if it is called any time afterwards.
  * 
  */
-void USBHID_Device_Hsm_Begin(void)
+void USBHID_Device_Hsm_Begin(USBHID_Device_Hsm * const me)
 {
-    if (USBHID_Device_Hsm_Me.hsm.state != (State *)0)
+    if ( ((Hsm *)me)->state == (StateHandler)USBHID_Device_Hsm_Init_State )
     {
-        return;
-    }
-    else
-    {
-        Hsm_Ctor((Hsm *)&USBHID_Device_Hsm, &USBHID_Device_Hsm_Initial_State_Hndlr);
-        Hsm_Begin((Hsm *)&USBHID_Device_Hsm, (Event *)0);
+        Hsm_Dispatch((Hsm *)me, (Event *)0);
     }
 }
 

@@ -38,19 +38,22 @@ typedef struct Hsm Hsm;     /* Must forward declare for StateHandler typedef. */
 typedef enum
 {
     HSM_DISPATCH_STATUS,    /*  Used to start executing Event handlers in Hsm_Dispatch() function. */
+    INIT_STATUS,            /*  The Initial Transition for the HSM executed. This is executed when the HSM constructor
+                                is first called and started up. Only the Entry Events from the Top State to the State
+                                transitioned into are executed. */
     TRAN_STATUS,            /*  Event dispatched to the HSM resulted in a State Transition. The Entry and Exit Event
                                 of the state that handled the event will also execute. */
     INTERNAL_TRAN_STATUS,   /*  Event dispatched to the HSM resulted in a State Transition. However the Entry and
                                 Exit Events of the state that handled the event will not execute. */
     HANDLED_STATUS,         /*  Event handler executed. */
     IGNORED_STATUS,         /*  Event dispatched to HSM was ignored. */
-    INIT_STATUS,
     SUPER_STATUS            /*  Transitioned to a superstate. If an event dispatched to the HSM doesn't exist in the current state,
                                 the state hierarchy is traversed up until the event is located or the Top State is reached. 
                                 If the event does not exist in the Top State, it is ignored. */
 } Status;
 
 typedef Status (*StateHandler)(Hsm * const me, const Event * const e);
+typedef Status (*InitStateHandler)(Hsm * const me);
 
 typedef struct 
 {
@@ -63,11 +66,20 @@ typedef struct
 
 struct Hsm
 {
-    State * state;
+    State top;              /*  Top-most State. It's superstate will be (State *)0 */
+    State * state;          /*  The Current State the Hsm is in. */
     /* Private members can be added here in subclass that inherits Hsm Base Class. */
 };
 
 /* Hsm Methods */
+
+/**
+ * @brief Meant to only be wsed in the State Handler function that handles the Initial Transition 
+ * of the Hsm. This handler should execute once when the Hsm Constructor is called and the Hsm first 
+ * starts up. Entry Events from Top State to State @p target_ are executed. Takes you to State @p target_
+ * 
+ */
+#define INIT(target_)                   (((Hsm *)me)->state = (State *)(&target_), INIT_STATUS)
 
 /**
  * @brief Used in State Handler functions. State to State Transition or used to reset a State. 
@@ -95,9 +107,9 @@ struct Hsm
 #define SUPER(super_)                   (((Hsm *)me)->state = (State *)(&super_), SUPER_STATUS)
 
 
-void State_Ctor(State * const me, State * const superstate, StateHandler * const hndlr);
-void Hsm_Ctor(Hsm * const me, StateHandler initial);
-void Hsm_Begin(Hsm * const me, const Event * const e);
+void State_Ctor(State * const me, State * const superstate, const StateHandler hndlr);
+void Hsm_Ctor(Hsm * const me, const StateHandler tophndlr);
+bool Hsm_Begin(Hsm * const me, const State * const initstate);
 void Hsm_Dispatch(Hsm * const me, const Event * const e);
 
 #endif /* HSM_H */
