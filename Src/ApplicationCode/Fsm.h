@@ -10,50 +10,40 @@
 #ifndef FSM_H
 #define FSM_H
 
-#if defined(HSM_H)
-    #error "Do not include both Fsm.h and Hsm.h. Your object must either be a Hierarchical State Machine or Finite State Machine. It cannot be both."
-#endif
-
 #include <stdint.h>
+#include "Event.h"
 
-typedef struct Fsm Fsm; /* Must forward declare for StateHandler typedef. */
-typedef uint16_t Signal;
-
-enum ReservedSignals
-{
-    ENTRY_EVENT,          /* Entry Event Signal when transitioning into a state. */
-    EXIT_EVENT,           /* Exit Event Signal when transitioning out of a state. */
-    /*********/
-    USER_SIG              /* Beginning of user-definable Event Signals. */
-};
-
-/* Event Base Class */
-typedef struct
-{
-    Signal sig;
-    /* Private members can be added here in subclass that inherits Event Base Class. */
-} Event;
+typedef struct Fsm Fsm; /* Must forward declare for FsmStateHandler typedef. */
 
 typedef enum
 {
-    TRAN_STATUS,
-    HANDLED_STATUS,
-    IGNORED_STATUS,
-    INIT_STATUS,
-} State;
+    FSM_TRAN_STATUS,
+    FSM_HANDLED_STATUS,
+    FSM_IGNORED_STATUS,
+    FSM_INIT_STATUS,
+} FsmStatus;
 
-typedef State (*StateHandler)(Fsm * const me, const Event * const e);
+typedef FsmStatus (*FsmStateHandler)(Fsm * const me, const Event * const e);
 
-/* Fsm Base Class */
 struct Fsm
 {
-    StateHandler state;
+    FsmStateHandler state;
     /* Private members can be added here in subclass that inherits Fsm Base Class. */
 };
 
+
 /* Fsm Methods */
-#define TRAN(target_)   (((Fsm *)me)->state = (StateHandler)(target_), TRAN_STATUS)
-void Fsm_Ctor(Fsm * const me, StateHandler initial);
+
+/**
+ * @brief Used in Fsm State Handler functions. State to State Transition or used to reset a State. 
+ * Transition from the current state you were in to the State @p target_
+ * 
+ * @return FSM_TRAN_STATUS. This is used by the Fsm Dispatcher.
+ * 
+ */
+#define FSM_TRAN(target_)   (((Fsm *)me)->state = (FsmStateHandler)(target_), FSM_TRAN_STATUS)
+
+void Fsm_Ctor(Fsm * const me, FsmStateHandler initial);
 void Fsm_Init(Fsm * const me, const Event * const e);
 void Fsm_Dispatch(Fsm * const me, const Event * const e);
 

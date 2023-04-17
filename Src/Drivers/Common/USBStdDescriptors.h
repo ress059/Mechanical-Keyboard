@@ -14,6 +14,15 @@
 #include <stdint.h>
 #include "Attributes.h"
 
+/**
+ * @brief Use to set bMaxPower of the Configuration Descriptor.
+ * 
+ * @param mA Maximum current draw of the USB Device in mA.
+ * 
+ */
+#define SET_MAX_CURRENT(mA)                     ((mA) >> 1)
+
+
 enum /* bDescriptorType */
 {
     DEVICE_DESCRIPTOR_TYPE = 0x01,

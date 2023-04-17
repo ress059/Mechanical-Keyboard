@@ -17,6 +17,15 @@
 #include "USBHIDDeviceHsm.h"
 
 
+/**
+ * @brief This sets the maximum allowable current draw for every USBHID_Device_Hsm 
+ * Object created. bMaxPower of the Configuration Descriptor must be less than
+ * this value or else the USBHID_Device_Hsm Constructor will return False.
+ * 
+ */
+#define USBHID_DEVICE_HSM_MAX_CURRENT                       SET_MAX_CURRENT(500)
+
+
 // typedef struct
 // {
 //     Event super; /* Inherit Base Event Class */
@@ -102,7 +111,7 @@ static const USB_Std_Configuration_Descriptor_t Default_Configuration_Descriptor
     .bNumInterfaces             = 1,
     .bConfigurationValue        = 1,
     .iConfiguration             = 0,
-    .bmAttributes               = 0b0010000,                        /* Remote Wakeup */
+    .bmAttributes               = 0b1010000,                        /* Remote Wakeup */
     .bMaxPower                  = 50,                               /* 100mA max */
 };
 
@@ -142,65 +151,60 @@ static const USB_Std_Endpoint_Descriptor_t Default_Endpoint_Descriptor =
 
 
 /**
- * State Objects and State Handler function prototypes.
+ * State Objects and State Handler function prototypes. Note that we will upcast
+ * (Hsm *) to (USBHID_Device_Hsm *) within the State Handler function definition
+ * and downcast (USBHID_Device_Hsm *) to (Hsm *) whenever calling Hsm_Dispatch().
+ * This follows Strict Aliasing rules and allows us to access members in
+ * USBHID_Device_Hsm class.
  */
 
-/* Init State. This state is entered when the USBHID_Device_Hsm Constructor is first called. */
-static Status USBHID_Device_Hsm_Init_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_Init_State =
-{
-    .superstate = (State *)0,                       /* Hsm Dispatcher uses NULL pointer to identify Top State has been reached. Do not change. */
-    .hndlr = &USBHID_Device_Hsm_Init_State_Hndlr
-};
-
-
 /* Top-most State. Contains USB_Superstate and Error_State */
-static Status USBHID_Device_Hsm_Top_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_Top_State = 
+static HsmStatus USBHID_Device_Hsm_Top_State_Hndlr(Hsm * const me, const Event * const e);
+static const HsmState USBHID_Device_Hsm_Top_State = 
 {
-    .superstate = (State *)0,                       /* Hsm Dispatcher uses NULL pointer to identify Top State has been reached. Do not change. */
-    .hndlr = &USBHID_Device_Hsm_Top_State_Hndlr
+    .superstate = (HsmState *)0,                       /* Hsm Dispatcher uses NULL pointer to identify Top State. */
+    .hndlr = USBHID_Device_Hsm_Top_State_Hndlr
 };
 
 
-static Status USBHID_Device_Hsm_Error_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_Error_State =
+static HsmStatus USBHID_Device_Hsm_Error_State_Hndlr(Hsm * const me, const Event * const e);
+static const HsmState USBHID_Device_Hsm_Error_State =
 {
-    (State *)&USBHID_Device_Hsm_Top_State,
-    &USBHID_Device_Hsm_Error_State_Hndlr
+    .superstate = (HsmState *)&USBHID_Device_Hsm_Top_State,
+    .hndlr = USBHID_Device_Hsm_Error_State_Hndlr
 };
 
 
-/* Contains Default_State, Address_State, and Configured_State. USB 2.0 spec - Chapter 9 */
-static Status USBHID_Device_Hsm_USB_Superstate_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_USB_Superstate =
+/* Contains Default_State, Address_State, and Configured_State in accordance with USB 2.0 spec - Chapter 9 */
+static HsmStatus USBHID_Device_Hsm_USB_Superstate_Hndlr(Hsm * const me, const Event * const e);
+static const HsmState USBHID_Device_Hsm_USB_Superstate =
 {
-    (State *)&USBHID_Device_Hsm_Top_State,
-    &USBHID_Device_Hsm_USB_Superstate_Hndlr
+    .superstate = (HsmState *)&USBHID_Device_Hsm_Top_State,
+    .hndlr = USBHID_Device_Hsm_USB_Superstate_Hndlr
 };
 
 
-static Status USBHID_Device_Hsm_Default_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_Default_State =
+static HsmStatus USBHID_Device_Hsm_Default_State_Hndlr(Hsm * const me, const Event * const e);
+static const HsmState USBHID_Device_Hsm_Default_State =
 {
-    (State *)&USBHID_Device_Hsm_USB_Superstate,
-    &USBHID_Device_Hsm_Default_State_Hndlr
+    .superstate = (HsmState *)&USBHID_Device_Hsm_USB_Superstate,
+    .hndlr = USBHID_Device_Hsm_Default_State_Hndlr
 };
 
 
-static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_Address_State =
+static HsmStatus USBHID_Device_Hsm_Address_State_Hndlr(Hsm * const me, const Event * const e);
+static const HsmState USBHID_Device_Hsm_Address_State =
 {
-    (State *)&USBHID_Device_Hsm_USB_Superstate,
-    &USBHID_Device_Hsm_Address_State_Hndlr
+    .superstate = (HsmState *)&USBHID_Device_Hsm_USB_Superstate,
+    .hndlr = USBHID_Device_Hsm_Address_State_Hndlr
 };
 
 
-static Status USBHID_Device_Hsm_Configured_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e);
-static const State USBHID_Device_Hsm_Configured_State =
+static HsmStatus USBHID_Device_Hsm_Configured_State_Hndlr(Hsm * const me, const Event * const e);
+static const HsmState USBHID_Device_Hsm_Configured_State =
 {
-    (State *)&USBHID_Device_Hsm_USB_Superstate,
-    &USBHID_Device_Hsm_Configured_State_Hndlr
+    .superstate = (HsmState *)&USBHID_Device_Hsm_USB_Superstate,
+    .hndlr = USBHID_Device_Hsm_Configured_State_Hndlr
 };
 
 
@@ -208,29 +212,319 @@ static const State USBHID_Device_Hsm_Configured_State =
  * Control Transfers must be processed differently depending on the State you are in.
  * See USB 2.0 Spec Chapter 9.4 - Standard Device Requests
  */
-static Status USBHID_Device_Hsm_Default_State_Process_Control_Transfer(USBHID_Device_Hsm * const me);
-static Status USBHID_Device_Hsm_Address_State_Process_Control_Transfer(USBHID_Device_Hsm * const me);
-static Status USBHID_Device_Hsm_Configured_State_Process_Control_Transfer(USBHID_Device_Hsm * const me);
+
+/**
+ * @brief Processes Control Transfers while the USBHID_Hsm is in the Default State.
+ * In the Default State the HID Device is powered, attached to the bus, and has
+ * been reset by the Host. However it has not been assigned a unique address.
+ * 
+ */
+static HsmStatus USBHID_Device_Hsm_Default_State_Process_Control_Transfer(USBHID_Device_Hsm * const me);
+static HsmStatus USBHID_Device_Hsm_Default_State_Process_Control_Transfer(USBHID_Device_Hsm * const me)
+{
+    HsmStatus status;
+    #error "TODO: Figure out Control Transfer request. Store in local variable 'Standard_Device_Request'."
+
+    switch (Standard_Device_Request)
+    {
+        case GET_DESCRIPTOR:
+        {
+            #error "TODO: Process this"
+            status = HSM_HANDLED_STATUS;
+            break;
+        }
+
+        case SET_ADDRESS:
+        {
+            #error "TODO: Process this"
+            if (address > 0) 
+            {
+                me->Address = address;
+                status = HSM_TRAN(USBHID_Device_Hsm_Address_State);
+            }
+            else
+            {
+                status = HSM_IGNORED_STATUS;
+            }
+            break;
+        }
+
+        case SET_FEATURE:
+        {
+            #error "TODO: Process SET_FEATURE(TEST_MODE) and SET_FEATURE(TEST_SELECTOR). Otherwise ignore"
+            if (TEST_MODE || TEST_SELECTOR)
+            {
+                status = HSM_HANDLED_STATUS;
+            }
+            else
+            {
+                status = HSM_IGNORED_STATUS;
+            }
+            break;
+        }
+        
+        /*  CLEAR_FEATURE, GET_CONFIGURATION, GET_INTERFACE, GET_STATUS, SET_CONFIGURATION, 
+            SET_DESCRIPTOR, SET_INTERFACE, and SYNCH_FRAME requests are ignored. */
+        default:
+        {
+            status = HSM_IGNORED_STATUS;
+            break;
+        }
+    }
+    return status;
+}
+
+
+/**
+ * @brief Processes Control Transfers while the USBHID_Hsm is in the Address State.
+ * In the Address State the HID Device has been assigned a unique address by the
+ * Host but has not been enumerated.
+ * 
+ */
+static HsmStatus USBHID_Device_Hsm_Address_State_Process_Control_Transfer(USBHID_Device_Hsm * const me);
+static HsmStatus USBHID_Device_Hsm_Address_State_Process_Control_Transfer(USBHID_Device_Hsm * const me)
+{
+    HsmStatus status = HSM_HANDLED_STATUS;
+    #error "TODO: Figure out Control Transfer request. Store in local variable 'Standard_Device_Request'."
+
+    switch (Standard_Device_Request)
+    {
+        case CLEAR_FEATURE:
+        {
+            if (referring to endpoint 0)
+            {
+                #error "TODO: Process this."
+            }
+            else
+            {
+                #error "TODO: Respond to Host with a Request Error."
+            }
+            break;
+        }
+
+        case GET_CONFIGURATION:
+        {
+            #error "TODO: Return a value of 0 to the Host."
+            break;
+        }
+
+        case GET_DESCRIPTOR:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case GET_INTERFACE:
+        {
+            #error "TODO: Respond to Host with Request Error."
+            break;
+        }
+
+        case GET_STATUS:
+        {
+            if (referring to endpoint 0)
+            {
+                #error "TODO: Process this."
+            }
+            else
+            {
+                #error "TODO: Respond to Host with a Request Error."
+            }
+            break;
+        }
+
+        case SET_ADDRESS:
+        {
+            #error "TODO: Process this"
+            if (address == 0) 
+            {
+                status = HSM_TRAN(USBHID_Device_Hsm_Default_State);
+            }
+            else
+            {
+                me->Address = address;
+            }
+            break;
+        }
+
+        case SET_CONFIGURATION:
+        {
+            #error "TODO: Process this"
+            if (configuration == 0)
+            {
+                status = HSM_IGNORED_STATUS;
+            }
+            else if (configuration value matches value from a configuration descriptor in this device)
+            {
+                me->Configuration_Index = configuration;
+                status = HSM_TRAN(USBHID_Device_Hsm_Configured_State);
+            }
+            else
+            {
+                #error "TODO: Respond to Host with a Request Error."
+            }
+            break;
+        }
+
+        case SET_DESCRIPTOR:
+        {
+            #error "TODO: Process this"
+            break;
+        }
+
+        case SET_FEATURE:
+        {
+            if (referring to endpoint 0)
+            {
+                #error "TODO: Process this."
+            }
+            else
+            {
+                #error "TODO: Respond to Host with a Request Error."
+            }
+            break;
+        }
+
+        case SET_INTERFACE:
+        {
+            #error "TODO: Respond to Host with a Request Error."
+            break;
+        }
+
+        case SYNCH_FRAME:
+        {
+            #error "TODO: Respond to Host with a Request Error."
+            break;
+        }
+
+        default:
+        {
+            status = HSM_IGNORED_STATUS;
+            break;
+        }
+    }
+    return status;
+}
+
+
+/**
+ * @brief Processes Control Transfers while the USBHID_Hsm is in the Confiured State.
+ * In the Configured State the HID Device has completed the Enumeration Phase and is
+ * fully functional.
+ * 
+ */
+static HsmStatus USBHID_Device_Hsm_Configured_State_Process_Control_Transfer(USBHID_Device_Hsm * const me);
+static HsmStatus USBHID_Device_Hsm_Configured_State_Process_Control_Transfer(USBHID_Device_Hsm * const me)
+{
+    HsmStatus status = HSM_HANDLED_STATUS;
+
+    #error "TODO: Figure out Control Transfer request. Store in local variable 'Standard_Device_Request'."
+    switch (Standard_Device_Request)
+    {
+        case CLEAR_FEATURE:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case GET_CONFIGURATION:
+        {
+            #error "TODO: Send me->Configuration_Index."
+            break;
+        }
+
+        case GET_DESCRIPTOR:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case GET_INTERFACE:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case GET_STATUS:
+        {
+            if (interface/endpoint specified exists)
+            {
+                #error "TODO: Process this."
+            }
+            else
+            {
+                #error "TODO: Send Request Error."
+            }
+            break;
+        }
+
+        case SET_CONFIGURATION:
+        {
+            if (configuration == 0)
+            {
+                status = HSM_TRAN(USBHID_Device_Hsm_Address_State);
+            }
+            else if (configuration value matches value from a configuration descriptor in this device)
+            {
+                me->Configuration_Index = configuration;
+            }
+            else
+            {
+                #error "TODO: Respond to Host with a Request Error."
+            }
+            break;
+        }
+
+        case SET_DESCRIPTOR:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case SET_FEATURE:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case SET_INTERFACE:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        case SYNCH_FRAME:
+        {
+            #error "TODO: Process this."
+            break;
+        }
+
+        default: /* SET_ADDRESS is ignored. */
+        {
+            status = HSM_IGNORED_STATUS;
+            break;
+        }
+    }
+    return status;
+}
 
 
 /**
  * State Handler function definitions
- * 
  */
-
 
 /**
- * @brief The Init State is entered when the USBHID_Device_Hsm Constructor is first called. 
- * This will not be called until USBHID_Device_Hsm_Begin() is called.
+ * @brief Initial Transition of the USBHID Hsm. Enters when the Constructor and
+ * USBHID_Device_Hsm_Begin() are called. This will start up the Hsm and transition
+ * into the USB Default State. The Dispatcher will figure out the appropriate 
+ * Entry Event sequence to execute. In this case this is: 
+ * Entry(USBHID_Device_Hsm_Top_State_Hndlr) -> Entry(USBHID_Device_Hsm_USB_Superstate_Hndlr) 
+ * -> Entry(USBHID_Device_Hsm_Default_State_Hndlr)
  * 
  */
-static Status USBHID_Device_Hsm_Init_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e)
+static HsmStatus USBHID_Device_Hsm_Init_State_Hndlr(Hsm * const me)
 {
-    Status status = IGNORED_STATUS;
-    (void)me;
-    (void)e;
-    status = INIT(USBHID_Device_Hsm_Default_State);
-    return status;
+    return HSM_TRAN(USBHID_Device_Hsm_Default_State);
 }
 
 
@@ -334,7 +628,7 @@ static Status USBHID_Device_Hsm_USB_Superstate_Hndlr(USBHID_Device_Hsm * const m
         {
             #error "TODO: Detach USB Device from bus."
             me->Address = 0;
-            me->Configuration = 0;
+            me->Configuration_Index = 0;
             me->Device_State = USBHID_DEVICE_DISABLED_STATE;
             status = HANDLED_STATUS;
             break;
@@ -382,7 +676,7 @@ static Status USBHID_Device_Hsm_Default_State_Hndlr(USBHID_Device_Hsm * const me
         {
             me->Device_State = USBHID_DEVICE_DEFAULT_STATE;
             me->Address = 0;
-            me->Configuration = 0;
+            me->Configuration_Index = 0;
             status = HANDLED_STATUS;
             break;
         }
@@ -428,7 +722,7 @@ static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me
         case ENTRY_EVENT:
         {
             me->Device_State = USBHID_DEVICE_ADDRESS_STATE;
-            me->Configuration = 0;
+            me->Configuration_Index = 0;
             status = HANDLED_STATUS;
             break;
         }
@@ -465,7 +759,7 @@ static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me
  * transitions to the Address_State.
  * 
  */
-static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e)
+static Status USBHID_Device_Hsm_Configured_State_Hndlr(USBHID_Device_Hsm * const me, const Event * const e)
 {
     Status status;
 
@@ -523,20 +817,128 @@ static Status USBHID_Device_Hsm_Address_State_Hndlr(USBHID_Device_Hsm * const me
  * 
  * @param me Pointer to USBHID_Device_Hsm type.
  * 
+ * Please not that the user supplies their own descriptors. If an invalid descriptor configuration
+ * is provided, the default descriptors are assigned.
+ * 
+ * @note The descriptors are packed structs but we can access the members directly because
+ * GCC guarentees that misalignment will be handled by the compiler. Therefore this will
+ * work even on targets that have strict alignment requirements.
+ * 
+ * 
+ * Note that bcdUSB member is apart of a Packed Struct with potentially misaligned memory. GCC
+ * compiler handles memory misalignment when accessing packed struct members directly but not 
+ * via pointer access. The Run-time Endianness Swapping macro does use pointer access. However 
+ * the macro expands to an inlined function (if compiling on Big Endian target) where we pass 
+ * bcdUSB by value and make a copy of it. Therefore we do not access potentially misaligned 
+ * memory directly.
+ * 
  */
-void USBHID_Device_Hsm_Ctor(USBHID_Device_Hsm * const me)
+bool USBHID_Device_Hsm_Ctor(    
+                                USBHID_Device_Hsm                           * const me,
+                                const USB_Std_Device_Descriptor_t           * const Device_Descriptor,
+                                const USB_Std_Configuration_Descriptor_t    * const Configuration_Descriptor,
+                                const USB_Std_Interface_Descriptor_t        * const Interface_Descriptor,
+                                const USB_HID_Std_HID_Descriptor_t          * const HID_Descriptor,
+                                const USB_Std_Endpoint_Descriptor_t         * const Endpoint_Descriptor,
+                                const uint8_t                               * const Report_Descriptor,
+                                const uint8_t                               Report_Descriptor_Size
+                            )
 {
-    me->Descriptors.Device_Descriptor               = Default_Device_Descriptor;
-    me->Descriptors.Configuration_Descriptor        = Default_Configuration_Descriptor;
-    me->Descriptors.Interface_Descriptor            = Default_Interface_Descriptor;
-    me->Descriptors.HID_Descriptor                  = Default_HID_Descriptor;
-    me->Descriptors.Endpoint_Descriptor             = Default_Endpoint_Descriptor;
-    me->Descriptors.Report_Descriptor               = Default_Report_Descriptor;
-    me->Descriptors.Report_Descriptor_Size          = sizeof(Default_Report_Descriptor);
-    me->Device_State                                = USBHID_DEVICE_POWERED_STATE;
-    me->Address                                     = 0;
-    me->Configuration_Index                         = 0;
-    Hsm_Ctor((Hsm *)me, (StateHandler)USBHID_Device_Hsm_Init_State); // TODO: me->state is currently NULL
+    /* TODO: Think going to change so user just supplies Endpoint, HID, and Report/Physical Descriptors 
+        Device, Configuration, and Interface will be set to Default. 
+        TODO: Possibly separate out Descriptor Checks into separate functions. */
+
+    /* Used for Endianness Checks. */
+    uint16_t bcdUSB;
+    uint16_t wTotalLength;
+
+    /* NULL Checks */
+    if (!me || !Device_Descriptor || !Configuration_Descriptor || !Interface_Descriptor || !HID_Descriptor || \
+        !Endpoint_Descriptor || !Report_Descriptor || !Report_Descriptor_Size)
+    {
+        return false;
+    }
+    else
+    {
+        bcdUSB          = LE16_RUNTIME(Device_Descriptor->bcdUSB);
+        wTotalLength    = LE16_RUNTIME(Configuration_Descriptor->wTotalLength);
+    }
+
+    /* Valid Device Descriptor Check */
+    if ((Device_Descriptor->bLength != sizeof(USB_Std_Device_Descriptor_t)) || \
+        (Device_Descriptor->bDescriptionType != DEVICE_DESCRIPTOR_TYPE) || \
+        (!(bcdUSB & 0x0F00)) || \   /*  Must be Little Endian. bcdUSB will always contain a Major Version in BCD format
+                                        so we mask against that. On Little Endian targets the LE16_RUNTIME macro does 
+                                        nothing so bcdUSB should be stored in the form 0x0V00 where V is the Major 
+                                        Version. On Big Endian targets bcdUSB should be stored in the form 0x000V so it 
+                                        is sent across the bus in Little Endian. */
+        (bcdUSB > USB_VERSION) || \
+        (Device_Descriptor->bDeviceClass != 0) || \
+        (Device_Descriptor->bSubClass != 0) || \
+        (Device_Descriptor->bDeviceProtocol != 0) || \
+        (Device_Descriptor->bMaxPacketSize0 != 8 &&  Device_Descriptor->bMaxPacketSize0 != 16 && \
+            Device_Descriptor->bMaxPacketSize0 != 32 && Device_Descriptor->bMaxPacketSize0 != 64) || \
+        (Device_Descriptor->bNumConfigurations != 1))
+    {
+        return false;
+    }
+
+    /* Valid Configuration Descriptor Check */
+    if ((Configuration_Descriptor->bLength != sizeof(USB_Std_Configuration_Descriptor_t)) || \
+        (Configuration_Descriptor->bDescriptionType != CONFIGURATION_DESCRIPTOR_TYPE) || \
+        (wTotalLength !=   (  sizeof(USB_Std_Configuration_Descriptor_t) \  /* This also indirectly checks if wTotalLength is in Little Endian. */
+                            + sizeof(USB_Std_Interface_Descriptor_t) \
+                            + sizeof(USB_Std_Endpoint_Descriptor_t) \
+                            + sizeof(USB_HID_Std_HID_Descriptor_t) \
+                            + Report_Descriptor_Size)) || \
+        (Configuration_Descriptor->bNumInterfaces != 1) || \
+        (Configuration_Descriptor->bmAttributes & 0b10011111 != 0b10000000) || \ /* Bits 0 to 4 are Zero. Bit 7 is set. */
+        (Configuration_Descriptor->bMaxPower > USBHID_DEVICE_HSM_MAX_CURRENT))
+    {
+        return false;
+    }
+
+    /* Valid Interface Descriptor Check */
+
+}
+
+
+/**
+ * @brief Initializes a USBHID_Device Hsm Object with the Default descriptor
+ * configuration defined at the start of USBHIDDeviceHsm.c. This is a standard
+ * US HID Keyboard Device with a max current draw of 100mA. There is 1 Endpoint
+ * Descriptor for Endpoint 1 IN. Interrupt Transfers with 5ms Polling are used.
+ * This is also a Remote Wakeup capable device.
+ * 
+ * @warning The USBHID_Device_Hsm Object supplied to the Constructor must be
+ * initialized at compile-time. Dynamic Memory Allocation is not used.
+ * 
+ * @param me Pointer to an initialized USBHID_Device_Hsm Object.
+ * 
+ * @return True if USBHID_Device_Hsm Object supplied to the Constructor
+ * was previously initialized. False otherwise.
+ * 
+ */
+bool USBHID_Device_Hsm_Default_Ctor(USBHID_Device_Hsm * const me)
+{
+    bool sucess = false;
+
+    if (me)
+    {
+        me->Descriptors.Device_Descriptor               = &Default_Device_Descriptor;
+        me->Descriptors.Configuration_Descriptor        = &Default_Configuration_Descriptor;
+        me->Descriptors.Interface_Descriptor            = &Default_Interface_Descriptor;
+        me->Descriptors.HID_Descriptor                  = &Default_HID_Descriptor;
+        me->Descriptors.Endpoint_Descriptor             = &Default_Endpoint_Descriptor;
+        me->Descriptors.Report_Descriptor               = Default_Report_Descriptor; /* uint8_t array */
+        me->Descriptors.Report_Descriptor_Size          = sizeof(Default_Report_Descriptor);
+        me->Device_State                                = USBHID_DEVICE_DISABLED_STATE;
+        me->Address                                     = 0;
+        me->Configuration_Index                         = 0;
+        Hsm_Ctor((Hsm *)me, USBHID_Device_Hsm_Top_State_Hndlr);
+        success = true;
+    }
+    return success;
 }
 
 
@@ -554,235 +956,5 @@ void USBHID_Device_Hsm_Begin(USBHID_Device_Hsm * const me)
     {
         Hsm_Dispatch((Hsm *)me, (Event *)0);
     }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-static Status USBHID_Device_Hsm_Default_State_Process_Control_Transfer(USBHID_Device_Hsm * const me)
-{
-    State status;
-    #error "TODO: Figure out Control Transfer request. Store in local variable 'Standard_Device_Request'."
-
-    switch (Standard_Device_Request)
-    {
-        case GET_DESCRIPTOR:
-            #error "TODO: Process this"
-            status = HANDLED_STATUS;
-            break;
-
-        case SET_ADDRESS:
-            #error "TODO: Process this"
-            if (address > 0) 
-            {
-                me->Address = address;
-                status = TRAN(USBHID_Device_Hsm_Address_State);
-            }
-            else
-            {
-                status = IGNORED_STATUS;
-            }
-            break;
-
-        case SET_FEATURE:
-            #error "TODO: Process SET_FEATURE(TEST_MODE) and SET_FEATURE(TEST_SELECTOR). Otherwise ignore"
-            if (TEST_MODE || TEST_SELECTOR)
-            {
-                status = HANDLED_STATUS;
-            }
-            else
-            {
-                status = IGNORED_STATUS;
-            }
-            break;
-        
-        default: /* CLEAR_FEATURE, GET_CONFIGURATION, GET_INTERFACE, GET_STATUS, SET_CONFIGURATION, SET_DESCRIPTOR, SET_INTERFACE, and SYNCH_FRAME requests are ignored. */
-            status = IGNORED_STATUS;
-            break;
-    }
-    return status;
-}
-
-
-static Status USBHID_Device_Hsm_Address_State_Process_Control_Transfer(USBHID_Device_Hsm * const me)
-{
-    Status status = HANDLED_STATUS;
-    #error "TODO: Figure out Control Transfer request. Store in local variable 'Standard_Device_Request'."
-
-    switch (Standard_Device_Request)
-    {
-        case CLEAR_FEATURE:
-            if (referring to endpoint 0)
-            {
-                #error "TODO: Process this."
-            }
-            else
-            {
-                #error "TODO: Respond to Host with a Request Error."
-            }
-            break;
-
-        case GET_CONFIGURATION:
-            #error "TODO: Return a value of 0 to the Host."
-            break;
-
-        case GET_DESCRIPTOR:
-            #error "TODO: Process this."
-            break;
-
-        case GET_INTERFACE:
-            #error "TODO: Respond to Host with Request Error."
-            break;
-
-        case GET_STATUS:
-            if (referring to endpoint 0)
-            {
-                #error "TODO: Process this."
-            }
-            else
-            {
-                #error "TODO: Respond to Host with a Request Error."
-            }
-            break;
-
-        case SET_ADDRESS:
-            #error "TODO: Process this"
-            if (address == 0) 
-            {
-                status = TRAN(USBHID_Device_Hsm_Default_State);
-            }
-            else
-            {
-                me->Address = address;
-            }
-            break;
-
-        case SET_CONFIGURATION:
-            #error "TODO: Process this"
-            if (configuration == 0)
-            {
-                status = IGNORED_STATUS;
-            }
-            else if (configuration value matches value from a configuration descriptor in this device)
-            {
-                me->Configuration = configuration;
-                status = TRAN(USBHID_Device_Hsm_Configured_State);
-            }
-            else
-            {
-                #error "TODO: Respond to Host with a Request Error."
-            }
-            break;
-
-        case SET_DESCRIPTOR:
-            #error "TODO: Process this"
-            break;
-
-        case SET_FEATURE:
-            if (referring to endpoint 0)
-            {
-                #error "TODO: Process this."
-            }
-            else
-            {
-                #error "TODO: Respond to Host with a Request Error."
-            }
-            break;
-
-        case SET_INTERFACE:
-            #error "TODO: Respond to Host with a Request Error."
-            break;
-
-        case SYNCH_FRAME:
-            #error "TODO: Respond to Host with a Request Error."
-            break;
-
-        default:
-            status = IGNORED_STATUS;
-            break;
-    }
-    return status;
-}
-
-
-static Status USBHID_Device_Hsm_Configured_State_Process_Control_Transfer(USBHID_Device_Hsm * const me)
-{
-    Status status = HANDLED_STATUS;
-
-    #error "TODO: Figure out Control Transfer request. Store in local variable 'Standard_Device_Request'."
-    switch (Standard_Device_Request)
-    {
-        case CLEAR_FEATURE:
-            #error "TODO: Process this."
-            break;
-
-        case GET_CONFIGURATION:
-            #error "TODO: Send me->Configuration."
-            break;
-
-        case GET_DESCRIPTOR:
-            #error "TODO: Process this."
-            break;
-
-        case GET_INTERFACE:
-            #error "TODO: Process this."
-            break;
-
-        case GET_STATUS:
-            if (interface/endpoint specified exists)
-            {
-                #error "TODO: Process this."
-            }
-            else
-            {
-                #error "TODO: Send Request Error."
-            }
-            break;
-
-        case SET_CONFIGURATION:
-            if (configuration == 0)
-            {
-                status = TRAN(USBHID_Device_Hsm_Address_State);
-            }
-            else if (configuration value matches value from a configuration descriptor in this device)
-            {
-                me->Configuration = configuration;
-            }
-            else
-            {
-                #error "TODO: Respond to Host with a Request Error."
-            }
-            break;
-
-
-        case SET_DESCRIPTOR:
-            #error "TODO: Process this."
-            break;
-
-        case SET_FEATURE:
-            #error "TODO: Process this."
-            break;
-
-        case SET_INTERFACE:
-            #error "TODO: Process this."
-            break;
-
-        case SYNCH_FRAME:
-            #error "TODO: Process this."
-            break;
-
-        default: /* SET_ADDRESS is ignored. */
-            status = IGNORED_STATUS;
-            break;
-    }
-    return status;
 }
 

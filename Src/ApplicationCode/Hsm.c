@@ -1,7 +1,8 @@
 /**
  * @file Hsm.c
- * @author Dr. Miro Samek, Quantum Leaps LLC 
- * @brief Hierarchical State Machine and Event Base Class
+ * @author Template from Dr. Miro Samek, Quantum Leaps LLC. Adjustments for specific
+ * application made by Ian Ress.
+ * @brief Hierarchical State Machine Base Class
  * @date 2023-03-20
  * 
  */
@@ -9,12 +10,7 @@
 #include <stdbool.h>
 #include "Hsm.h"
 
-/**
- * @brief The Superstate of the Hsm's Top State (root) is always set to this NULL value.
- * This is used as an identifier for the Top State.
- * 
- */
-#define NULL_STATE                      ((State *)0)
+#define NULL_STATE                      ((HsmState *)0)
 
 
 /**
@@ -25,10 +21,7 @@
  * 
  *  - State(A) -> State(A11) -> State(A111) -> State(A1111) is not allowed since this is 3 nesting levels.
  * 
- * @note If the second scenario occurs, a run-time error will execute if you are currently 
- * in State A1111 and an event defined in State A is dispatched to the Hsm. The user will 
- * be notified of the Source State (A1111) and the Target State (A) combination that resulted 
- * in the error.
+ * @note A user-definable run-time error will execute if the second scenario occurs.
  * 
  */
 #define MAX_LEVELS                      3
@@ -43,34 +36,36 @@ static const Event exitEvent    = {EXIT_EVENT};
  * the Initial State Handler function that is defined by the user. The Dispatcher
  * will determine the proper State Traversal and Entry Event sequence to execute.
  * 
- * @warning The user MUST transition into a State within the Hsm by calling
- * @p HSM_TRAN(target_) macro. Calling @p HSM_INTERNAL_TRAN(target_) will be
- * treated as if @p HSM_TRAN(target_) was called.
+ * @warning Within the supplied handler function, the user MUST transition into 
+ * a State within their Hsm by calling @p HSM_TRAN(target_) macro. 
+ * 
+ * @note Calling @p HSM_INTERNAL_TRAN(target_) will be treated as if 
+ * @p HSM_TRAN(target_) was called.
  * 
  * @param me Pointer to Hsm object.
  * @param inithndlr User-defined Initial State Handler function. See warning above.
  * 
- * @return true if the user properly defined the Initial State Handler Function,
- * false otherwise.
+ * @return True if the user properly defined the Initial State Handler function.
+ * False otherwise.
  * 
  */
-static void Hsm_Init_Dispatch(Hsm * const me, const InitStateHandler inithndlr);
-static void Hsm_Init_Dispatch(Hsm * const me, const InitStateHandler inithndlr)
+static bool Hsm_Init_Dispatch(Hsm * const me, const HsmInitStateHandler inithndlr);
+static bool Hsm_Init_Dispatch(Hsm * const me, const HsmInitStateHandler inithndlr)
 {
     bool success = false;
-    Status status = (*inithndlr)(me); /* Execute Initial State Handler function */
+    HsmStatus status = (*inithndlr)(me); /* Execute Initial State Handler function */
 
     /* The Initial State Handler function must cause a State Transition. Return false if this does not enter. */
-    if ( (status == TRAN_STATUS || status == INTERNAL_TRAN_STATUS) )
+    if ( (status == HSM_TRAN_STATUS || status == HSM_INTERNAL_TRAN_STATUS) )
     {
         int levels = 0;
-        State * entryPath[MAX_LEVELS+1] = {NULL_STATE};
-        State ** entryTrace = &entryPath[0];
+        HsmState * entryPath[MAX_LEVELS+1] = {NULL_STATE};
+        HsmState ** entryTrace = &entryPath[0];
 
         /**
-         * Find Entry Path. This is the State you transitioned into up to the Top State.
+         * Find Entry Path. This is starting from the State you transitioned into up until the Top State.
          */
-        for (State * s = me->state; s != &me->top; s = s->superstate)
+        for (HsmState * s = me->state; s != &me->top; s = s->superstate)
         {
             if (levels++ > MAX_LEVELS)
             {
@@ -98,9 +93,8 @@ static void Hsm_Init_Dispatch(Hsm * const me, const InitStateHandler inithndlr)
 }
 
 
-
 /**
- * @brief Initializes a substate within the Hsm. 
+ * @brief Initializes a State within the Hsm. 
  * 
  * @param me Pointer to the state you want to initialize.
  * @param superstate Pointer to the superstate of your current state. For example
@@ -112,7 +106,7 @@ static void Hsm_Init_Dispatch(Hsm * const me, const InitStateHandler inithndlr)
  * will be unique depending on whcih state you are currently in.
  * 
  */
-void State_Ctor(State * const me, State * const superstate, const StateHandler hndlr)
+void HsmState_Ctor(HsmState * const me, const HsmState * const superstate, const HsmStateHandler hndlr)
 {
     me->superstate = superstate;
     me->hndlr = hndlr;
@@ -130,9 +124,9 @@ void State_Ctor(State * const me, State * const superstate, const StateHandler h
  * @param tophndlr Function that executes when the Hsm is in the Top-most State.
  * 
  */
-void Hsm_Ctor(Hsm * const me, const StateHandler tophndlr)
+void Hsm_Ctor(Hsm * const me, const HsmStateHandler tophndlr)
 {
-    State_Ctor(&me->top, (State *)0, tophndlr);
+    State_Ctor(&me->top, (HsmState *)0, tophndlr);
 }
 
 
@@ -142,30 +136,33 @@ void Hsm_Ctor(Hsm * const me, const StateHandler tophndlr)
  * function will execute. The Hsm Dispatcher will determine the proper
  * State Traversal and Entry Event sequence to execute.
  * 
- * @warning @p HSM_Ctor() must be called beforehand.
+ * @warning @p HSM_Ctor() MUST be called beforehand.
  * 
- * @warning In the Initial State Handler function, the user MUST define a 
- * @p HSM_ENTRY_EVENT case. Within this, the user must transition to
- * a State within the Hsm by calling the @p HSM_INIT(target_) macro. Do 
- * not use the @p HSM_TRAN(target_) or @p HSM_INTERNAL_TRAN(target_) macros 
- * within the Initial State Handler. If this is not followed, the Hsm
- * will have undefined behavior. 
+ * @warning Within the Initial State Handler function, the user MUST 
+ * transition into a State within their Hsm by calling @p HSM_TRAN(target_) 
+ * macro. If this is not followed, then the Initial State Handler 
+ * function will execute and the Hsm will remain in a pending (not started)
+ * state. This function will return false if this occurs. 
+ * 
+ * PLEASE NOTE THIS DOES NOT SUPPORT TRANSITION EVENTS IN THE ENTRY AND
+ * EXIT EVENTS OF THE HSM
  * 
  * @param me Pointer to Hsm object.
  * @param initstate The Initial State the user wants assigned to the Hsm.
  * 
- * @return true if the Hsm successfully started, false otherwise.
+ * @return True if the Hsm successfully started. This means the user supplied
+ * a correctly defined Initial State object and called Hsm_Ctor() before
+ * calling this routine. False otherwise.
  * 
  */
-bool Hsm_Begin(Hsm * const me, const State * const initstate)
+bool Hsm_Begin(Hsm * const me, const HsmState * const initstate)
 {
     bool success = false;
 
-    if ( ((me->top).hndlr != (StateHandler)0) && (initstate != (State *)0) && (initstate->hndlr != (StateHandler)0) ) /* Hsm_Ctor called beforehand and Initial State defined correctly by user. */
+    /* Hsm_Ctor called beforehand and Initial State defined correctly by user. */
+    if ( ((me->top).hndlr != (HsmStateHandler)0) && (initstate != (HsmState *)0) && (initstate->hndlr != (HsmStateHandler)0) )
     {
-        me->state = initstate;
-        Hsm_Dispatch(me, &entryEvent);   /* Execute Initial Transition function assigned in Hsm_Ctor and relevant State Entry Events. */
-        success = true;
+        success = Hsm_Init_Dispatch(me, initstate->hndlr);
     }
     return success;
 }
@@ -187,28 +184,30 @@ bool Hsm_Begin(Hsm * const me, const State * const initstate)
  */
 void Hsm_Dispatch(Hsm * const me, const Event * const e)
 {
-    State * const StartState = me->state;
-    Status status = HSM_DISPATCH_STATUS;
-    State * HandledState;   /* Stores the state that handled the dispatched event. */
+    HsmState * const StartState = me->state;
+    HsmState * HandledState = me->state; /* Stores the state that handled the dispatched event. */
 
     /* Execute dispatched event in current state's Event Handler. Exits when event is handled. */
-    while ( (status == SUPER_STATUS || status == HSM_DISPATCH_STATUS) )
+    HsmStatus status = (*me->state->hndlr)(me, e);
+    while (status == HSM_SUPER_STATUS)
     {
         HandledState = me->state;
         status = (*me->state->hndlr)(me, e);
     }
 
     /* Did the dispatched event cause a State Transition? */
-    if ( (status == TRAN_STATUS || status == INTERNAL_TRAN_STATUS) )
+    if ( (status == HSM_TRAN_STATUS || status == HSM_INTERNAL_TRAN_STATUS) )
     {
         /* Declared here to try to reduce Stack allocation since this is only needed if a State Transition occurs. */
-        State * LCA;
+        int levels = 0;
+        HsmState * LCA;
+        HsmState * s;
         
-        State * entryPath[MAX_LEVELS+1] = {NULL_STATE};
-        State ** entryTrace = &entryPath[0];
+        HsmState * entryPath[MAX_LEVELS+1] = {NULL_STATE};
+        HsmState ** entryTrace = &entryPath[0];
 
-        State * exitPath[MAX_LEVELS+1] = {NULL_STATE};
-        State ** exitTrace = &exitPath[0];
+        HsmState * exitPath[MAX_LEVELS+1] = {NULL_STATE};
+        HsmState ** exitTrace = &exitPath[0];
 
         /**
          * Source State = state we just transitioned out of. Similar to the node of a tree.
@@ -246,36 +245,34 @@ void Hsm_Dispatch(Hsm * const me, const Event * const e)
          * The order of Entry Events will be from the LCA to the Target State.
          * 
          */
-        *exitTrace = StartState;
-        *entryTrace = me->state;
-
 
         /**
-         * Trace up to the Top State
+         * Trace up to Top State
          */
-        for (   int levels = 0; \
-                ( ((*exitTrace)->superstate != NULL_STATE) && ((*entryTrace)->superstate != NULL_STATE) ); \
-                levels++    )
+        for ( s = StartState; s != NULL_STATE; s = s->superstate )
         {
-            if (levels >= MAX_LEVELS)
+            if (levels++ > MAX_LEVELS)
             {
-                // Throw run-time error here since we can notify user of guilty state combination that caused the error.
-                // Source State = StartState
-                // Target State = me->state 
+                // TODO: throw run-time error
                 return;
             }
             else
             {
-                if ( (*exitTrace)->superstate != NULL_STATE )
-                {
-                    *(exitTrace+1) = (*exitTrace)->superstate;
-                    exitTrace++;
-                }
-                if ( (*entryTrace)->superstate != NULL_STATE )
-                {
-                    *(entryTrace+1) = (*entryTrace)->superstate;
-                    entryTrace++;
-                }
+                *(exitTrace++) = s; /* {0, StartState, ...TopState} */ 
+            }
+        }
+
+        levels = 0;
+        for ( s = me->state; s != NULL_STATE; s = s->superstate )
+        {
+            if (levels++ > MAX_LEVELS)
+            {
+                // TODO: throw run-time error
+                return;
+            }
+            else
+            {
+                *(entryTrace++) = s; /* {0, CurrentState, ...TopState} */ 
             }
         }
 
@@ -283,13 +280,15 @@ void Hsm_Dispatch(Hsm * const me, const Event * const e)
         /**
          * Find LCA
          */
-        while ( ((*exitTrace == *entryTrace) && (exitTrace != &exitPath[0]) && (entryTrace != &entryPath[0]) && (*exitTrace != HandledState) && (*entryTrace != HandledState)) )
+        while ( (*exitTrace == *entryTrace) && (*exitTrace != &exitPath[1]) && (*entryTrace != &entryPath[1]) && (*exitTrace != HandledState) && (*entryTrace != HandledState) )
         {
             exitTrace--;
             entryTrace--;
         }
 
-        if ( (*exitTrace == *entryTrace) && (status == INTERNAL_TRAN_STATUS) ) /* Nested, Internal State Transition. See INTERNAL_TRAN(target_) macro */
+        LCA = (*exitTrace)
+
+        if ( (*exitTrace == *entryTrace) && (status == HSM_INTERNAL_TRAN_STATUS) ) /* Nested, Internal State Transition. See INTERNAL_TRAN(target_) macro */
         {
             LCA = (*exitTrace); /* Same as (*entryTrace) */
         }
@@ -297,6 +296,29 @@ void Hsm_Dispatch(Hsm * const me, const Event * const e)
         {
             LCA = (*exitTrace)->superstate; /* Same as (*entryTrace)->superstate. */
         }
+
+
+        /**
+         * Execute Exit and Entry Events
+         */
+        if (LCA)
+        {
+            for ( s = StartState; s != LCA; s = s->superstate )
+            {
+                (void)(*s->hndlr)(me, &exitEvent);
+            }
+
+            for ( s = *entryTrace; s; s = *(entryTrace--) )  /* Recall first element of entryTrace is (HsmState *)0 */
+            {
+                (void)(*s->hndlr)(me, &entryEvent);
+            }
+        }
+        else
+        {
+            // TODO: throw run-time error
+        }
+
+
 
 
 

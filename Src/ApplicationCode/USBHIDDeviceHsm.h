@@ -11,6 +11,7 @@
 #ifndef USBHIDDEVICEHSM_H
 #define USBHIDDEVICEHSM_H
 
+#include <stdbool.h>
 #include "Hsm.h"
 #include "USBHIDDescriptors.h"
 
@@ -25,19 +26,19 @@ typedef struct
     Hsm hsm; /* Inherit Hsm Base Class */
 
     /* Additional Members */
-    struct /* Should be pointers to descriptors with internal linkage in .c file */
+    struct
     {
-        USB_Std_Device_Descriptor_t Device_Descriptor;
-        USB_Std_Configuration_Descriptor_t Configuration_Descriptor;
-        USB_Std_Interface_Descriptor_t Interface_Descriptor;
-        USB_HID_Std_HID_Descriptor_t HID_Descriptor;
-        USB_Std_Endpoint_Descriptor_t Endpoint_Descriptor;
-        uint8_t * Report_Descriptor;
-        uint8_t Report_Descriptor_Size;
+        const USB_Std_Device_Descriptor_t           * Device_Descriptor;
+        const USB_Std_Configuration_Descriptor_t    * Configuration_Descriptor;
+        const USB_Std_Interface_Descriptor_t        * Interface_Descriptor;
+        const USB_HID_Std_HID_Descriptor_t          * HID_Descriptor;
+        const USB_Std_Endpoint_Descriptor_t         * Endpoint_Descriptor;
+        const uint8_t                               * Report_Descriptor;
+        uint8_t                                     Report_Descriptor_Size;
     } Descriptors;
 
     enum
-    {
+    {   /* Visible USB Device States. Chapter 9 of USB 2.0 Spec. */
         USBHID_DEVICE_ATTACHED_STATE,
         USBHID_DEVICE_POWERED_STATE,
         USBHID_DEVICE_DEFAULT_STATE,
@@ -45,10 +46,10 @@ typedef struct
         USBHID_DEVICE_CONFIGURED_STATE,
         USBHID_DEVICE_SUSPENDED_STATE,
         USBHID_DEVICE_DISABLED_STATE    /* Not defined in USB Spec. Signifies the USB HID Device Hsm instance is disabled - either because it is starting up or a major error has occured. */
-    } Device_State; /* Visible USB Device States. Chapter 9 of USB 2.0 Spec. */
+    } Device_State;                     
 
-    uint8_t Address;                /* The address the Host sets the USB Device to. This is updated when a SET_ADDRESS request is received. Otherwise the default Address of 0 is used. */
-    uint8_t Configuration_Index;    /* The Configuration Descriptor the Device uses. This is updated when a SET_CONFIGURATION request is received. Otherwise it is 0. */
+    uint8_t Address;                    /* The address the Host sets the USB Device to. This is updated when a SET_ADDRESS request is received. Otherwise the default Address of 0 is used. */
+    uint8_t Configuration_Index;        /* The Configuration Descriptor the Device uses. This is updated when a SET_CONFIGURATION request is received. Otherwise it is 0. */
 } USBHID_Device_Hsm;
 
 
@@ -81,8 +82,19 @@ enum USBHID_Device_Hsm_Event_Sigs
 };
 
 
-void USBHID_Device_Hsm_Ctor(USBHID_Device_Hsm * const me);
-void USBHID_Device_Hsm_Begin(USBHID_Device_Hsm * const me);
-void USBHID_Device_Hsm_Dispatch(const USBHID_Device_Hsm_Event * const e);
+bool USBHID_Device_Hsm_Ctor(    
+                                USBHID_Device_Hsm                           * const me,
+                                const USB_Std_Device_Descriptor_t           * const Device_Descriptor,
+                                const USB_Std_Configuration_Descriptor_t    * const Configuration_Descriptor,
+                                const USB_Std_Interface_Descriptor_t        * const Interface_Descriptor,
+                                const USB_HID_Std_HID_Descriptor_t          * const HID_Descriptor,
+                                const USB_Std_Endpoint_Descriptor_t         * const Endpoint_Descriptor,
+                                const uint8_t                               * const Report_Descriptor,
+                                const uint8_t                               Report_Descriptor_Size
+                            );
+
+void USBHID_Device_Hsm_Default_Ctor(USBHID_Device_Hsm * const me);
+bool USBHID_Device_Hsm_Begin(USBHID_Device_Hsm * const me);
+void USBHID_Device_Hsm_Dispatch(const USBHID_Device_Hsm_Event * const e); // TODO: parameters don't make sense rn
 
 #endif /* USBHIDDEVICEHSM_H */
