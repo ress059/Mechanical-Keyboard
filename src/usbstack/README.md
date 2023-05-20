@@ -21,7 +21,7 @@ USB stack meant for any compiler that supports the packed attribute. Contains US
 │       │
 │       ├── device/  # Specific to HID Devices.
 │       │   │
-│       │   └── usb_hid_device_descriptor_checks.h/.c  # Functions that check if an 
+│       │   └── usb_hid_device_check_descriptors.h/.c  # Functions that check if an 
 │       │                                                HID device's descriptors are 
 │       │                                                filled out with valid info.
 │       │
@@ -37,7 +37,7 @@ USB stack meant for any compiler that supports the packed attribute. Contains US
 │   │
 │   ├── device/  # Specific to USB Devices.
 │   │   │
-│   │   └── usb_std_device_descriptor_checks.h/.c  # Functions that check if a 
+│   │   └── usb_std_device_check_descriptors.h/.c  # Functions that check if a 
 │   │                                                USB device's descriptors are 
 │   │                                                filled out with valid info.
 │   │

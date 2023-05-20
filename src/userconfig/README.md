@@ -3,14 +3,14 @@ This README contains an overview of all user-definable settings. See the Source 
 
 <h1 align="center">Table Of Contents</h1>
 
-[KeyboardConfig.h](#keyboardconfigh)<br>
-[USBConfig.h](#usbconfigh)<br>
-[USBEventHandler.c](#usbeventhandlerc)<br>
-[USBHIDConfig.h](#usbhidconfigh)
+[keyboard_config.h](#keyboardconfigh)<br>
+[usb_config.h](#usbconfigh)<br>
+[usb_event_handler.c](#usbeventhandlerc)<br>
+[usb_hid_config.h](#usbhidconfigh)
 <br><br><br>
 
 ---
-<a id="keyboardconfigh"></a> <h2 align="center">KeyboardConfig.h</h2>
+<a id="keyboardconfigh"></a> <h2 align="center">keyboard_config.h</h2>
 Keyboard layouts, pin assignments, and settings are defined within this header file.<br><br>
 
 ```C
@@ -31,7 +31,7 @@ Keyboard layouts, pin assignments, and settings are defined within this header f
 + Number of rows in your keyboard layout. For example, the layout below is 4 rows.
 
 <p align="center">
-  <img src= "../../Docs/Images/UserConfig/Basic-Keyboard-Layout.png" width="400"/>
+  <img src= "../../doc/images/userconfig/Basic-Keyboard-Layout.png" width="400"/>
 </p><br><br>
 
 
@@ -62,7 +62,7 @@ Keyboard layouts, pin assignments, and settings are defined within this header f
 + Each row is connected to a GPIO pin on the target CPU in order to detect key presses. Therefore this definition depends on the schematic and PCB layout of your keyboard. Below is the pinout for an ATmega32U4 which is one of the supported targets in this codebase.
 
 <p align="center">
-  <img src= "../../Docs/Images/UserConfig/atmega32u4-pinout.png" width="300" />
+  <img src= "../../doc/images/userconfig/atmega32u4-pinout.png" width="300" />
 </p>
 
 + PB0, PB1, PB2, PC7, etc are GPIO pins. If the rows are connected to PB0, PB1, PB2, and PC7, your **ROW_PINS** definition would be **{PIN_PB0, PIN_PB1, PIN_PB2, PIN_PC7}**<br><br><br>
@@ -94,7 +94,7 @@ Keyboard layouts, pin assignments, and settings are defined within this header f
 <br><br>
 
 ---
-<a id="usbconfigh"></a><h2 align="center">USBConfig.h</h2>
+<a id="usbconfigh"></a><h2 align="center">usb_config.h</h2>
 The USB version, clock sources, speed settings, and Control Endpoint configurations are defined within this header file.<br><br>
 
 ```C
@@ -199,13 +199,13 @@ The USB version, clock sources, speed settings, and Control Endpoint configurati
 <br><br>
 
 ---
-<a id="usbeventhandlerc"></a><h2 align="center">USBEventHandler.c</h2>
+<a id="usbeventhandlerc"></a><h2 align="center">usb_event_handler.c</h2>
 User-definable event handlers and error handlers. TODO: <br><br>
 
 <br><br>
 
 ---
-<a id="usbhidconfigh"></a><h2 align="center">USBHIDConfig.h</h2>
+<a id="usbhidconfigh"></a><h2 align="center">usb_hid_config.h</h2>
 The HID version and HID endpoint configurations are defined within this header file.<br><br>
 
 ```C
