@@ -2,4 +2,4 @@
 /.vs/
 /.vscode/
 /Src/LUFA
-
+/avr8-gnu-toolchain-win32_x86_64/

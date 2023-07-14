@@ -12,7 +12,7 @@
 #define DEBUG_H
 
 #include <stdint.h>
-#include "gpio.h"
+#include "bsp_gpio.h"
 #include "systick.h"
 
 extern const Pinmap_t led;

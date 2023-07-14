@@ -1,14 +1,14 @@
 /**
- * @file gpio.c
+ * @file bsp_gpio.c
  * @author Ian Ress
- * @brief Basic GPIO driver for ATxMega64B3. See gpio.h for full description.
+ * @brief Basic GPIO driver for ATxMega64B3. See bsp_gpio.h for full description.
  * @date 2023-02-15
  * 
  * @copyright Copyright (c) 2023
  * 
  */
 
-#include "gpio.h"
+#include "bsp_gpio.h"
 
 static gpioreg_t * const gpio[5] = 
 {

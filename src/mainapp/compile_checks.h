@@ -18,7 +18,8 @@
 
         #include "attributes.h"
         #include "target_specific.h"
-        #include "keyboard_config.h"
+        #include "kb_config.h"
+        #include "kb_programming_config.h"
         #include "usb_config.h"
         #include "usb_hid_config.h"
         #include "usb_hid_version.h"
@@ -320,8 +321,8 @@
         /**
          * Keyboard Configuration checks.
          */
-        #if ((NUM_COLUMNS + NUM_ROWS) > NUMBER_OF_IO_PINS)
-            #error "Target does not have enough I/O pins to support keyboard configuration in keyboard_config.h"
+        #if ((KB_NUMBER_OF_COLUMNS + KB_NUMBER_OF_ROWS) > NUMBER_OF_IO_PINS)
+            #error "Target does not have enough I/O pins to support keyboard configuration in kb_config.h"
         #endif
         /* TODO: Try to add check for only valid GPIO pins are used. */
 

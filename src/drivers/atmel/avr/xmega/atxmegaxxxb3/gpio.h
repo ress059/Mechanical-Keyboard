@@ -1,10 +1,10 @@
 /**
- * @file gpio.h
+ * @file bsp_gpio.h
  * @author Ian Ress
  * @brief Basic GPIO driver for ATxMega64B3. Pins specific to the microcontroller are also declared here
  * and are defined as a Pinmap_t type in userconfig.h. The Pinmap_t struct contains two members:
  * 
- * 1) index = index in the gpio array defined in gpio.c. This array contains the base address
+ * 1) index = index in the gpio array defined in bsp_gpio.c. This array contains the base address
  * of each GPIO port. So this maps the pin to the correct port address (port B, port C, etc.)
  * 
  * 2) mask. AVR does not have a barrel shifter so storing each pin's pin mask at compile time
@@ -86,7 +86,7 @@ typedef struct {
 #define PIN6_MASK					    (1U << 6)
 #define PIN7_MASK					    (1U << 7)
 
-/* #define Pin                          {Index in gpio array (see gpio.c), Pin mask} */ 
+/* #define Pin                          {Index in gpio array (see bsp_gpio.c), Pin mask} */ 
 #define PIN_PB0                         {PORTB_INDEX, (PIN0_MASK)}                       
 #define PIN_PB1     					{PORTB_INDEX, (PIN1_MASK)}
 #define PIN_PB2     					{PORTB_INDEX, (PIN2_MASK)}

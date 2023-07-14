@@ -13,11 +13,11 @@
 #include <avr/io.h>
 #include <util/atomic.h>
 #include "debug.h"
-#include "gpio.h"
+#include "bsp_gpio.h"
 #include "matrix.h"
 #include "systick.h"
 
-static uint16_t matrix_state[NUM_ROWS][NUM_COLUMNS] = {{0}};
+static uint16_t matrix_state[KB_NUMBER_OF_ROWS][KB_NUMBER_OF_COLUMNS] = {{0}};
 
 static bool debounce_logic(uint8_t row, uint8_t col);
 
@@ -43,7 +43,7 @@ static bool debounce_logic(uint8_t row, uint8_t col)
 	/* Handle lower-bound overflow cases. E.g. (systick_wordsize_t)(5-65535) = 5 which is desired since
 	g_ms wraps around to 0 on overflow, so this still gives us the amount of time passed. This example
 	is if systick_wordsize_t definition is set to uint16_t. */
-	if ((systick_wordsize_t)(g_ms_copy - matrix_state[row][col]) >= (systick_wordsize_t)DEBOUNCE_TIME) 
+	if ((systick_wordsize_t)(g_ms_copy - matrix_state[row][col]) >= (systick_wordsize_t)KB_DEBOUNCE_TIME_MS) 
 	{
 		return true;
 	}
@@ -66,11 +66,11 @@ void Matrix_Init(void)
 		MCUCR |= (1U << 7);
 	#endif
 
-	for (int r = 0; r < NUM_ROWS; r++) {
+	for (int r = 0; r < KB_NUMBER_OF_ROWS; r++) {
 		GPIO_Set_Input(g_keyboard_rowpins[r]); /* Input pullup */
 	}
 
-	for (int c = 0; c < NUM_COLUMNS; c++) {
+	for (int c = 0; c < KB_NUMBER_OF_COLUMNS; c++) {
 		GPIO_Set_Output(g_keyboard_colpins[c]);
 		GPIO_Output_High(g_keyboard_colpins[c]);
 	}
@@ -84,10 +84,10 @@ void Matrix_Scan(void)
 {
 	uint8_t keypress = 0;
 
-	for (int c = 0; c < NUM_COLUMNS; c++) {
+	for (int c = 0; c < KB_NUMBER_OF_COLUMNS; c++) {
 		GPIO_Output_Low(g_keyboard_colpins[c]);
 
-		for (int r = 0; r < NUM_ROWS; r++) {
+		for (int r = 0; r < KB_NUMBER_OF_ROWS; r++) {
 
 			//if (matrix_state[r][c]) { /* Has debounce timer already started for this key? */
 
