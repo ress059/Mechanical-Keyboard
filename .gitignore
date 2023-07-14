@@ -1,5 +1,5 @@
 /Debug/
 /.vs/
 /.vscode/
-/Src/LUFA
-
+/src/LUFA
+/avr8-gnu-toolchain-win32_x86_64/
