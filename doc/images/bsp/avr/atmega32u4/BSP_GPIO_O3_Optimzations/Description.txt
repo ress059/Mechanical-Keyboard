@@ -1,0 +1,28 @@
+Shows the multi-line function disassembles to the same CBI Machine Instruction
+as the single line function. Justifies why we use multi-line function:
+
+1) It is much easier to read.
+2) It disassembles to the same Machine Instruction as the Single-line function.
+
+
+
+/* Multi-line Function - Easier to Read */
+static inline void BSP_GPIO_Set_Pin_Type_Input_HiZ_MultiLine(KB_PINSIZE_T KB_PIN);
+static inline void BSP_GPIO_Set_Pin_Type_Input_HiZ_MultiLine(KB_PINSIZE_T KB_PIN)
+{
+	/* 0x20 = PINx, 0x21 = DDRx, 0x22 = PORTx */
+	uint8_t port = BSP_GET_PORT(KB_PIN);
+	uint8_t pin = BSP_GET_PIN(KB_PIN);
+
+	/* DDRx Write */
+	*( (volatile uint8_t *)(0x21 + (0x03 * port)) ) &= ~(1U << pin);
+}
+
+
+/* Single Line Function */
+static inline void BSP_GPIO_Set_Pin_Type_Input_HiZ_OneLine(KB_PINSIZE_T KB_PIN);
+static inline void BSP_GPIO_Set_Pin_Type_Input_HiZ_OneLine(KB_PINSIZE_T KB_PIN)
+{
+	/* DDRx Write */
+	*( (volatile uint8_t *)( 0x21 + (0x03 * (BSP_GET_PORT(KB_PIN))) ) ) &= ~(1U << BSP_GET_PIN(KB_PIN));
+}

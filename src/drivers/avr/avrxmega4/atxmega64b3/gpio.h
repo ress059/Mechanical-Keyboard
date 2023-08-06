@@ -1,3 +1,4 @@
+#warning "TODO: UPDATE THIS TO FOLLOW NEW GPIO DRIVER FORMAT"
 /**
  * @file bsp_gpio.h
  * @author Ian Ress
